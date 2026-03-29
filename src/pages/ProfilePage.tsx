@@ -43,6 +43,7 @@ const ProfilePage = () => {
       .single()
       .then(({ data }) => {
         if (data) {
+          setAvatarUrl(data.avatar_url);
           setProfile({
             display_name: data.display_name ?? "",
             username: data.username ?? "",
