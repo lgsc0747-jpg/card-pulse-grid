@@ -1,4 +1,4 @@
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut } from "lucide-react";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,6 +19,7 @@ const mainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "NFC Cards", url: "/cards", icon: CreditCard },
   { title: "Interaction Logs", url: "/logs", icon: List },
+  { title: "Categories", url: "/categories", icon: Tag },
   { title: "Profile", url: "/profile", icon: User },
 ];
 
