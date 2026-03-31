@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
-import { CreditCard, Zap, Activity, Clock, Loader as Loader2, Sparkles, ChartBar as BarChart3 } from "lucide-react";
+import { CreditCard, Zap, Activity, Clock, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -60,25 +58,9 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold">Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">Real-time NFC interaction overview</p>
-          </div>
-          <div className="flex gap-2">
-            <Link to="/landing">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Sparkles className="w-4 h-4" />
-                3D Card Demo
-              </Button>
-            </Link>
-            <Link to="/analytics">
-              <Button variant="outline" size="sm" className="gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Advanced Analytics
-              </Button>
-            </Link>
-          </div>
+        <div>
+          <h1 className="text-2xl font-display font-bold">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Real-time NFC interaction overview</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
