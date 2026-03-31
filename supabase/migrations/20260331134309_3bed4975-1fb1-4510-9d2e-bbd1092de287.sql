@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN card_accent_color text DEFAULT '#0d9488';
