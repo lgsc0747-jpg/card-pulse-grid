@@ -137,6 +137,7 @@ export type Database = {
           availability_status: string | null
           avatar_url: string | null
           bio: string | null
+          card_accent_color: string | null
           created_at: string
           cv_url: string | null
           display_name: string | null
@@ -159,6 +160,7 @@ export type Database = {
           availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
+          card_accent_color?: string | null
           created_at?: string
           cv_url?: string | null
           display_name?: string | null
@@ -181,6 +183,7 @@ export type Database = {
           availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
+          card_accent_color?: string | null
           created_at?: string
           cv_url?: string | null
           display_name?: string | null

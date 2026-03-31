@@ -1,39 +1,57 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { StatCard } from "@/components/StatCard";
-import { CreditCard, Zap, Activity, Clock, Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { AnalyticsChart } from "@/components/AnalyticsChart";
+import { WidgetManager } from "@/components/WidgetManager";
+import { ThemeDesigner } from "@/components/ThemeDesigner";
+import { useNfcData } from "@/hooks/useNfcData";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ activeCards: 0, totalCards: 0, totalLogs: 0 });
+  const { toast } = useToast();
+  const { stats, chartData, timeframe, setTimeframe, loading } = useNfcData();
+  const [accentColor, setAccentColor] = useState("#0d9488");
+  const [savingColor, setSavingColor] = useState(false);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
 
-    const fetchData = async () => {
-      const [cardsRes, logsRes, recentRes] = await Promise.all([
-        supabase.from("nfc_cards").select("id, status").eq("user_id", user.id),
-        supabase.from("interaction_logs").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("interaction_logs").select("id, entity_id, occasion, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
-      ]);
-
-      const cards = cardsRes.data ?? [];
-      setStats({
-        activeCards: cards.filter((c) => c.status === "active").length,
-        totalCards: cards.length,
-        totalLogs: logsRes.count ?? 0,
+    // Fetch accent color
+    supabase
+      .from("profiles")
+      .select("card_accent_color")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.card_accent_color) setAccentColor(data.card_accent_color);
       });
-      setRecentLogs(recentRes.data ?? []);
-      setLoading(false);
-    };
 
-    fetchData();
+    // Fetch recent logs
+    supabase
+      .from("interaction_logs")
+      .select("id, entity_id, occasion, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5)
+      .then(({ data }) => setRecentLogs(data ?? []));
   }, [user]);
+
+  const handleColorChange = async (color: string) => {
+    if (!user) return;
+    setAccentColor(color);
+    setSavingColor(true);
+    await supabase
+      .from("profiles")
+      .update({ card_accent_color: color } as any)
+      .eq("user_id", user.id);
+    setSavingColor(false);
+    toast({ title: "Theme updated", description: "Your card accent color has been saved." });
+  };
 
   const timeSince = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -63,27 +81,21 @@ const Dashboard = () => {
           <p className="text-sm text-muted-foreground mt-1">Real-time NFC interaction overview</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            title="Active Cards"
-            value={`${stats.activeCards} / ${stats.totalCards}`}
-            icon={<CreditCard className="w-4 h-4" />}
-          />
-          <StatCard
-            title="Total Interactions"
-            value={stats.totalLogs.toLocaleString()}
-            icon={<Zap className="w-4 h-4" />}
-          />
-          <StatCard
-            title="Categories"
-            value="—"
-            icon={<Activity className="w-4 h-4" />}
-          />
-          <StatCard
-            title="System"
-            value="Online"
-            icon={<Clock className="w-4 h-4" />}
-          />
+        {/* Widgets */}
+        <WidgetManager stats={stats} />
+
+        {/* Chart + Theme side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <AnalyticsChart data={chartData} timeframe={timeframe} onTimeframeChange={setTimeframe} />
+          </div>
+          <div>
+            <ThemeDesigner
+              currentColor={accentColor}
+              onColorChange={handleColorChange}
+              saving={savingColor}
+            />
+          </div>
         </div>
 
         {/* Recent Activity */}
@@ -95,7 +107,7 @@ const Dashboard = () => {
             <div className="space-y-3">
               {recentLogs.map((log: any) => (
                 <div key={log.id} className="flex items-start gap-3 group">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0 group-hover:animate-pulse-glow" />
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{log.entity_id}</p>
                     <div className="flex items-center gap-2 mt-0.5">
