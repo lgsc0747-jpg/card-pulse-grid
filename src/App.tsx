@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import CardsPage from "./pages/CardsPage.tsx";
+import NfcManagerPage from "./pages/NfcManagerPage.tsx";
+import ShortUrlRedirect from "./pages/ShortUrlRedirect.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import CategoriesPage from "./pages/CategoriesPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
@@ -37,10 +39,12 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/cards" element={<ProtectedRoute><CardsPage /></ProtectedRoute>} />
+            <Route path="/nfc-manager" element={<ProtectedRoute><NfcManagerPage /></ProtectedRoute>} />
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/categories" element={<ProtectedRoute><CategoriesPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/p/:username" element={<PublicProfilePage />} />
+            <Route path="/u/:code" element={<ShortUrlRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
