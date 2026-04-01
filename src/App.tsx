@@ -12,6 +12,8 @@ import ShortUrlRedirect from "./pages/ShortUrlRedirect.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import CategoriesPage from "./pages/CategoriesPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
+import PersonasPage from "./pages/PersonasPage.tsx";
+import LeadsPage from "./pages/LeadsPage.tsx";
 import PublicProfilePage from "./pages/PublicProfilePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
@@ -43,7 +45,10 @@ const App = () => (
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/categories" element={<ProtectedRoute><CategoriesPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/personas" element={<ProtectedRoute><PersonasPage /></ProtectedRoute>} />
+            <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
             <Route path="/p/:username" element={<PublicProfilePage />} />
+            <Route path="/p/:username/:personaSlug" element={<PublicProfilePage />} />
             <Route path="/u/:code" element={<ShortUrlRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { InteractiveCard3D } from "@/components/InteractiveCard3D";
+import { SecurityGate } from "@/components/SecurityGate";
 import { downloadVCard } from "@/lib/vcard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,89 +10,211 @@ import {
   MapPin, Mail, Phone, Globe, Linkedin, Github,
   UserPlus, FileText, Loader2, Wifi,
 } from "lucide-react";
-import type { Tables } from "@/integrations/supabase/types";
 
-type Profile = Tables<"profiles"> & { card_accent_color?: string };
+interface PersonaData {
+  id: string;
+  slug: string;
+  label: string;
+  is_private: boolean;
+  pin_code: string | null;
+  require_contact_exchange: boolean;
+  display_name: string | null;
+  headline: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  email_public: string | null;
+  phone: string | null;
+  location: string | null;
+  website: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  cv_url: string | null;
+  accent_color: string | null;
+  background_preset: string | null;
+  background_image_url: string | null;
+  glass_opacity: number | null;
+  availability_status: string | null;
+  work_mode: string | null;
+  show_availability: boolean | null;
+  show_location: boolean | null;
+  user_id: string;
+}
+
+interface ProfileData {
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  headline: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  email_public: string | null;
+  phone: string | null;
+  location: string | null;
+  website: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  cv_url: string | null;
+  card_accent_color: string | null;
+  availability_status: string | null;
+  work_mode: string | null;
+  show_availability: boolean | null;
+  show_location: boolean | null;
+}
 
 const PublicProfilePage = () => {
-  const { username } = useParams<{ username: string }>();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { username, personaSlug } = useParams<{ username: string; personaSlug?: string }>();
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [persona, setPersona] = useState<PersonaData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [gateUnlocked, setGateUnlocked] = useState(false);
 
   useEffect(() => {
     if (!username) return;
 
     const load = async () => {
-      const { data, error } = await supabase
+      // 1. Load profile by username
+      const { data: profileData, error: profileErr } = await supabase
         .from("profiles")
         .select("*")
         .eq("username", username)
         .single();
 
-      if (error || !data) {
+      if (profileErr || !profileData) {
         setNotFound(true);
-      } else {
-        setProfile(data as Profile);
-        // Log via edge function
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            target_user_id: data.user_id,
-            interaction_type: "profile_view",
-            metadata: { source: "public_landing", ua: navigator.userAgent },
-          }),
-        }).catch(() => {});
+        setLoading(false);
+        return;
       }
+
+      setProfile(profileData as ProfileData);
+
+      // 2. Try to load persona
+      if (personaSlug) {
+        const { data: personaData } = await supabase
+          .from("personas")
+          .select("*")
+          .eq("user_id", profileData.user_id)
+          .eq("slug", personaSlug)
+          .single();
+
+        if (personaData) {
+          setPersona(personaData as PersonaData);
+        }
+      } else {
+        // Load active persona if no slug provided
+        const { data: activePer } = await supabase
+          .from("personas")
+          .select("*")
+          .eq("user_id", profileData.user_id)
+          .eq("is_active", true)
+          .limit(1)
+          .single();
+
+        if (activePer) {
+          setPersona(activePer as PersonaData);
+        }
+      }
+
+      // 3. Log visit
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_user_id: profileData.user_id,
+          interaction_type: "profile_view",
+          metadata: {
+            source: "public_landing",
+            ua: navigator.userAgent,
+            persona_slug: personaSlug || null,
+          },
+        }),
+      }).catch(() => {});
+
       setLoading(false);
     };
 
     load();
-  }, [username]);
+  }, [username, personaSlug]);
+
+  // Merge persona data over profile (persona overrides profile fields)
+  const merged = persona
+    ? {
+        display_name: persona.display_name || profile?.display_name,
+        headline: persona.headline || profile?.headline,
+        bio: persona.bio || profile?.bio,
+        avatar_url: persona.avatar_url || profile?.avatar_url,
+        email_public: persona.email_public || profile?.email_public,
+        phone: persona.phone || profile?.phone,
+        location: persona.location || profile?.location,
+        website: persona.website || profile?.website,
+        linkedin_url: persona.linkedin_url || profile?.linkedin_url,
+        github_url: persona.github_url || profile?.github_url,
+        cv_url: persona.cv_url || profile?.cv_url,
+        accent_color: persona.accent_color || profile?.card_accent_color || "#0d9488",
+        availability_status: persona.availability_status || profile?.availability_status,
+        work_mode: persona.work_mode || profile?.work_mode,
+        show_availability: persona.show_availability ?? profile?.show_availability,
+        show_location: persona.show_location ?? profile?.show_location,
+        user_id: profile?.user_id || "",
+      }
+    : {
+        display_name: profile?.display_name,
+        headline: profile?.headline,
+        bio: profile?.bio,
+        avatar_url: profile?.avatar_url,
+        email_public: profile?.email_public,
+        phone: profile?.phone,
+        location: profile?.location,
+        website: profile?.website,
+        linkedin_url: profile?.linkedin_url,
+        github_url: profile?.github_url,
+        cv_url: profile?.cv_url,
+        accent_color: profile?.card_accent_color || "#0d9488",
+        availability_status: profile?.availability_status,
+        work_mode: profile?.work_mode,
+        show_availability: profile?.show_availability,
+        show_location: profile?.show_location,
+        user_id: profile?.user_id || "",
+      };
 
   const handleDownloadVCard = () => {
-    if (!profile) return;
-
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        target_user_id: profile.user_id,
+        target_user_id: merged.user_id,
         interaction_type: "vcard_download",
         metadata: { source: "public_landing", ua: navigator.userAgent },
       }),
     }).catch(() => {});
 
     downloadVCard({
-      displayName: profile.display_name ?? undefined,
-      email: profile.email_public ?? undefined,
-      phone: profile.phone ?? undefined,
-      website: profile.website ?? undefined,
-      linkedin: profile.linkedin_url ?? undefined,
-      github: profile.github_url ?? undefined,
-      headline: profile.headline ?? undefined,
-      location: profile.location ?? undefined,
+      displayName: merged.display_name ?? undefined,
+      email: merged.email_public ?? undefined,
+      phone: merged.phone ?? undefined,
+      website: merged.website ?? undefined,
+      linkedin: merged.linkedin_url ?? undefined,
+      github: merged.github_url ?? undefined,
+      headline: merged.headline ?? undefined,
+      location: merged.location ?? undefined,
     });
   };
 
   const handleDownloadCV = () => {
-    if (!profile?.cv_url) return;
-
+    if (!merged.cv_url) return;
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        target_user_id: profile.user_id,
+        target_user_id: merged.user_id,
         interaction_type: "cv_download",
         metadata: { source: "public_landing", ua: navigator.userAgent },
       }),
     }).catch(() => {});
-
-    window.open(profile.cv_url, "_blank");
+    window.open(merged.cv_url, "_blank");
   };
 
   if (loading) {
@@ -116,11 +239,23 @@ const PublicProfilePage = () => {
     );
   }
 
-  const accentColor = profile.card_accent_color ?? "#0d9488";
+  // Security gate check
+  if (persona?.is_private && !gateUnlocked) {
+    return (
+      <SecurityGate
+        personaId={persona.id}
+        ownerUserId={merged.user_id}
+        ownerName={merged.display_name || username || ""}
+        pinRequired={!persona.require_contact_exchange}
+        contactRequired={persona.require_contact_exchange}
+        accentColor={merged.accent_color}
+        onUnlocked={() => setGateUnlocked(true)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero with 3D card */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
         <div className="max-w-lg mx-auto pt-10 px-4">
@@ -131,83 +266,77 @@ const PublicProfilePage = () => {
             <span className="text-xs font-display font-semibold tracking-widest uppercase text-muted-foreground">
               NFC Hub
             </span>
+            {persona && (
+              <Badge variant="secondary" className="text-[10px] ml-1">{persona.label}</Badge>
+            )}
           </div>
           <InteractiveCard3D
-            name={profile.display_name ?? username ?? ""}
-            headline={profile.headline ?? undefined}
-            avatarUrl={profile.avatar_url ?? undefined}
+            name={merged.display_name ?? username ?? ""}
+            headline={merged.headline ?? undefined}
+            avatarUrl={merged.avatar_url ?? undefined}
             username={username ?? ""}
-            accentColor={accentColor}
-            linkedinUrl={profile.linkedin_url ?? undefined}
-            githubUrl={profile.github_url ?? undefined}
-            website={profile.website ?? undefined}
-            email={profile.email_public ?? undefined}
+            accentColor={merged.accent_color}
+            linkedinUrl={merged.linkedin_url ?? undefined}
+            githubUrl={merged.github_url ?? undefined}
+            website={merged.website ?? undefined}
+            email={merged.email_public ?? undefined}
           />
         </div>
       </div>
 
-      {/* Profile info */}
       <div className="max-w-lg mx-auto px-4 pb-12 pt-6 space-y-6">
-        {/* Identity */}
         <div className="text-center space-y-2">
-          {profile.avatar_url && (
+          {merged.avatar_url && (
             <img
-              src={profile.avatar_url}
-              alt={profile.display_name ?? "Avatar"}
+              src={merged.avatar_url}
+              alt={merged.display_name ?? "Avatar"}
               className="w-20 h-20 rounded-full mx-auto border-2 border-border object-cover"
             />
           )}
-          <h1 className="text-2xl font-display font-bold">{profile.display_name}</h1>
-          {profile.headline && (
-            <p className="text-muted-foreground">{profile.headline}</p>
-          )}
+          <h1 className="text-2xl font-display font-bold">{merged.display_name}</h1>
+          {merged.headline && <p className="text-muted-foreground">{merged.headline}</p>}
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            {profile.show_availability && (
+            {merged.show_availability && (
               <Badge variant="default" className="gradient-primary text-primary-foreground border-0">
-                {profile.availability_status ?? "Available"}
+                {merged.availability_status ?? "Available"}
               </Badge>
             )}
-            {profile.work_mode && (
-              <Badge variant="secondary">{profile.work_mode}</Badge>
-            )}
+            {merged.work_mode && <Badge variant="secondary">{merged.work_mode}</Badge>}
           </div>
         </div>
 
-        {/* Bio */}
-        {profile.bio && (
+        {merged.bio && (
           <div className="glass-card rounded-lg p-4">
-            <p className="text-sm leading-relaxed text-foreground/90">{profile.bio}</p>
+            <p className="text-sm leading-relaxed text-foreground/90">{merged.bio}</p>
           </div>
         )}
 
-        {/* Contact details */}
         <div className="glass-card rounded-lg divide-y divide-border/60">
-          {profile.show_location && profile.location && (
-            <ContactRow icon={<MapPin className="w-4 h-4" />} label={profile.location} />
+          {merged.show_location && merged.location && (
+            <ContactRow icon={<MapPin className="w-4 h-4" />} label={merged.location} />
           )}
-          {profile.email_public && (
-            <ContactRow icon={<Mail className="w-4 h-4" />} label={profile.email_public} href={`mailto:${profile.email_public}`} />
+          {merged.email_public && (
+            <ContactRow icon={<Mail className="w-4 h-4" />} label={merged.email_public} href={`mailto:${merged.email_public}`} />
           )}
-          {profile.phone && (
-            <ContactRow icon={<Phone className="w-4 h-4" />} label={profile.phone} href={`tel:${profile.phone}`} />
+          {merged.phone && (
+            <ContactRow icon={<Phone className="w-4 h-4" />} label={merged.phone} href={`tel:${merged.phone}`} />
           )}
-          {profile.website && (
-            <ContactRow icon={<Globe className="w-4 h-4" />} label={profile.website} href={profile.website} external />
+          {merged.website && (
+            <ContactRow icon={<Globe className="w-4 h-4" />} label={merged.website} href={merged.website} external />
           )}
-          {profile.linkedin_url && (
-            <ContactRow icon={<Linkedin className="w-4 h-4" />} label="LinkedIn" href={profile.linkedin_url} external />
+          {merged.linkedin_url && (
+            <ContactRow icon={<Linkedin className="w-4 h-4" />} label="LinkedIn" href={merged.linkedin_url} external />
           )}
-          {profile.github_url && (
-            <ContactRow icon={<Github className="w-4 h-4" />} label="GitHub" href={profile.github_url} external />
+          {merged.github_url && (
+            <ContactRow icon={<Github className="w-4 h-4" />} label="GitHub" href={merged.github_url} external />
           )}
         </div>
 
-        {/* Action buttons */}
         <div className="space-y-3">
           <Button onClick={handleDownloadVCard} className="w-full gradient-primary text-primary-foreground h-12">
             <UserPlus className="w-4 h-4 mr-2" /> Save Contact
           </Button>
-          {profile.cv_url && (
+          {merged.cv_url && (
             <Button onClick={handleDownloadCV} variant="outline" className="w-full h-12">
               <FileText className="w-4 h-4 mr-2" /> Download CV / Resume
             </Button>

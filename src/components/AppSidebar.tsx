@@ -1,4 +1,4 @@
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone } from "lucide-react";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,6 +19,8 @@ const mainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "NFC Cards", url: "/cards", icon: CreditCard },
   { title: "NFC Manager", url: "/nfc-manager", icon: Smartphone },
+  { title: "Personas", url: "/personas", icon: Users },
+  { title: "Leads", url: "/leads", icon: Mail },
   { title: "Interaction Logs", url: "/logs", icon: List },
   { title: "Categories", url: "/categories", icon: Tag },
   { title: "Profile", url: "/profile", icon: User },
