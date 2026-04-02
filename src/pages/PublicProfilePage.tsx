@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { InteractiveCard3D } from "@/components/InteractiveCard3D";
 import { SecurityGate } from "@/components/SecurityGate";
+import { CardDisabledPage } from "@/components/CardDisabledPage";
 import { downloadVCard } from "@/lib/vcard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
