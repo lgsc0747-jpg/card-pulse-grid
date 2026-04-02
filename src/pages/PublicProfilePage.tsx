@@ -241,6 +241,11 @@ const PublicProfilePage = () => {
     );
   }
 
+  // Kill-switch: persona is inactive
+  if (persona && !persona.is_active) {
+    return <CardDisabledPage ownerName={merged.display_name || username || undefined} />;
+  }
+
   // Security gate check
   if (persona?.is_private && !gateUnlocked) {
     return (
