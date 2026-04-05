@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Paintbrush, Cookie, FileText, Shield, Check, LogOut, Trash2,
-  KeyRound, Bell, Sun, Moon,
+  KeyRound, Bell, Sun, Moon, UserX,
 } from "lucide-react";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { useDashboardTheme, DASHBOARD_THEMES, type DashboardTheme } from "@/contexts/DashboardThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ const SettingsPage = () => {
   const { theme, setTheme, colorMode, setColorMode } = useDashboardTheme();
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Granular cookie prefs
   const [cookiePrefs, setCookiePrefs] = useState<CookiePrefs>(getCookiePrefs);
@@ -322,13 +324,31 @@ const SettingsPage = () => {
               <LogOut className="w-4 h-4" /> Account
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Button variant="outline" className="text-destructive hover:text-destructive" onClick={signOut}>
               <LogOut className="w-4 h-4 mr-1.5" />
               Sign Out
             </Button>
+
+            <Separator />
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <UserX className="w-4 h-4 text-destructive" />
+                <p className="text-sm font-medium text-destructive">Delete Account</p>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Permanently delete your account and all associated data. This action is irreversible and complies with the right to erasure under <strong>RA 10173</strong>.
+              </p>
+              <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                <Trash2 className="w-3 h-3 mr-1.5" />
+                Delete My Account
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        <DeleteAccountDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} />
       </div>
     </DashboardLayout>
   );
