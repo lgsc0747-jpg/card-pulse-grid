@@ -31,6 +31,20 @@ export function useChartPalette() {
   return useContext(ChartPaletteContext);
 }
 
+interface ChartPaletteContextValueFull extends ChartPaletteContextValue {
+  setPaletteId: (id: PaletteId) => void;
+}
+
+const ChartPaletteContextFull = createContext<ChartPaletteContextValueFull>({
+  colors: PALETTES[0].colors as unknown as string[],
+  paletteId: "default",
+  setPaletteId: () => {},
+});
+
+export function useChartPaletteFull() {
+  return useContext(ChartPaletteContextFull);
+}
+
 export function ChartPaletteProvider({ children }: { children: React.ReactNode }) {
   const [paletteId, setPaletteId] = useState<PaletteId>(() => {
     return (localStorage.getItem(STORAGE_KEY) as PaletteId) || "default";
@@ -43,9 +57,11 @@ export function ChartPaletteProvider({ children }: { children: React.ReactNode }
   const palette = PALETTES.find((p) => p.id === paletteId) ?? PALETTES[0];
 
   return (
-    <ChartPaletteContext.Provider value={{ colors: [...palette.colors], paletteId }}>
-      {children}
-    </ChartPaletteContext.Provider>
+    <ChartPaletteContextFull.Provider value={{ colors: [...palette.colors], paletteId, setPaletteId }}>
+      <ChartPaletteContext.Provider value={{ colors: [...palette.colors], paletteId }}>
+        {children}
+      </ChartPaletteContext.Provider>
+    </ChartPaletteContextFull.Provider>
   );
 }
 
