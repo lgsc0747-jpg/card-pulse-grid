@@ -166,8 +166,64 @@
 }
 
 /* ── Independent Dashboard Theme Presets ── */
-/* These override the dark-mode tokens ONLY for the admin dashboard.
-   The public landing page never uses these classes. */
+
+.theme-light {
+  --background: 220 20% 97%;
+  --foreground: 220 25% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 25% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 25% 10%;
+  --primary: 174 72% 40%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 92%;
+  --secondary-foreground: 220 25% 15%;
+  --muted: 220 14% 94%;
+  --muted-foreground: 220 10% 46%;
+  --accent: 174 60% 92%;
+  --accent-foreground: 174 72% 25%;
+  --border: 220 13% 89%;
+  --input: 220 13% 89%;
+  --ring: 174 72% 40%;
+  --sidebar-background: 220 20% 99%;
+  --sidebar-foreground: 220 10% 30%;
+  --sidebar-primary: 174 72% 40%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 174 60% 94%;
+  --sidebar-accent-foreground: 174 72% 25%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 174 72% 40%;
+  --gradient-primary: linear-gradient(135deg, hsl(174 72% 40%), hsl(200 70% 50%));
+}
+
+.theme-dark {
+  --background: 222 25% 8%;
+  --foreground: 210 20% 92%;
+  --card: 222 22% 11%;
+  --card-foreground: 210 20% 92%;
+  --popover: 222 22% 11%;
+  --popover-foreground: 210 20% 92%;
+  --primary: 174 72% 45%;
+  --primary-foreground: 222 25% 8%;
+  --secondary: 222 18% 16%;
+  --secondary-foreground: 210 20% 85%;
+  --muted: 222 18% 16%;
+  --muted-foreground: 215 15% 55%;
+  --accent: 174 50% 15%;
+  --accent-foreground: 174 72% 60%;
+  --border: 222 18% 18%;
+  --input: 222 18% 18%;
+  --ring: 174 72% 45%;
+  --sidebar-background: 222 25% 6%;
+  --sidebar-foreground: 210 15% 70%;
+  --sidebar-primary: 174 72% 45%;
+  --sidebar-primary-foreground: 222 25% 8%;
+  --sidebar-accent: 174 40% 12%;
+  --sidebar-accent-foreground: 174 72% 60%;
+  --sidebar-border: 222 18% 15%;
+  --sidebar-ring: 174 72% 45%;
+  --gradient-primary: linear-gradient(135deg, hsl(174 72% 45%), hsl(200 70% 55%));
+}
 
 .theme-midnight {
   --background: 222 30% 7%;
