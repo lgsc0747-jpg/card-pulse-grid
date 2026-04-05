@@ -488,24 +488,30 @@ const DesignStudioPage = () => {
                   <p className="text-[10px] text-muted-foreground">Optional — appears as a download button on your landing page</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {editing?.cv_url ? (
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs truncate max-w-[200px]">
-                        {editing.cv_url.split("/").pop()}
-                      </Badge>
-                      <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive" onClick={() => update("cv_url", null)}>
-                        Remove
-                      </Button>
-                    </div>
+                  {isPro ? (
+                    <>
+                      {editing?.cv_url ? (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs truncate max-w-[200px]">
+                            {editing.cv_url.split("/").pop()}
+                          </Badge>
+                          <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive" onClick={() => update("cv_url", null)}>
+                            Remove
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No CV uploaded yet</p>
+                      )}
+                      <ImageUploadField
+                        label="Upload CV (PDF or image)"
+                        value={editing?.cv_url ?? null}
+                        onChange={(url) => update("cv_url", url)}
+                        folder="cv-uploads"
+                      />
+                    </>
                   ) : (
-                    <p className="text-xs text-muted-foreground">No CV uploaded yet</p>
+                    <UpgradePrompt feature="CV / Resume Hosting" description="Upload and track CV downloads with Pro." />
                   )}
-                  <ImageUploadField
-                    label="Upload CV (PDF or image)"
-                    value={editing?.cv_url ?? null}
-                    onChange={(url) => update("cv_url", url)}
-                    folder="cv-uploads"
-                  />
                 </CardContent>
               </Card>
             </TabsContent>
