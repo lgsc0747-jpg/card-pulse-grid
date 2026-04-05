@@ -133,26 +133,14 @@ const PublicProfilePage = () => {
         .single();
       setOwnerIsPro(subData?.plan === "pro");
 
-      if (personaSlug) {
-        const { data: personaData } = await supabase
-          .from("personas")
-          .select("*")
-          .eq("user_id", profileData.user_id)
-          .eq("slug", personaSlug)
-          .single();
+      // Use secure RPC to fetch persona (excludes pin_code, returns has_pin)
+      const { data: personaRows } = await (supabase.rpc as any)("get_public_persona", {
+        p_user_id: profileData.user_id,
+        p_slug: personaSlug || null,
+      });
 
-        if (personaData) setPersona(personaData as PersonaData);
-      } else {
-        const { data: activePer } = await supabase
-          .from("personas")
-          .select("*")
-          .eq("user_id", profileData.user_id)
-          .eq("is_active", true)
-          .limit(1)
-          .single();
-
-        if (activePer) setPersona(activePer as PersonaData);
-      }
+      const personaData = Array.isArray(personaRows) ? personaRows[0] : personaRows;
+      if (personaData) setPersona(personaData as PersonaData);
 
       // Track return visitors via localStorage
       const visitorKey = `nfc_visitor_${profileData.user_id}`;
