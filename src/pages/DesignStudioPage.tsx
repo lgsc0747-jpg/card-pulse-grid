@@ -21,7 +21,7 @@ import type { PersonaDesign } from "@/components/DesignStudio/types";
 import {
   Loader2, Monitor, Smartphone, Palette, Save, Eye,
   CreditCard, Layout, Type,
-  AlignLeft, AlignCenter, AlignRight,
+  AlignLeft, AlignCenter, AlignRight, FileText, Upload,
 } from "lucide-react";
 
 const TEXT_ALIGNMENTS = [
