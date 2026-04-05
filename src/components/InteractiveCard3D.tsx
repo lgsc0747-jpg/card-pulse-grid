@@ -432,7 +432,7 @@ function CardBack({
 }
 
 const SocialIcon = forwardRef<HTMLAnchorElement, SocialIconProps>(function SocialIcon(
-  { href, label, external = true, children },
+  { href, label, external = true, children, onClick },
   ref,
 ) {
   return (
@@ -444,7 +444,7 @@ const SocialIcon = forwardRef<HTMLAnchorElement, SocialIconProps>(function Socia
       aria-label={label}
       className="flex h-[2em] w-[2em] items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
       onPointerDown={(event) => event.stopPropagation()}
-      onClick={(event) => event.stopPropagation()}
+      onClick={(event) => { event.stopPropagation(); onClick?.(); }}
     >
       {children}
     </a>

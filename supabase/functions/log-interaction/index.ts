@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
       "link_click",
       "dwell_time",
       "security_attempt",
+      "card_flip",
     ];
     if (!allowedTypes.includes(interaction_type)) {
       return new Response(
