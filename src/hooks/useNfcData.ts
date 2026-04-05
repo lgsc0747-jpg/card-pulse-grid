@@ -168,6 +168,7 @@ export function useNfcData() {
     const devices = new Map<string, number>();
     const browsers = new Map<string, number>();
     const oses = new Map<string, number>();
+    const regions = new Map<string, number>();
     const locations = new Map<string, number>();
     const hourlyMap = new Map<string, number>();
     const linkClicks = new Map<string, number>();
