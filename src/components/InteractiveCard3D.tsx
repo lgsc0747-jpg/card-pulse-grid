@@ -301,9 +301,6 @@ function CardFront({
         boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
         fontFamily,
       }}
-        boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
-        fontFamily,
-      }}
       onClick={onFlip}
     >
       {/* Glass overlay */}
