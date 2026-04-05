@@ -244,11 +244,29 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
   );
 });
 
+function getBackgroundStyle(url: string | undefined, size: string, accentColor: string, secondaryColor: string) {
+  if (!url) return { background: `linear-gradient(135deg, ${accentColor}dd, ${secondaryColor}88)` };
+  const sizeMap: Record<string, { backgroundSize: string; backgroundPosition: string }> = {
+    cover: { backgroundSize: "cover", backgroundPosition: "center" },
+    contain: { backgroundSize: "contain", backgroundPosition: "center" },
+    center: { backgroundSize: "auto", backgroundPosition: "center" },
+    original: { backgroundSize: "auto", backgroundPosition: "top left" },
+  };
+  const s = sizeMap[size] ?? sizeMap.cover;
+  return {
+    backgroundImage: `url(${url})`,
+    backgroundRepeat: "no-repeat" as const,
+    backgroundColor: `${accentColor}22`,
+    ...s,
+  };
+}
+
 function CardFront({
   accentColor,
   secondaryColor,
   textColor,
   cardBgImageUrl,
+  cardBgSize = "cover",
   glassOpacity,
   avatarUrl,
   glareBackground,
@@ -279,7 +297,10 @@ function CardFront({
       style={{
         ...FACE_STYLE,
         pointerEvents: isFlipped ? "none" : "auto",
-        background: cardBgImageUrl ? `url(${cardBgImageUrl}) center/cover no-repeat` : `linear-gradient(135deg, ${accentColor}dd, ${secondaryColor}88)`,
+        ...getBackgroundStyle(cardBgImageUrl, cardBgSize, accentColor, secondaryColor),
+        boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
+        fontFamily,
+      }}
         boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
         fontFamily,
       }}
