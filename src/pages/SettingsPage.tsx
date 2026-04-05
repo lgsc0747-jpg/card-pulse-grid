@@ -15,8 +15,8 @@ import { useDashboardTheme, DASHBOARD_THEMES, type DashboardTheme } from "@/cont
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getCookiePrefs, saveCookiePrefs, type CookiePrefs } from "@/components/CookieConsentBanner";
 
-const CONSENT_KEY = "cookie-consent";
 const NOTIF_KEY = "notification_prefs";
 
 const SettingsPage = () => {
@@ -24,10 +24,17 @@ const SettingsPage = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
 
-  const [cookieConsent, setCookieConsent] = useState(() => localStorage.getItem(CONSENT_KEY) ?? "none");
+  // Granular cookie prefs
+  const [cookiePrefs, setCookiePrefs] = useState<CookiePrefs>(getCookiePrefs);
+
+  const updateCookiePref = (key: keyof Omit<CookiePrefs, "essential">, value: boolean) => {
+    const updated = { ...cookiePrefs, [key]: value };
+    setCookiePrefs(updated);
+    saveCookiePrefs(updated);
+    toast({ title: "Cookie preferences updated" });
+  };
 
   // Password change
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -49,18 +56,12 @@ const SettingsPage = () => {
     toast({ title: "Notification preferences saved" });
   };
 
-  const handleCookieChange = (value: "all" | "essential") => {
-    localStorage.setItem(CONSENT_KEY, value);
-    setCookieConsent(value);
-    toast({ title: "Cookie preferences saved" });
-  };
-
   const handleClearData = () => {
     localStorage.removeItem("nfc_widget_order");
     localStorage.removeItem("nfc_widget_visibility");
-    localStorage.removeItem(CONSENT_KEY);
+    localStorage.removeItem("cookie-consent");
     toast({ title: "Local data cleared", description: "Widget layout and cookie preferences have been reset." });
-    setCookieConsent("none");
+    setCookiePrefs({ essential: true, analytics: false, functional: false });
   };
 
   const handleChangePassword = async () => {
@@ -79,7 +80,6 @@ const SettingsPage = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Password updated successfully" });
-      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     }
@@ -101,7 +101,6 @@ const SettingsPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            {/* Light / Dark Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {colorMode === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -120,7 +119,6 @@ const SettingsPage = () => {
 
             <Separator />
 
-            {/* Theme Grid */}
             <div>
               <p className="text-sm text-muted-foreground mb-3">Dashboard Theme</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -168,23 +166,11 @@ const SettingsPage = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="new-pw" className="text-xs">New Password</Label>
-              <Input
-                id="new-pw"
-                type="password"
-                placeholder="••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
+              <Input id="new-pw" type="password" placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-pw" className="text-xs">Confirm New Password</Label>
-              <Input
-                id="confirm-pw"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
+              <Input id="confirm-pw" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             </div>
             <Button size="sm" onClick={handleChangePassword} disabled={changingPassword || !newPassword}>
               {changingPassword ? "Updating…" : "Update Password"}
@@ -201,7 +187,6 @@ const SettingsPage = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-xs text-muted-foreground">Choose which notifications you'd like to receive.</p>
-
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -217,9 +202,7 @@ const SettingsPage = () => {
                 </div>
                 <Switch checked={notifPrefs.emailTaps} onCheckedChange={(v) => updateNotifPref("emailTaps", v)} />
               </div>
-
               <Separator />
-
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">In-App — New Leads</p>
@@ -238,7 +221,7 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Privacy & Cookies */}
+        {/* Privacy & Cookies — Granular */}
         <Card className="glass-card animate-fade-in">
           <CardHeader className="pb-3">
             <CardTitle className="font-display text-sm flex items-center gap-2">
@@ -246,22 +229,38 @@ const SettingsPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Analytics Cookies</p>
-                <p className="text-xs text-muted-foreground">Help us understand how you use the app</p>
+            <p className="text-xs text-muted-foreground">
+              In compliance with the <strong>Data Privacy Act (RA 10173)</strong>, you can manage which cookies are active. Essential cookies cannot be disabled.
+            </p>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Essential Cookies</p>
+                  <p className="text-[10px] text-muted-foreground">Authentication, session management & security (required)</p>
+                </div>
+                <Switch checked disabled className="opacity-60" />
               </div>
-              <Switch
-                checked={cookieConsent === "all"}
-                onCheckedChange={(checked) => handleCookieChange(checked ? "all" : "essential")}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Essential Cookies</p>
-                <p className="text-xs text-muted-foreground">Required for authentication and basic functionality</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Analytics Cookies</p>
+                  <p className="text-[10px] text-muted-foreground">Anonymized usage patterns, page views & tap analytics</p>
+                </div>
+                <Switch
+                  checked={cookiePrefs.analytics}
+                  onCheckedChange={(v) => updateCookiePref("analytics", v)}
+                />
               </div>
-              <Switch checked disabled />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Functional Cookies</p>
+                  <p className="text-[10px] text-muted-foreground">Theme preferences, widget layout & notification settings</p>
+                </div>
+                <Switch
+                  checked={cookiePrefs.functional}
+                  onCheckedChange={(v) => updateCookiePref("functional", v)}
+                />
+              </div>
             </div>
 
             <Separator />
@@ -269,9 +268,9 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" className="text-xs" onClick={handleClearData}>
                 <Trash2 className="w-3 h-3 mr-1.5" />
-                Clear Local Data
+                Delete All Cookie Data
               </Button>
-              <p className="text-[10px] text-muted-foreground">Resets widget layout and cookie preferences</p>
+              <p className="text-[10px] text-muted-foreground">Resets all preferences and clears stored cookie data</p>
             </div>
           </CardContent>
         </Card>
@@ -280,10 +279,13 @@ const SettingsPage = () => {
         <Card className="glass-card animate-fade-in">
           <CardHeader className="pb-3">
             <CardTitle className="font-display text-sm flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Legal
+              <FileText className="w-4 h-4" /> Legal & Compliance
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground mb-2">
+              Our platform operates in compliance with the <strong>Data Privacy Act of 2012 (RA 10173)</strong> of the Philippines.
+            </p>
             <Link
               to="/terms"
               className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/40 transition-colors group"
@@ -292,7 +294,7 @@ const SettingsPage = () => {
                 <Shield className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 <div>
                   <p className="text-sm font-medium">Terms of Service</p>
-                  <p className="text-[10px] text-muted-foreground">Read our terms and conditions</p>
+                  <p className="text-[10px] text-muted-foreground">Read our terms, data rights & RA 10173 compliance</p>
                 </div>
               </div>
               <span className="text-xs text-muted-foreground">→</span>
@@ -305,7 +307,7 @@ const SettingsPage = () => {
                 <FileText className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 <div>
                   <p className="text-sm font-medium">Privacy Policy</p>
-                  <p className="text-[10px] text-muted-foreground">How we handle your data</p>
+                  <p className="text-[10px] text-muted-foreground">How we collect, process & protect your data under RA 10173</p>
                 </div>
               </div>
               <span className="text-xs text-muted-foreground">→</span>
