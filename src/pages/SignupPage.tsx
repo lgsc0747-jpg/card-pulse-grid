@@ -112,7 +112,8 @@ const SignupPage = () => {
                 I agree to the{" "}
                 <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link>{" "}
                 and{" "}
-                <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link>
+                <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link>,
+                and consent to the collection and processing of my personal data in accordance with the Data Privacy Act of 2012 (RA 10173).
               </label>
             </div>
             <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading || !agreedToTerms}>

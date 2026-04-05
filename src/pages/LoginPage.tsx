@@ -60,6 +60,11 @@ const LoginPage = () => {
               <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
             </p>
           </div>
+          <p className="mt-3 text-[10px] text-muted-foreground text-center leading-relaxed">
+            By signing in, you agree to our{" "}
+            <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link> in compliance with the Data Privacy Act of 2012 (RA 10173).
+          </p>
         </CardContent>
       </Card>
     </div>
