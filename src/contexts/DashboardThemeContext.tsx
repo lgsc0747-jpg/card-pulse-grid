@@ -5,11 +5,13 @@ export type DashboardTheme =
   | "serika" | "botanical" | "olivia" | "carbon"
   | "monokai" | "aurora" | "dracula" | "terminal";
 
+export type ColorMode = "dark" | "light" | "system";
+
 interface ThemeConfig {
   label: string;
   description: string;
-  preview: string;   // primary accent hex
-  secondary: string; // secondary accent hex
+  preview: string;
+  secondary: string;
 }
 
 export const DASHBOARD_THEMES: Record<DashboardTheme, ThemeConfig> = {
@@ -90,19 +92,28 @@ export const DASHBOARD_THEMES: Record<DashboardTheme, ThemeConfig> = {
 interface Ctx {
   theme: DashboardTheme;
   setTheme: (t: DashboardTheme) => void;
-  colorMode: "dark" | "light";
-  setColorMode: (m: "dark" | "light") => void;
+  colorMode: ColorMode;
+  setColorMode: (m: ColorMode) => void;
+  resolvedColorMode: "dark" | "light";
 }
 
 const DashboardThemeContext = createContext<Ctx>({
   theme: "midnight",
   setTheme: () => {},
-  colorMode: "dark",
+  colorMode: "system",
   setColorMode: () => {},
+  resolvedColorMode: "dark",
 });
 
 const STORAGE_KEY = "admin_theme";
 const COLOR_MODE_KEY = "admin_color_mode";
+
+function getSystemPreference(): "dark" | "light" {
+  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    return "dark";
+  }
+  return "light";
+}
 
 export function DashboardThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<DashboardTheme>(() => {
@@ -111,28 +122,40 @@ export function DashboardThemeProvider({ children }: { children: ReactNode }) {
     return "midnight";
   });
 
-  const [colorMode, setColorModeState] = useState<"dark" | "light">(() => {
+  const [colorMode, setColorModeState] = useState<ColorMode>(() => {
     const stored = localStorage.getItem(COLOR_MODE_KEY);
-    if (stored === "light" || stored === "dark") return stored;
-    return "dark";
+    if (stored === "light" || stored === "dark" || stored === "system") return stored;
+    return "system";
   });
+
+  const [systemPref, setSystemPref] = useState<"dark" | "light">(getSystemPreference);
+
+  const resolvedColorMode: "dark" | "light" = colorMode === "system" ? systemPref : colorMode;
 
   const setTheme = (t: DashboardTheme) => {
     setThemeState(t);
     localStorage.setItem(STORAGE_KEY, t);
   };
 
-  const setColorMode = (m: "dark" | "light") => {
+  const setColorMode = (m: ColorMode) => {
     setColorModeState(m);
     localStorage.setItem(COLOR_MODE_KEY, m);
   };
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => setSystemPref(e.matches ? "dark" : "light");
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
     Object.keys(DASHBOARD_THEMES).forEach((k) => root.classList.remove(`theme-${k}`));
     root.classList.add(`theme-${theme}`);
 
-    if (colorMode === "dark") {
+    if (resolvedColorMode === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
@@ -141,10 +164,10 @@ export function DashboardThemeProvider({ children }: { children: ReactNode }) {
     return () => {
       root.classList.remove(`theme-${theme}`);
     };
-  }, [theme, colorMode]);
+  }, [theme, resolvedColorMode]);
 
   return (
-    <DashboardThemeContext.Provider value={{ theme, setTheme, colorMode, setColorMode }}>
+    <DashboardThemeContext.Provider value={{ theme, setTheme, colorMode, setColorMode, resolvedColorMode }}>
       {children}
     </DashboardThemeContext.Provider>
   );

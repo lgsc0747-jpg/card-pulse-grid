@@ -12,7 +12,7 @@ import NfcManagerPage from "./pages/NfcManagerPage.tsx";
 import ShortUrlRedirect from "./pages/ShortUrlRedirect.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import CategoriesPage from "./pages/CategoriesPage.tsx";
-import ProfilePage from "./pages/ProfilePage.tsx";
+
 import PersonasPage from "./pages/PersonasPage.tsx";
 import LeadsPage from "./pages/LeadsPage.tsx";
 import DesignStudioPage from "./pages/DesignStudioPage.tsx";
