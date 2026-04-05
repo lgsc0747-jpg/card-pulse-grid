@@ -8,6 +8,7 @@ interface PersonaBarChartProps {
 }
 
 export function PersonaBarChart({ data }: PersonaBarChartProps) {
+  const { colors } = useChartPalette();
   if (data.length === 0) {
     return (
       <Card className="glass-card animate-fade-in">
