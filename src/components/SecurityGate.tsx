@@ -45,7 +45,7 @@ export function SecurityGate({
     setPinError(false);
 
     // Verify PIN server-side via secure RPC (never exposes stored PIN)
-    const { data, error } = await supabase.rpc("verify_persona_pin", {
+    const { data, error } = await (supabase.rpc as any)("verify_persona_pin", {
       p_persona_id: personaId,
       p_pin: pin,
     });
