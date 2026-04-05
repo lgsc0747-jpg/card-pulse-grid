@@ -546,9 +546,11 @@ const PublicProfilePage = () => {
             )}
           </motion.div>
 
-          <p className="text-center text-xs text-muted-foreground pt-4">
-            Powered by <span className="font-display font-semibold">NFC Hub</span>
-          </p>
+          {!ownerIsPro && (
+            <p className="text-center text-xs text-muted-foreground pt-4">
+              Powered by <span className="font-display font-semibold">NFC Hub</span>
+            </p>
+          )}
         </div>
       </section>
     </div>
