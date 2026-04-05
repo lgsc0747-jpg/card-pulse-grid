@@ -168,10 +168,13 @@ export function useNfcData() {
     const linkClicks = new Map<string, number>();
     const personaTaps = new Map<string, number>();
     const personaVcards = new Map<string, number>();
-    let profileViews = 0, cvDownloads = 0, vcardDownloads = 0;
+    let profileViews = 0, cvDownloads = 0, vcardDownloads = 0, cardFlips = 0;
     let totalDwell = 0, dwellCount = 0;
     let securitySuccess = 0, securityTotal = 0, unauthorizedAttempts = 0;
     let nfcSource = 0, qrSource = 0, directSource = 0;
+    let returnVisitors = 0;
+    const visitorsWithFlips = new Set<string>();
+    const visitorsWithInteractions = new Set<string>();
 
     allLogs.forEach((log) => {
       const meta = (log.metadata as Record<string, any>) ?? {};
