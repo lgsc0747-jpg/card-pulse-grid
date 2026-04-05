@@ -12,7 +12,7 @@ import NfcManagerPage from "./pages/NfcManagerPage.tsx";
 import ShortUrlRedirect from "./pages/ShortUrlRedirect.tsx";
 import LogsPage from "./pages/LogsPage.tsx";
 import CategoriesPage from "./pages/CategoriesPage.tsx";
-import ProfilePage from "./pages/ProfilePage.tsx";
+
 import PersonasPage from "./pages/PersonasPage.tsx";
 import LeadsPage from "./pages/LeadsPage.tsx";
 import DesignStudioPage from "./pages/DesignStudioPage.tsx";
@@ -51,7 +51,7 @@ const App = () => (
             <Route path="/nfc-manager" element={<ProtectedRoute><NfcManagerPage /></ProtectedRoute>} />
             <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
             <Route path="/categories" element={<ProtectedRoute><CategoriesPage /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/personas" element={<ProtectedRoute><PersonasPage /></ProtectedRoute>} />
             <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
             <Route path="/design-studio" element={<ProtectedRoute><DesignStudioPage /></ProtectedRoute>} />

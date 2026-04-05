@@ -24,7 +24,7 @@ const mainItems = [
   { title: "Design Studio", url: "/design-studio", icon: Palette },
   { title: "Interaction Logs", url: "/logs", icon: List },
   { title: "Categories", url: "/categories", icon: Tag },
-  { title: "Profile", url: "/profile", icon: User },
+  
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
