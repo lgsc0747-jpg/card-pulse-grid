@@ -431,9 +431,6 @@ const PersonasPage = () => {
                           />
                         </div>
                       )}
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
