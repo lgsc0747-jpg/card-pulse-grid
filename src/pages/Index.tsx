@@ -15,7 +15,6 @@ const Dashboard = () => {
   const { toast } = useToast();
   const { stats, chartData, timeframe, setTimeframe, loading } = useNfcData();
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
