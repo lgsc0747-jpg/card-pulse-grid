@@ -52,12 +52,12 @@ export function AnalyticsChart({ data, timeframe, onTimeframeChange }: Analytics
             <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="tapGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(174, 72%, 40%)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="hsl(174, 72%, 40%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor={colors[0]} stopOpacity={0.4} />
+                  <stop offset="95%" stopColor={colors[0]} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="vcardGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor={colors[1]} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={colors[1]} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
