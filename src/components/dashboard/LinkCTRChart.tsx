@@ -8,6 +8,7 @@ interface LinkCTRChartProps {
 }
 
 export function LinkCTRChart({ data }: LinkCTRChartProps) {
+  const { colors: COLORS } = useChartPalette();
   if (data.length === 0) {
     return (
       <Card className="glass-card animate-fade-in">

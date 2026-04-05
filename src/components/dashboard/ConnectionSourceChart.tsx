@@ -11,8 +11,9 @@ const SOURCE_KEYS = ["nfc", "qr", "direct"] as const;
 const SOURCE_LABELS: Record<string, string> = { nfc: "NFC Tap", qr: "QR Scan", direct: "Direct Link" };
 
 export function ConnectionSourceChart({ sources }: ConnectionSourceChartProps) {
-  const data = SOURCE_DATA
-    .map((s) => ({ name: s.label, value: sources[s.key], color: s.color }))
+  const { colors } = useChartPalette();
+  const data = SOURCE_KEYS
+    .map((key, i) => ({ name: SOURCE_LABELS[key], value: sources[key], color: colors[i % colors.length] }))
     .filter((d) => d.value > 0);
 
   const total = data.reduce((s, d) => s + d.value, 0);

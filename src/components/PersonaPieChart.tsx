@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useChartPalette } from "@/components/dashboard/ChartPaletteSelector";
 
 export function PersonaPieChart() {
+  const { colors: COLORS } = useChartPalette();
   const { user } = useAuth();
   const [data, setData] = useState<{ name: string; value: number }[]>([]);
   const [loading, setLoading] = useState(true);
