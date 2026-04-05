@@ -48,6 +48,10 @@ export interface NfcStats {
   authSuccessRate: number;
   leadGenCount: number;
   unauthorizedAttempts: number;
+  // New metrics
+  cardFlips: number;
+  returnVisitorRate: number;
+  interactionDepthRate: number;
   // Breakdowns
   deviceBreakdown: DeviceBreakdown[];
   browserBreakdown: DeviceBreakdown[];
