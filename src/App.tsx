@@ -57,6 +57,8 @@ const App = () => (
             <Route path="/p/:username" element={<PublicProfilePage />} />
             <Route path="/p/:username/:personaSlug" element={<PublicProfilePage />} />
             <Route path="/u/:code" element={<ShortUrlRedirect />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </DashboardThemeProvider>
