@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Paintbrush, Cookie, FileText, Shield, Check, LogOut, Trash2,
-  KeyRound, Bell, Sun, Moon, UserX, User, Camera, Loader2, Save,
+  KeyRound, Bell, Sun, Moon, UserX, User, Camera, Loader2, Save, Monitor,
 } from "lucide-react";
 import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { useDashboardTheme, DASHBOARD_THEMES, type DashboardTheme } from "@/contexts/DashboardThemeContext";
