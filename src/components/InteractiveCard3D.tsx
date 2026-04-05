@@ -98,6 +98,10 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
     githubUrl,
     website,
     email,
+    fontFamily = "Space Grotesk",
+    textAlignment = "left",
+    cardBlur = 12,
+    cardTexture = "none",
   },
   forwardedRef,
 ) {
