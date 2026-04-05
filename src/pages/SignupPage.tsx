@@ -27,6 +27,10 @@ const SignupPage = () => {
       toast({ title: "Invalid username", description: "Use 3-30 lowercase letters, numbers, hyphens, or underscores.", variant: "destructive" });
       return;
     }
+    if (!agreedToTerms) {
+      toast({ title: "Terms required", description: "You must agree to the Terms of Service and Privacy Policy.", variant: "destructive" });
+      return;
+    }
 
     setLoading(true);
 
