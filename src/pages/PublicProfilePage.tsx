@@ -62,13 +62,10 @@ interface ProfileData {
   headline: string | null;
   bio: string | null;
   avatar_url: string | null;
-  email_public: string | null;
-  phone: string | null;
   location: string | null;
   website: string | null;
   linkedin_url: string | null;
   github_url: string | null;
-  cv_url: string | null;
   card_accent_color: string | null;
   availability_status: string | null;
   work_mode: string | null;
@@ -111,11 +108,12 @@ const PublicProfilePage = () => {
     if (!username) return;
 
     const load = async () => {
-      const { data: profileData, error: profileErr } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("username", username)
-        .single();
+      // Use secure RPC to fetch only safe public fields
+      const { data: profileRows, error: profileErr } = await (supabase.rpc as any)("get_public_profile", {
+        p_username: username,
+      });
+
+      const profileData = Array.isArray(profileRows) ? profileRows[0] : profileRows;
 
       if (profileErr || !profileData) {
         setNotFound(true);
@@ -203,13 +201,13 @@ const PublicProfilePage = () => {
         headline: persona.headline || profile?.headline,
         bio: persona.bio || profile?.bio,
         avatar_url: persona.avatar_url || profile?.avatar_url,
-        email_public: persona.email_public || profile?.email_public,
-        phone: persona.phone || profile?.phone,
+        email_public: persona.email_public || null,
+        phone: persona.phone || null,
         location: persona.location || profile?.location,
         website: persona.website || profile?.website,
         linkedin_url: persona.linkedin_url || profile?.linkedin_url,
         github_url: persona.github_url || profile?.github_url,
-        cv_url: persona.cv_url || profile?.cv_url,
+        cv_url: persona.cv_url || null,
         accent_color: persona.accent_color || profile?.card_accent_color || "#0d9488",
         availability_status: persona.availability_status || profile?.availability_status,
         work_mode: persona.work_mode || profile?.work_mode,
@@ -222,13 +220,13 @@ const PublicProfilePage = () => {
         headline: profile?.headline,
         bio: profile?.bio,
         avatar_url: profile?.avatar_url,
-        email_public: profile?.email_public,
-        phone: profile?.phone,
+        email_public: null as string | null,
+        phone: null as string | null,
         location: profile?.location,
         website: profile?.website,
         linkedin_url: profile?.linkedin_url,
         github_url: profile?.github_url,
-        cv_url: profile?.cv_url,
+        cv_url: null as string | null,
         accent_color: profile?.card_accent_color || "#0d9488",
         availability_status: profile?.availability_status,
         work_mode: profile?.work_mode,
