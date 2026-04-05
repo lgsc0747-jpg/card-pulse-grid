@@ -37,7 +37,7 @@ interface WidgetManagerProps {
   };
 }
 
-type WidgetKey = "totalTaps" | "uniqueVisitors" | "contactSaveRate" | "topDevice" | "profileViews" | "vcardDownloads" | "cvDownloads" | "leadGenCount";
+type WidgetKey = "totalTaps" | "uniqueVisitors" | "contactSaveRate" | "topDevice" | "profileViews" | "vcardDownloads" | "cvDownloads" | "leadGenCount" | "cardFlips" | "returnVisitorRate" | "interactionDepthRate";
 
 const WIDGET_CONFIG: { key: WidgetKey; label: string; icon: React.ReactNode; description: string }[] = [
   { key: "totalTaps", label: "Total Taps", icon: <Zap className="w-4 h-4" />, description: "Total profile views from NFC taps" },
@@ -48,12 +48,16 @@ const WIDGET_CONFIG: { key: WidgetKey; label: string; icon: React.ReactNode; des
   { key: "vcardDownloads", label: "vCard Saves", icon: <FileText className="w-4 h-4" />, description: "Total contact card downloads" },
   { key: "cvDownloads", label: "CV Downloads", icon: <FileText className="w-4 h-4" />, description: "Total resume downloads" },
   { key: "leadGenCount", label: "Leads Captured", icon: <Users className="w-4 h-4" />, description: "Contacts from private mode" },
+  { key: "cardFlips", label: "Card Flips", icon: <Zap className="w-4 h-4" />, description: "Times visitors flipped the card" },
+  { key: "returnVisitorRate", label: "Return Visitors", icon: <Users className="w-4 h-4" />, description: "% of returning visitors" },
+  { key: "interactionDepthRate", label: "Interaction Depth", icon: <Eye className="w-4 h-4" />, description: "% who interacted beyond viewing" },
 ];
 
 const DEFAULT_ORDER: WidgetKey[] = WIDGET_CONFIG.map((w) => w.key);
 const DEFAULT_VISIBILITY: Record<WidgetKey, boolean> = {
   totalTaps: true, uniqueVisitors: true, contactSaveRate: true,
   topDevice: true, profileViews: true, vcardDownloads: true, cvDownloads: true, leadGenCount: true,
+  cardFlips: true, returnVisitorRate: true, interactionDepthRate: true,
 };
 
 const STORAGE_KEY_ORDER = "nfc_widget_order";
