@@ -4,8 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recha
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-
-const COLORS = ["#0d9488", "#06b6d4", "#3b82f6", "#8b5cf6", "#d946ef", "#f43f5e", "#f97316", "#10b981"];
+import { useChartPalette } from "@/components/dashboard/ChartPaletteSelector";
 
 export function PersonaPieChart() {
   const { user } = useAuth();
