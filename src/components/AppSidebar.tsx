@@ -26,6 +26,7 @@ const mainItems = [
   { title: "Categories", url: "/categories", icon: Tag },
   
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Plans", url: "/plans", icon: Crown },
 ];
 
 export function AppSidebar() {
