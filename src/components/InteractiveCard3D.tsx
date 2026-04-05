@@ -224,7 +224,6 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
               username={username}
               website={website}
             />
-            />
           </motion.div>
         </motion.div>
       </div>
