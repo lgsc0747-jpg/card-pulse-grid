@@ -206,12 +206,15 @@ export function useNfcData() {
         if (source === "nfc_redirect") nfcSource++;
         else if (source === "qr_scan") qrSource++;
         else directSource++;
+        if (meta.is_return) returnVisitors++;
       }
-      if (log.interaction_type === "cv_download") cvDownloads++;
-      if (log.interaction_type === "vcard_download") vcardDownloads++;
+      if (log.interaction_type === "cv_download") { cvDownloads++; visitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "vcard_download") { vcardDownloads++; visitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "card_flip") { cardFlips++; visitorsWithFlips.add(log.entity_id); visitorsWithInteractions.add(log.entity_id); }
       if (log.interaction_type === "link_click") {
         const lt = meta.link_type || "unknown";
         linkClicks.set(lt, (linkClicks.get(lt) ?? 0) + 1);
+        visitorsWithInteractions.add(log.entity_id);
       }
       if (log.interaction_type === "dwell_time" && meta.seconds) {
         totalDwell += Number(meta.seconds);
