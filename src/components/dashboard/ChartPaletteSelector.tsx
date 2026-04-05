@@ -31,6 +31,20 @@ export function useChartPalette() {
   return useContext(ChartPaletteContext);
 }
 
+interface ChartPaletteContextValueFull extends ChartPaletteContextValue {
+  setPaletteId: (id: PaletteId) => void;
+}
+
+const ChartPaletteContextFull = createContext<ChartPaletteContextValueFull>({
+  colors: PALETTES[0].colors as unknown as string[],
+  paletteId: "default",
+  setPaletteId: () => {},
+});
+
+export function useChartPaletteFull() {
+  return useContext(ChartPaletteContextFull);
+}
+
 export function ChartPaletteProvider({ children }: { children: React.ReactNode }) {
   const [paletteId, setPaletteId] = useState<PaletteId>(() => {
     return (localStorage.getItem(STORAGE_KEY) as PaletteId) || "default";
@@ -43,22 +57,19 @@ export function ChartPaletteProvider({ children }: { children: React.ReactNode }
   const palette = PALETTES.find((p) => p.id === paletteId) ?? PALETTES[0];
 
   return (
-    <ChartPaletteContext.Provider value={{ colors: [...palette.colors], paletteId }}>
-      {children}
-    </ChartPaletteContext.Provider>
+    <ChartPaletteContextFull.Provider value={{ colors: [...palette.colors], paletteId, setPaletteId }}>
+      <ChartPaletteContext.Provider value={{ colors: [...palette.colors], paletteId }}>
+        {children}
+      </ChartPaletteContext.Provider>
+    </ChartPaletteContextFull.Provider>
   );
 }
 
 export function ChartPaletteSelector() {
-  const { paletteId } = useChartPalette();
-  const [selected, setSelected] = useState(paletteId);
-
-  useEffect(() => setSelected(paletteId), [paletteId]);
+  const { paletteId, setPaletteId } = useChartPaletteFull();
 
   const apply = (id: PaletteId) => {
-    setSelected(id);
-    localStorage.setItem(STORAGE_KEY, id);
-    window.location.reload();
+    setPaletteId(id);
   };
 
   return (
@@ -76,7 +87,7 @@ export function ChartPaletteSelector() {
               key={p.id}
               onClick={() => apply(p.id)}
               className={`w-full flex items-center gap-2 p-2 rounded-lg text-xs transition-colors ${
-                selected === p.id ? "bg-primary/10 ring-1 ring-primary" : "hover:bg-muted"
+                paletteId === p.id ? "bg-primary/10 ring-1 ring-primary" : "hover:bg-muted"
               }`}
             >
               <div className="flex gap-0.5">

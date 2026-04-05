@@ -414,6 +414,7 @@ const PublicProfilePage = () => {
               tertiaryColor={persona?.tertiary_color ?? undefined}
               textColor={persona?.text_color ?? "#ffffff"}
               cardBgImageUrl={persona?.card_bg_image_url ?? undefined}
+              cardBgSize={(persona as any)?.card_bg_size ?? "cover"}
               glassOpacity={persona?.glass_opacity ?? 0.15}
               linkedinUrl={merged.linkedin_url ?? undefined}
               githubUrl={merged.github_url ?? undefined}
