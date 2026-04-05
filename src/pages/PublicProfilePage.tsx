@@ -516,7 +516,31 @@ const PublicProfilePage = () => {
   );
 };
 
-function ContactRow({ icon, label, href, external }: { icon: React.ReactNode; label: string; href?: string; external?: boolean }) {
+function ContactRow({ icon, label, href, external, onClick }: { icon: React.ReactNode; label: string; href?: string; external?: boolean; onClick?: () => void }) {
+  const cls = "flex items-center gap-3 p-3.5 hover:bg-accent/40 transition-colors";
+  if (href) {
+    return (
+      <a
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
+        className={cls}
+        onClick={onClick}
+      >
+        <span className="text-muted-foreground shrink-0">{icon}</span>
+        <span className="text-sm truncate">{label}</span>
+      </a>
+    );
+  }
+  return (
+    <div className={cls}>
+      <span className="text-muted-foreground shrink-0">{icon}</span>
+      <span className="text-sm">{label}</span>
+    </div>
+  );
+}
+
+export default PublicProfilePage;
   const cls = "flex items-center gap-3 p-3.5 hover:bg-accent/40 transition-colors";
   if (href) {
     return (
