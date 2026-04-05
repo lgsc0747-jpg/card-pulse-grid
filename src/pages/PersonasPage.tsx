@@ -398,10 +398,14 @@ const PersonasPage = () => {
                       <p className="text-sm font-medium">Private Mode</p>
                       <p className="text-xs text-muted-foreground">Visitors must authenticate to view</p>
                     </div>
-                    <Switch
-                      checked={editingPersona.is_private}
-                      onCheckedChange={(v) => updateField("is_private", v)}
-                    />
+                    {isPro ? (
+                      <Switch
+                        checked={editingPersona.is_private}
+                        onCheckedChange={(v) => updateField("is_private", v)}
+                      />
+                    ) : (
+                      <UpgradePrompt feature="Private Mode" compact />
+                    )}
                   </div>
                   {editingPersona.is_private && (
                     <div className="space-y-3 pl-4 border-l-2 border-border">
