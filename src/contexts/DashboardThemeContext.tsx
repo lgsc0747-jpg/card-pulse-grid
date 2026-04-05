@@ -16,6 +16,18 @@ interface ThemeConfig {
 }
 
 export const DASHBOARD_THEMES: Record<DashboardTheme, ThemeConfig> = {
+  light: {
+    label: "Light",
+    description: "Clean, bright interface",
+    preview: "#0d9488",
+    secondary: "#3b82f6",
+  },
+  dark: {
+    label: "Dark",
+    description: "Easy on the eyes",
+    preview: "#14b8a6",
+    secondary: "#6366f1",
+  },
   midnight: {
     label: "Midnight",
     description: "Deep blue-black with cool accents",
