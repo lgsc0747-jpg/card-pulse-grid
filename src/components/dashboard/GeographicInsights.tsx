@@ -12,7 +12,7 @@ interface GeographicInsightsProps {
 }
 
 export function GeographicInsights({ data }: GeographicInsightsProps) {
-  const colors = useChartPalette();
+  const { colors } = useChartPalette();
   const total = data.reduce((s, d) => s + d.count, 0);
   const sorted = [...data].sort((a, b) => b.count - a.count).slice(0, 8);
 

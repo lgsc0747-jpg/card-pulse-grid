@@ -13,7 +13,7 @@ interface TapVelocityChartProps {
 }
 
 export function TapVelocityChart({ data }: TapVelocityChartProps) {
-  const colors = useChartPalette();
+  const { colors } = useChartPalette();
   const peak = data.reduce((max, d) => (d.taps > max.taps ? d : max), data[0] || { label: "", taps: 0 });
 
   return (
