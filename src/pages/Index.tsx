@@ -198,12 +198,21 @@ const Dashboard = () => {
                     <span className="font-bold">{stats.cvDownloads}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Return Visitors</span>
+                    <span className="font-bold">{stats.returnVisitorRate}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Interaction Depth</span>
+                    <span className="font-bold">{stats.interactionDepthRate}%</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-muted-foreground">Avg. Dwell Time</span>
                     <span className="font-bold">{stats.avgDwellTime > 0 ? `${stats.avgDwellTime}s` : "—"}</span>
                   </div>
                 </div>
               </div>
             </div>
+            <LeadGenTracker />
           </TabsContent>
         </Tabs>
       </div>
