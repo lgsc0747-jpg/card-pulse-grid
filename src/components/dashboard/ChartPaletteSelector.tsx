@@ -87,7 +87,7 @@ export function ChartPaletteSelector() {
               key={p.id}
               onClick={() => apply(p.id)}
               className={`w-full flex items-center gap-2 p-2 rounded-lg text-xs transition-colors ${
-                selected === p.id ? "bg-primary/10 ring-1 ring-primary" : "hover:bg-muted"
+                paletteId === p.id ? "bg-primary/10 ring-1 ring-primary" : "hover:bg-muted"
               }`}
             >
               <div className="flex gap-0.5">

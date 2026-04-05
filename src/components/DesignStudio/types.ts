@@ -26,4 +26,5 @@ export interface PersonaDesign {
   card_blur: number | null;
   card_texture: string | null;
   cv_url: string | null;
+  card_bg_size: string | null;
 }
