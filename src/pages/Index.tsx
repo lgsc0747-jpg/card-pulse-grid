@@ -4,7 +4,7 @@ import { AnalyticsChart } from "@/components/AnalyticsChart";
 import { WidgetManager } from "@/components/WidgetManager";
 import { PersonaPieChart } from "@/components/PersonaPieChart";
 import { useNfcData } from "@/hooks/useNfcData";
-import { useNfcData } from "@/hooks/useNfcData";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
