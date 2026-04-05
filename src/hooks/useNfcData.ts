@@ -60,6 +60,9 @@ export interface NfcStats {
   linkCTR: LinkCTR[];
   personaPerformance: PersonaPerf[];
   connectionSources: { nfc: number; qr: number; direct: number };
+  // New: Tap Velocity & Geographic
+  tapVelocity: { label: string; taps: number }[];
+  regionBreakdown: { region: string; count: number }[];
 }
 
 const DEVICE_COLORS: Record<string, string> = {
@@ -101,6 +104,8 @@ export function useNfcData() {
     deviceBreakdown: [], browserBreakdown: [], osBreakdown: [],
     hourlyHeat: [], linkCTR: [], personaPerformance: [],
     connectionSources: { nfc: 0, qr: 0, direct: 0 },
+    tapVelocity: [],
+    regionBreakdown: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -163,6 +168,7 @@ export function useNfcData() {
     const devices = new Map<string, number>();
     const browsers = new Map<string, number>();
     const oses = new Map<string, number>();
+    const regions = new Map<string, number>();
     const locations = new Map<string, number>();
     const hourlyMap = new Map<string, number>();
     const linkClicks = new Map<string, number>();
@@ -189,6 +195,13 @@ export function useNfcData() {
       devices.set(device, (devices.get(device) ?? 0) + 1);
       browsers.set(browser, (browsers.get(browser) ?? 0) + 1);
       oses.set(os, (oses.get(os) ?? 0) + 1);
+
+      // Region from timezone
+      const tz = meta.timezone as string | undefined;
+      if (tz) {
+        const region = tz.replace(/_/g, " ").split("/").slice(-1)[0] || tz;
+        regions.set(region, (regions.get(region) ?? 0) + 1);
+      }
 
       // Location
       const loc = log.location ?? "Unknown";
@@ -302,8 +315,24 @@ export function useNfcData() {
     const returnVisitorRate = profileViews > 0 ? Math.round((returnVisitors / profileViews) * 100) : 0;
     const interactionDepthRate = visitors.size > 0 ? Math.round((visitorsWithInteractions.size / visitors.size) * 100) : 0;
 
+    // Tap Velocity: group profile_views into hourly buckets
+    const velocityMap = new Map<string, number>();
+    const profileViewLogs = allLogs.filter((l) => l.interaction_type === "profile_view");
+    profileViewLogs.forEach((log) => {
+      const dt = new Date(log.created_at);
+      const hourKey = `${dt.getMonth() + 1}/${dt.getDate()} ${dt.getHours()}:00`;
+      velocityMap.set(hourKey, (velocityMap.get(hourKey) ?? 0) + 1);
+    });
+    const tapVelocity = Array.from(velocityMap.entries())
+      .map(([label, taps]) => ({ label, taps }));
+
+    // Region breakdown from timezone metadata
+    const regionBreakdown = Array.from(regions.entries())
+      .map(([region, count]) => ({ region, count }))
+      .sort((a, b) => b.count - a.count);
+
     setStats({
-      totalTaps: allLogs.filter((l) => l.interaction_type === "profile_view").length,
+      totalTaps: profileViewLogs.length,
       uniqueVisitors: visitors.size,
       contactSaveRate,
       avgDwellTime,
@@ -325,6 +354,8 @@ export function useNfcData() {
       linkCTR,
       personaPerformance,
       connectionSources: { nfc: nfcSource, qr: qrSource, direct: directSource },
+      tapVelocity,
+      regionBreakdown,
     });
 
     setLoading(false);

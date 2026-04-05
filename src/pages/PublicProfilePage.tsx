@@ -168,6 +168,8 @@ const PublicProfilePage = () => {
             visitor_id: visitorId,
             is_return: isReturn,
             visit_count: visitHistory.length,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            locale: navigator.language,
           },
         }),
       }).catch(() => {});
