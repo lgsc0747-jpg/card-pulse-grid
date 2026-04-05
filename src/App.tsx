@@ -56,6 +56,7 @@ const App = () => (
             <Route path="/u/:code" element={<ShortUrlRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </DashboardThemeProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
