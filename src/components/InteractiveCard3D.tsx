@@ -32,6 +32,8 @@ interface InteractiveCard3DProps {
   textAlignment?: string;
   cardBlur?: number;
   cardTexture?: string;
+  onFlipToBack?: () => void;
+  onLinkClick?: (linkType: string) => void;
 }
 
 interface CardFrontProps {
