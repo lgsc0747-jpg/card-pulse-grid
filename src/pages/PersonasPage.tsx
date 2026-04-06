@@ -64,6 +64,7 @@ const PersonasPage = () => {
   const [editingPersona, setEditingPersona] = useState<Persona | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [newPinInput, setNewPinInput] = useState("");
 
   const fetchPersonas = async () => {
     if (!user) return;
