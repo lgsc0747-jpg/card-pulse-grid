@@ -294,6 +294,7 @@ const PersonasPage = () => {
                       variant="outline"
                       onClick={() => {
                         setEditingPersona({ ...persona });
+                        setNewPinInput("");
                         setShowEditor(true);
                       }}
                     >
