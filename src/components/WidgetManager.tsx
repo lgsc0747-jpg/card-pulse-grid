@@ -27,7 +27,6 @@ interface WidgetManagerProps {
     contactSaveRate: number;
     avgDwellTime: number;
     topDevice: string;
-    topLocation: string;
     profileViews: number;
     cvDownloads: number;
     vcardDownloads: number;

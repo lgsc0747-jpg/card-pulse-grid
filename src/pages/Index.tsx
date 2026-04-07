@@ -13,7 +13,7 @@ import { ConversionFunnel } from "@/components/dashboard/ConversionFunnel";
 import { ExportButton } from "@/components/dashboard/ExportButton";
 import { LeadGenTracker } from "@/components/dashboard/LeadGenTracker";
 import { TapVelocityChart } from "@/components/dashboard/TapVelocityChart";
-import { GeographicInsights } from "@/components/dashboard/GeographicInsights";
+
 import { ChartPaletteProvider, ChartPaletteSelector } from "@/components/dashboard/ChartPaletteSelector";
 import { useNfcData } from "@/hooks/useNfcData";
 import { useAuth } from "@/contexts/AuthContext";
@@ -189,9 +189,8 @@ const Dashboard = () => {
                   <DeviceDonutChart data={stats.browserBreakdown} title="Browser" />
                   <DeviceDonutChart data={stats.osBreakdown} title="Operating System" />
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
                   <TapVelocityChart data={stats.tapVelocity} />
-                  <GeographicInsights data={stats.regionBreakdown} />
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <ActivityHeatmap data={stats.hourlyHeat} />

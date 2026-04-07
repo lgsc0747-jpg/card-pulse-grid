@@ -16,6 +16,7 @@ const TIMEFRAMES: { label: string; value: Timeframe }[] = [
   { label: "24h", value: "daily" },
   { label: "7d", value: "weekly" },
   { label: "30d", value: "monthly" },
+  { label: "90d", value: "quarterly" },
 ];
 
 export function AnalyticsChart({ data, timeframe, onTimeframeChange }: AnalyticsChartProps) {
