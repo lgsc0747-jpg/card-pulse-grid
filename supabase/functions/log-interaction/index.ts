@@ -95,7 +95,6 @@ Deno.serve(async (req) => {
       device,
       os,
       browser,
-      city,
       connection_type: connectionType,
       timestamp: new Date().toISOString(),
     };
@@ -108,14 +107,7 @@ Deno.serve(async (req) => {
     else if (interaction_type === "dwell_time") occasion = "Dwell Time";
     else if (interaction_type === "security_attempt") occasion = `Security: ${metadata?.result || "unknown"}`;
 
-    // Derive location string from city + locale region
-    let locationStr = city;
-    if (locale) {
-      const regionCode = locale.split("-")[1];
-      if (regionCode && regionCode.length === 2) {
-        locationStr = city ? `${city}, ${regionCode}` : regionCode;
-      }
-    }
+    // Location tracking removed
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -127,7 +119,6 @@ Deno.serve(async (req) => {
       entity_id: metadata?.visitor_id || `visitor_${Date.now()}`,
       interaction_type,
       occasion,
-      location: locationStr || null,
       metadata: enrichedMeta,
     });
 
