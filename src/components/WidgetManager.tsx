@@ -35,6 +35,7 @@ interface WidgetManagerProps {
     cardFlips: number;
     returnVisitorRate: number;
     interactionDepthRate: number;
+    authSuccessRate: number;
   };
 }
 
