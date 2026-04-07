@@ -207,7 +207,7 @@ const DesignStudioPage = () => {
           </nav>
 
           {/* Mobile Nav */}
-          <div className="md:hidden w-full border-b border-border/40 bg-card/50 overflow-x-auto">
+          <div className="md:hidden w-full border-b border-border/40 bg-card/50 overflow-x-auto shrink-0">
             <div className="flex gap-1 p-2 min-w-max">
               {NAV_SECTIONS.flatMap((s) => s.items).map((item) => {
                 const Icon = item.icon;
@@ -230,7 +230,7 @@ const DesignStudioPage = () => {
           </div>
 
           {/* Panel Content */}
-          <div className="flex-1 overflow-y-auto p-5 lg:max-w-sm lg:border-r lg:border-border/40">
+          <div className="flex-1 min-h-0 overflow-y-auto p-5 lg:max-w-sm lg:border-r lg:border-border/40">
             {renderPanel()}
           </div>
 
