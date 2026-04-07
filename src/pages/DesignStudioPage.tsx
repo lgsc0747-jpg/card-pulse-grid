@@ -78,7 +78,7 @@ const DesignStudioPage = () => {
     if (!editing) return;
     setSaving(true);
     const { id, slug, label, ...rest } = editing;
-    const { error } = await supabase.from("personas").update(rest as Record<string, unknown>).eq("id", id);
+    const { error } = await supabase.from("personas").update(rest as any).eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {

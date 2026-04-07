@@ -151,6 +151,14 @@ const PublicProfilePage = () => {
       const visitorId = localStorage.getItem("nfc_visitor_id") || `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       localStorage.setItem("nfc_visitor_id", visitorId);
 
+      // Detect connection type
+      const nav = navigator as any;
+      const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+      const connectionType = conn?.effectiveType || conn?.type || "unknown";
+
+      // Detect Brave browser
+      const isBrave = (nav.brave && typeof nav.brave.isBrave === "function") ? true : false;
+
       fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -159,13 +167,14 @@ const PublicProfilePage = () => {
           interaction_type: "profile_view",
           metadata: {
             source: "public_landing",
-            ua: navigator.userAgent,
+            ua: navigator.userAgent + (isBrave ? " Brave" : ""),
             persona_slug: personaSlug || null,
             visitor_id: visitorId,
             is_return: isReturn,
             visit_count: visitHistory.length,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             locale: navigator.language,
+            connection_type: connectionType,
           },
         }),
       }).catch(() => {});

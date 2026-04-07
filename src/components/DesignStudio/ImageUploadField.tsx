@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Upload, X, Loader2, History } from "lucide-react";
+import { Upload, X, Loader2, History, Trash2 } from "lucide-react";
 
 const RECENT_KEY_PREFIX = "nfc_recent_uploads_";
 
@@ -34,6 +34,14 @@ export function ImageUploadField({ label, value, onChange, folder }: ImageUpload
     const updated = [url, ...recentUploads.filter((u) => u !== url)].slice(0, 6);
     setRecentUploads(updated);
     localStorage.setItem(storageKey, JSON.stringify(updated));
+  };
+
+  const removeFromRecent = (url: string) => {
+    const updated = recentUploads.filter((u) => u !== url);
+    setRecentUploads(updated);
+    localStorage.setItem(storageKey, JSON.stringify(updated));
+    // If the current value is the one being deleted, clear it
+    if (value === url) onChange(null);
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,17 +115,26 @@ export function ImageUploadField({ label, value, onChange, folder }: ImageUpload
       {/* Recent uploads gallery */}
       {showRecent && otherRecent.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] text-muted-foreground">Recent uploads — click to use</p>
+          <p className="text-[10px] text-muted-foreground">Recent uploads — click to use, hover to delete</p>
           <div className="grid grid-cols-3 gap-1.5">
             {otherRecent.map((url) => (
-              <button
-                key={url}
-                type="button"
-                className="rounded-md overflow-hidden border border-border hover:ring-2 hover:ring-primary transition-all"
-                onClick={() => onChange(url)}
-              >
-                <img src={url} alt="Recent upload" className="w-full h-14 object-cover" />
-              </button>
+              <div key={url} className="relative group">
+                <button
+                  type="button"
+                  className="rounded-md overflow-hidden border border-border hover:ring-2 hover:ring-primary transition-all w-full"
+                  onClick={() => onChange(url)}
+                >
+                  <img src={url} alt="Recent upload" className="w-full h-14 object-cover" />
+                </button>
+                <button
+                  type="button"
+                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => { e.stopPropagation(); removeFromRecent(url); }}
+                  title="Remove from recent"
+                >
+                  <Trash2 className="w-2.5 h-2.5" />
+                </button>
+              </div>
             ))}
           </div>
         </div>

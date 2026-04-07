@@ -66,23 +66,44 @@ Deno.serve(async (req) => {
       ? "Linux"
       : "Unknown";
 
-    const browser = /Edg\//i.test(ua)
+    // Browser detection — order matters (specific before generic)
+    const browser = /Brave/i.test(ua)
+      ? "Brave"
+      : /Edg\//i.test(ua)
       ? "Edge"
       : /OPR|Opera/i.test(ua)
       ? "Opera"
       : /Firefox/i.test(ua)
       ? "Firefox"
-      : /CriOS|Chrome/i.test(ua)
+      : /SamsungBrowser/i.test(ua)
+      ? "Samsung Internet"
+      : /CriOS/i.test(ua)
+      ? "Chrome"
+      : /Chrome/i.test(ua)
       ? "Chrome"
       : /Safari/i.test(ua)
       ? "Safari"
       : "Other";
+
+    // Derive geographic city from timezone (e.g. "America/New_York" → "New York")
+    const tz = metadata?.timezone as string | undefined;
+    const locale = metadata?.locale as string | undefined;
+    let city = "";
+    if (tz) {
+      const parts = tz.split("/");
+      city = (parts[parts.length - 1] || "").replace(/_/g, " ");
+    }
+
+    // Derive connection type from metadata (passed from client navigator.connection)
+    const connectionType = metadata?.connection_type || "unknown";
 
     const enrichedMeta = {
       ...(metadata || {}),
       device,
       os,
       browser,
+      city,
+      connection_type: connectionType,
       timestamp: new Date().toISOString(),
     };
 
@@ -94,6 +115,15 @@ Deno.serve(async (req) => {
     else if (interaction_type === "dwell_time") occasion = "Dwell Time";
     else if (interaction_type === "security_attempt") occasion = `Security: ${metadata?.result || "unknown"}`;
 
+    // Derive location string from city + locale region
+    let locationStr = city;
+    if (locale) {
+      const regionCode = locale.split("-")[1];
+      if (regionCode && regionCode.length === 2) {
+        locationStr = city ? `${city}, ${regionCode}` : regionCode;
+      }
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -104,6 +134,7 @@ Deno.serve(async (req) => {
       entity_id: metadata?.visitor_id || `visitor_${Date.now()}`,
       interaction_type,
       occasion,
+      location: locationStr || null,
       metadata: enrichedMeta,
     });
 

@@ -177,7 +177,7 @@ const PersonasPage = () => {
 
     const { error } = await supabase
       .from("personas")
-      .update(updateData)
+      .update(updateData as any)
       .eq("id", editingPersona.id);
 
     if (error) {

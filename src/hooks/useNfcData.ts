@@ -196,11 +196,12 @@ export function useNfcData() {
       browsers.set(browser, (browsers.get(browser) ?? 0) + 1);
       oses.set(os, (oses.get(os) ?? 0) + 1);
 
-      // Region from timezone
+      // Region: prefer city field from enriched metadata, fallback to timezone
+      const city = meta.city as string | undefined;
       const tz = meta.timezone as string | undefined;
-      if (tz) {
-        const region = tz.replace(/_/g, " ").split("/").slice(-1)[0] || tz;
-        regions.set(region, (regions.get(region) ?? 0) + 1);
+      const regionLabel = city || (tz ? tz.replace(/_/g, " ").split("/").slice(-1)[0] : null);
+      if (regionLabel) {
+        regions.set(regionLabel, (regions.get(regionLabel) ?? 0) + 1);
       }
 
       // Location
