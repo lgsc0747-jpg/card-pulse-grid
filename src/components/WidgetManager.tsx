@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   Zap, Users, Smartphone, Eye, FileText, Settings2, GripVertical, LayoutGrid,
+  Clock, Shield, BarChart3, MousePointerClick,
 } from "lucide-react";
 
 interface WidgetManagerProps {
@@ -37,11 +38,13 @@ interface WidgetManagerProps {
   };
 }
 
-type WidgetKey = "profileViews" | "uniqueVisitors" | "topDevice" | "vcardDownloads" | "cvDownloads" | "leadGenCount" | "cardFlips" | "returnVisitorRate" | "interactionDepthRate";
+type WidgetKey = "totalTaps" | "profileViews" | "uniqueVisitors" | "topDevice" | "vcardDownloads" | "cvDownloads" | "leadGenCount" | "cardFlips" | "returnVisitorRate" | "interactionDepthRate" | "contactSaveRate" | "avgDwellTime" | "authSuccessRate";
 
 const WIDGET_CONFIG: { key: WidgetKey; label: string; icon: React.ReactNode; description: string }[] = [
+  { key: "totalTaps", label: "Total Taps", icon: <MousePointerClick className="w-4 h-4" />, description: "All NFC taps & profile visits" },
   { key: "profileViews", label: "Profile Views", icon: <Eye className="w-4 h-4" />, description: "Total landing page views" },
   { key: "uniqueVisitors", label: "Unique Visitors", icon: <Users className="w-4 h-4" />, description: "Distinct visitors by session" },
+  { key: "contactSaveRate", label: "Contact Save Rate", icon: <BarChart3 className="w-4 h-4" />, description: "% of visitors who saved contact" },
   { key: "topDevice", label: "Top Device", icon: <Smartphone className="w-4 h-4" />, description: "Most common device type" },
   { key: "vcardDownloads", label: "vCard Saves", icon: <FileText className="w-4 h-4" />, description: "Total contact card downloads" },
   { key: "cvDownloads", label: "CV Downloads", icon: <FileText className="w-4 h-4" />, description: "Total resume downloads" },
@@ -49,13 +52,16 @@ const WIDGET_CONFIG: { key: WidgetKey; label: string; icon: React.ReactNode; des
   { key: "cardFlips", label: "Card Flips", icon: <Zap className="w-4 h-4" />, description: "Times visitors flipped the card" },
   { key: "returnVisitorRate", label: "Return Visitors", icon: <Users className="w-4 h-4" />, description: "% of returning visitors" },
   { key: "interactionDepthRate", label: "Interaction Depth", icon: <Eye className="w-4 h-4" />, description: "% who interacted beyond viewing" },
+  { key: "avgDwellTime", label: "Avg. Dwell Time", icon: <Clock className="w-4 h-4" />, description: "Average seconds on your profile" },
+  { key: "authSuccessRate", label: "PIN Success Rate", icon: <Shield className="w-4 h-4" />, description: "% of successful PIN entries" },
 ];
 
 const DEFAULT_ORDER: WidgetKey[] = WIDGET_CONFIG.map((w) => w.key);
 const DEFAULT_VISIBILITY: Record<WidgetKey, boolean> = {
-  profileViews: true, uniqueVisitors: true,
+  totalTaps: true, profileViews: true, uniqueVisitors: true, contactSaveRate: true,
   topDevice: true, vcardDownloads: true, cvDownloads: true, leadGenCount: true,
   cardFlips: true, returnVisitorRate: true, interactionDepthRate: true,
+  avgDwellTime: true, authSuccessRate: false,
 };
 
 const STORAGE_KEY_ORDER = "nfc_widget_order";
