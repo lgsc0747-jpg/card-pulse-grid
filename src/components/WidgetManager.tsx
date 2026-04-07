@@ -130,6 +130,7 @@ export function WidgetManager({ stats }: WidgetManagerProps) {
 
   const getValue = useCallback((key: WidgetKey): string => {
     switch (key) {
+      case "totalTaps": return stats.totalTaps.toLocaleString();
       case "uniqueVisitors": return stats.uniqueVisitors.toLocaleString();
       case "topDevice": return stats.topDevice;
       case "profileViews": return stats.profileViews.toLocaleString();
@@ -139,6 +140,9 @@ export function WidgetManager({ stats }: WidgetManagerProps) {
       case "cardFlips": return stats.cardFlips.toLocaleString();
       case "returnVisitorRate": return `${stats.returnVisitorRate}%`;
       case "interactionDepthRate": return `${stats.interactionDepthRate}%`;
+      case "contactSaveRate": return `${stats.contactSaveRate}%`;
+      case "avgDwellTime": return stats.avgDwellTime > 0 ? `${stats.avgDwellTime}s` : "—";
+      case "authSuccessRate": return stats.authSuccessRate > 0 ? `${stats.authSuccessRate}%` : "—";
     }
   }, [stats]);
 
