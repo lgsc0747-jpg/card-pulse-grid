@@ -673,6 +673,8 @@ export type Database = {
           background_image_url: string
           background_preset: string
           bio: string
+          border_radius: number
+          card_animation: string
           card_bg_image_url: string
           card_bg_size: string
           card_blur: number
@@ -696,6 +698,7 @@ export type Database = {
           phone: string
           require_contact_exchange: boolean
           secondary_color: string
+          shadow_preset: string
           show_availability: boolean
           show_location: boolean
           slug: string
