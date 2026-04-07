@@ -1,4 +1,4 @@
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, ShoppingBag, Blocks } from "lucide-react";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, ShoppingBag, Store, Blocks } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -22,11 +22,11 @@ const mainItems = [
   { title: "NFC Manager", url: "/nfc-manager", icon: Smartphone },
   { title: "Personas", url: "/personas", icon: Users },
   { title: "Leads", url: "/leads", icon: Mail },
-  { title: "Design Studio", url: "/design-studio", icon: Palette },
+  { title: "Card Studio", url: "/design-studio", icon: Palette },
+  { title: "Storefront", url: "/storefront", icon: Store },
   { title: "Commerce", url: "/commerce", icon: ShoppingBag },
   { title: "Interaction Logs", url: "/logs", icon: List },
   { title: "Categories", url: "/categories", icon: Tag },
-  
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "Plans", url: "/plans", icon: Crown },
 ];
