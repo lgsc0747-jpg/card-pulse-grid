@@ -146,12 +146,15 @@ const DesignStudioPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT: Controls */}
           <Tabs defaultValue="card" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="card" className="text-xs gap-1">
                 <CreditCard className="w-3.5 h-3.5" /> Card
               </TabsTrigger>
               <TabsTrigger value="landing" className="text-xs gap-1">
-                <Layout className="w-3.5 h-3.5" /> Landing Page
+                <Layout className="w-3.5 h-3.5" /> Landing
+              </TabsTrigger>
+              <TabsTrigger value="sections" className="text-xs gap-1">
+                <Blocks className="w-3.5 h-3.5" /> Sections
               </TabsTrigger>
               <TabsTrigger value="identity" className="text-xs gap-1">
                 <Type className="w-3.5 h-3.5" /> Identity

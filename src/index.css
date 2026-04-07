@@ -139,6 +139,10 @@
     @apply bg-card/80 backdrop-blur-sm border border-border/60 shadow-[var(--shadow-card)];
   }
 
+  .ios-card {
+    @apply bg-card/80 backdrop-blur-md border border-white/10 shadow-[var(--shadow-elevated)] rounded-[1.5rem];
+  }
+
   .glass-elevated {
     @apply bg-card/90 backdrop-blur-md border border-border/50 shadow-[var(--shadow-elevated)];
   }
