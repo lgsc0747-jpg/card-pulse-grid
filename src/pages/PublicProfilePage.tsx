@@ -129,12 +129,10 @@ const PublicProfilePage = () => {
 
       setProfile(profileData as ProfileData);
 
-      const { data: subData } = await supabase
-        .from("user_subscriptions")
-        .select("plan")
-        .eq("user_id", profileData.user_id)
-        .single();
-      setOwnerIsPro(subData?.plan === "pro");
+      const { data: proData } = await (supabase.rpc as any)("is_user_pro", {
+        p_user_id: profileData.user_id,
+      });
+      setOwnerIsPro(proData === true);
 
       const { data: personaRows } = await (supabase.rpc as any)("get_public_persona", {
         p_user_id: profileData.user_id,

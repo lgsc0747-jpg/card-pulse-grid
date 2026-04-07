@@ -16,7 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
   Loader2, Monitor, Smartphone, Save,
-  ShoppingBag, ClipboardList, QrCode, X,
+  ShoppingBag, ClipboardList, QrCode, X, Plus,
 } from "lucide-react";
 
 type Panel = "products" | "orders" | "payment" | null;
@@ -264,6 +264,16 @@ const StorefrontEditorPage = () => {
                 );
               })}
             </nav>
+
+            {/* Floating Add Product Button */}
+            {selectedId && selected && (
+              <Button
+                className="fixed bottom-16 right-4 z-40 h-14 w-14 rounded-full shadow-xl gradient-primary text-primary-foreground p-0"
+                onClick={() => setActivePanel("products")}
+              >
+                <Plus className="w-6 h-6" />
+              </Button>
+            )}
 
             {/* Panel as bottom sheet */}
             <Sheet open={!!activePanel} onOpenChange={(open) => !open && setActivePanel(null)}>
