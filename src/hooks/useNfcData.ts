@@ -132,18 +132,56 @@ export function useNfcData() {
       formatLabel = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
     }
 
-    // Fetch all logs and personas in parallel
-    const [logsRes, personasRes, leadsRes] = await Promise.all([
+    // Fetch timeframe-filtered logs, ALL-TIME logs for KPI widgets, personas, and leads in parallel
+    const [logsRes, allTimeLogsRes, personasRes, leadsRes, allTimeLeadsRes] = await Promise.all([
       supabase.from("interaction_logs").select("*").eq("user_id", user.id)
         .gte("created_at", since.toISOString()).order("created_at", { ascending: true }),
+      supabase.from("interaction_logs").select("*").eq("user_id", user.id)
+        .order("created_at", { ascending: true }),
       supabase.from("personas").select("id, label, slug").eq("user_id", user.id),
       supabase.from("lead_captures").select("id").eq("owner_user_id", user.id)
         .gte("created_at", since.toISOString()),
+      supabase.from("lead_captures").select("id").eq("owner_user_id", user.id),
     ]);
 
     const allLogs = logsRes.data ?? [];
+    const allTimeLogs = allTimeLogsRes.data ?? [];
     const personas = personasRes.data ?? [];
     const leads = leadsRes.data ?? [];
+    const allTimeLeads = allTimeLeadsRes.data ?? [];
+
+    // ── Compute ALL-TIME KPI metrics (for widget cards) ──
+    const atVisitors = new Set<string>();
+    let atProfileViews = 0, atCvDownloads = 0, atVcardDownloads = 0, atCardFlips = 0;
+    let atTotalDwell = 0, atDwellCount = 0;
+    let atSecSuccess = 0, atSecTotal = 0, atUnauth = 0;
+    let atReturnVisitors = 0;
+    const atVisitorsWithInteractions = new Set<string>();
+
+    allTimeLogs.forEach((log) => {
+      const meta = (log.metadata as Record<string, any>) ?? {};
+      atVisitors.add(log.entity_id);
+      if (log.interaction_type === "profile_view") {
+        atProfileViews++;
+        if (meta.is_return) atReturnVisitors++;
+      }
+      if (log.interaction_type === "cv_download") { atCvDownloads++; atVisitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "vcard_download") { atVcardDownloads++; atVisitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "card_flip") { atCardFlips++; atVisitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "link_click") { atVisitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "dwell_time" && meta.seconds) { atTotalDwell += Number(meta.seconds); atDwellCount++; }
+      if (log.interaction_type === "security_attempt") {
+        atSecTotal++;
+        if (meta.result === "success") atSecSuccess++;
+        if (meta.result === "failed" || meta.result === "blocked") atUnauth++;
+      }
+    });
+
+    const atContactSaveRate = atProfileViews > 0 ? Math.round((atVcardDownloads / atProfileViews) * 100) : 0;
+    const atAvgDwell = atDwellCount > 0 ? Math.round(atTotalDwell / atDwellCount) : 0;
+    const atAuthSuccessRate = atSecTotal > 0 ? Math.round((atSecSuccess / atSecTotal) * 100) : 0;
+    const atReturnRate = atProfileViews > 0 ? Math.round((atReturnVisitors / atProfileViews) * 100) : 0;
+    const atInteractionDepth = atVisitors.size > 0 ? Math.round((atVisitorsWithInteractions.size / atVisitors.size) * 100) : 0;
 
     // Chart buckets with multi-series
     const bucketMs = (now.getTime() - since.getTime()) / points;
@@ -333,21 +371,21 @@ export function useNfcData() {
       .sort((a, b) => b.count - a.count);
 
     setStats({
-      totalTaps: profileViewLogs.length,
-      uniqueVisitors: visitors.size,
-      contactSaveRate,
-      avgDwellTime,
-      profileViews,
-      cvDownloads,
-      vcardDownloads,
+      totalTaps: atProfileViews,
+      uniqueVisitors: atVisitors.size,
+      contactSaveRate: atContactSaveRate,
+      avgDwellTime: atAvgDwell,
+      profileViews: atProfileViews,
+      cvDownloads: atCvDownloads,
+      vcardDownloads: atVcardDownloads,
       topDevice,
       topLocation,
-      authSuccessRate,
-      leadGenCount: leads.length,
-      unauthorizedAttempts,
-      cardFlips,
-      returnVisitorRate,
-      interactionDepthRate,
+      authSuccessRate: atAuthSuccessRate,
+      leadGenCount: allTimeLeads.length,
+      unauthorizedAttempts: atUnauth,
+      cardFlips: atCardFlips,
+      returnVisitorRate: atReturnRate,
+      interactionDepthRate: atInteractionDepth,
       deviceBreakdown,
       browserBreakdown,
       osBreakdown,
