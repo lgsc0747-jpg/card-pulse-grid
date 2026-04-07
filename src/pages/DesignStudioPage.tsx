@@ -24,8 +24,9 @@ import type { PersonaDesign } from "@/components/DesignStudio/types";
 import {
   Loader2, Monitor, Smartphone, Palette, Save, Eye,
   CreditCard, Layout, Type,
-  AlignLeft, AlignCenter, AlignRight, FileText, Upload,
+  AlignLeft, AlignCenter, AlignRight, FileText, Upload, LayoutGrid,
 } from "lucide-react";
+import { SectionBuilder } from "@/components/commerce/SectionBuilder";
 
 const TEXT_ALIGNMENTS = [
   { id: "left", label: "Left", icon: AlignLeft },
@@ -154,7 +155,7 @@ const DesignStudioPage = () => {
                 <Layout className="w-3.5 h-3.5" /> Landing
               </TabsTrigger>
               <TabsTrigger value="sections" className="text-xs gap-1">
-                <Blocks className="w-3.5 h-3.5" /> Sections
+                <LayoutGrid className="w-3.5 h-3.5" /> Sections
               </TabsTrigger>
               <TabsTrigger value="identity" className="text-xs gap-1">
                 <Type className="w-3.5 h-3.5" /> Identity
