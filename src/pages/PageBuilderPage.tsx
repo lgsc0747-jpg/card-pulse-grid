@@ -16,6 +16,8 @@ import { BlockEditor } from "@/components/page-builder/BlockEditor";
 import { BLOCK_TYPES, type SitePage, type PageBlock, type BlockTypeId } from "@/components/page-builder/types";
 import { PAGE_TEMPLATES, type PageTemplate } from "@/components/page-builder/PageTemplates";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -26,6 +28,7 @@ import {
   MousePointerClick, Quote, Users, BarChart3, MessageSquareQuote,
   HelpCircle, Grid3x3, ShoppingBag, CreditCard, Mail, Share2, Code,
   Home, PanelLeftClose, PanelLeft, FilePlus, Undo2, Redo2, BookTemplate,
+  CheckSquare, Square,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -197,6 +200,24 @@ function PageBuilderPage() {
   const [addBlockOpen, setAddBlockOpen] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
 
+  // Confirmation dialogs
+  const [confirmDeleteBlock, setConfirmDeleteBlock] = useState<string | null>(null);
+  const [confirmDeletePage, setConfirmDeletePage] = useState<string | null>(null);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+
+  // Bulk selection
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedBlockIds, setSelectedBlockIds] = useState<Set<string>>(new Set());
+
+  const toggleBulkSelect = (id: string) => {
+    setSelectedBlockIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+
   // Undo/Redo history
   const historyRef = useRef<PageBlock[][]>([]);
   const historyIdxRef = useRef(-1);
@@ -340,10 +361,12 @@ function PageBuilderPage() {
 
   const deletePage = async (id: string) => {
     if (pages.length <= 1) { toast({ title: "Can't delete last page" }); return; }
+    await supabase.from("page_blocks").delete().eq("page_id", id);
     await supabase.from("site_pages").delete().eq("id", id);
     const remaining = pages.filter(p => p.id !== id);
     setPages(remaining);
     if (selectedPageId === id) setSelectedPageId(remaining[0]?.id ?? null);
+    setConfirmDeletePage(null);
   };
 
   const updatePageTitle = async (id: string, title: string) => {
@@ -383,6 +406,28 @@ function PageBuilderPage() {
     setBlocks(newBlocks);
     pushHistory(newBlocks);
     setEditingBlockId(null);
+    setConfirmDeleteBlock(null);
+  };
+
+  const bulkDeleteBlocks = async () => {
+    if (selectedBlockIds.size === 0) return;
+    for (const id of selectedBlockIds) {
+      await supabase.from("page_blocks").delete().eq("id", id);
+    }
+    const newBlocks = blocks.filter(b => !selectedBlockIds.has(b.id));
+    setBlocks(newBlocks);
+    pushHistory(newBlocks);
+    if (editingBlockId && selectedBlockIds.has(editingBlockId)) setEditingBlockId(null);
+    toast({ title: `${selectedBlockIds.size} block(s) deleted` });
+    setSelectedBlockIds(new Set());
+    setBulkMode(false);
+    setConfirmBulkDelete(false);
+  };
+
+  const bulkToggleVisibility = (visible: boolean) => {
+    const newBlocks = blocks.map(b => selectedBlockIds.has(b.id) ? { ...b, is_visible: visible } : b);
+    setBlocks(newBlocks);
+    pushHistory(newBlocks);
   };
 
   const duplicateBlock = async (block: PageBlock) => {
@@ -550,7 +595,7 @@ function PageBuilderPage() {
                     isActive={selectedPageId === page.id}
                     onSelect={() => setSelectedPageId(page.id)}
                     onRename={(newTitle) => updatePageTitle(page.id, newTitle)}
-                    onDelete={() => deletePage(page.id)}
+                    onDelete={() => setConfirmDeletePage(page.id)}
                     canDelete={pages.length > 1}
                   />
                 ))}
@@ -579,9 +624,9 @@ function PageBuilderPage() {
                     className="h-7 text-xs font-semibold"
                   />
                   {pages.length > 1 && (
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => selectedPage && deletePage(selectedPage.id)}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => selectedPage && setConfirmDeletePage(selectedPage.id)}>
+                       <Trash2 className="w-3 h-3" />
+                     </Button>
                   )}
                 </div>
               </div>
@@ -589,23 +634,53 @@ function PageBuilderPage() {
               {/* Block list */}
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-2 py-1">Blocks</p>
+                  <div className="flex items-center justify-between px-2 py-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">Blocks</p>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px]" onClick={() => { setBulkMode(!bulkMode); setSelectedBlockIds(new Set()); }}>
+                        {bulkMode ? "Cancel" : "Select"}
+                      </Button>
+                      {bulkMode && selectedBlockIds.size > 0 && (
+                        <>
+                          <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px]" onClick={() => bulkToggleVisibility(true)} title="Show selected">
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px]" onClick={() => bulkToggleVisibility(false)} title="Hide selected">
+                            <EyeOff className="w-3 h-3" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px] text-destructive" onClick={() => setConfirmBulkDelete(true)} title="Delete selected">
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSortEnd}>
                     <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
                       {blocks.map((block) => {
                         const meta = BLOCK_TYPES.find(b => b.id === block.block_type);
                         const Icon = meta ? ICON_MAP[meta.icon] ?? FileText : FileText;
                         return (
-                          <SortableBlockItem
-                            key={block.id}
-                            block={block}
-                            Icon={Icon}
-                            meta={meta}
-                            isActive={editingBlockId === block.id}
-                            onSelect={() => setEditingBlockId(block.id)}
-                            onDuplicate={() => duplicateBlock(block)}
-                            onDelete={() => deleteBlock(block.id)}
-                          />
+                          <div key={block.id} className="flex items-center gap-1">
+                            {bulkMode && (
+                              <Checkbox
+                                checked={selectedBlockIds.has(block.id)}
+                                onCheckedChange={() => toggleBulkSelect(block.id)}
+                                className="w-3.5 h-3.5"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <SortableBlockItem
+                                block={block}
+                                Icon={Icon}
+                                meta={meta}
+                                isActive={editingBlockId === block.id}
+                                onSelect={() => bulkMode ? toggleBulkSelect(block.id) : setEditingBlockId(block.id)}
+                                onDuplicate={() => duplicateBlock(block)}
+                                onDelete={() => setConfirmDeleteBlock(block.id)}
+                              />
+                            </div>
+                          </div>
                         );
                       })}
                     </SortableContext>
@@ -775,6 +850,29 @@ function PageBuilderPage() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Confirmation Dialogs */}
+      <ConfirmDialog
+        open={!!confirmDeleteBlock}
+        onOpenChange={(open) => !open && setConfirmDeleteBlock(null)}
+        title="Delete Block?"
+        description="This block and its content will be permanently removed."
+        onConfirm={() => confirmDeleteBlock && deleteBlock(confirmDeleteBlock)}
+      />
+      <ConfirmDialog
+        open={!!confirmDeletePage}
+        onOpenChange={(open) => !open && setConfirmDeletePage(null)}
+        title="Delete Page?"
+        description="This page and all its blocks will be permanently removed."
+        onConfirm={() => confirmDeletePage && deletePage(confirmDeletePage)}
+      />
+      <ConfirmDialog
+        open={confirmBulkDelete}
+        onOpenChange={setConfirmBulkDelete}
+        title={`Delete ${selectedBlockIds.size} Block(s)?`}
+        description="All selected blocks will be permanently removed."
+        onConfirm={bulkDeleteBlocks}
+      />
     </DashboardLayout>
   );
 }
