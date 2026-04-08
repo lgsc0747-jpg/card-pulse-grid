@@ -124,7 +124,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "text":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div
             className="leading-relaxed whitespace-pre-wrap"
@@ -141,7 +141,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "image":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           {content.url ? (
             <img
@@ -169,7 +169,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "gallery":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div
             className="grid gap-3"
@@ -192,7 +192,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "video":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           {content.url ? (
             <div className="relative w-full aspect-video rounded-xl overflow-hidden">
@@ -225,7 +225,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "divider":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <hr
             className="border-0"
@@ -261,7 +261,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "quote":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <blockquote className="relative pl-6 border-l-4" style={{ borderColor: styles.accentColor ?? "hsl(var(--primary))" }}>
             <QuoteIcon className="absolute -left-2 -top-2 w-8 h-8 opacity-10" />
@@ -277,7 +277,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "team":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="flex items-center gap-4 p-4 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
             {content.photoUrl ? (
@@ -296,7 +296,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "stats":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {(content.items ?? [{ value: "100+", label: "Customers" }, { value: "50K", label: "Sales" }, { value: "4.9", label: "Rating" }]).map((item: { value: string; label: string }, i: number) => (
@@ -311,7 +311,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "testimonial":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="p-5 rounded-2xl bg-card/50 border border-border/60 backdrop-blur-sm">
             <div className="flex gap-0.5 mb-3">
@@ -333,7 +333,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "faq": {
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="space-y-2">
             {(content.items ?? [{ q: "Question?", a: "Answer goes here." }]).map((item: { q: string; a: string }, i: number) => (
@@ -346,7 +346,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "icon_grid":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="grid grid-cols-3 gap-4">
             {(content.items ?? [{ icon: "🚀", label: "Fast" }, { icon: "🔒", label: "Secure" }, { icon: "🎨", label: "Beautiful" }]).map((item: { icon: string; label: string; description?: string }, i: number) => (
@@ -362,7 +362,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "products":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="text-center p-8 rounded-xl bg-muted/20 border border-border/40">
             <span className="text-sm text-muted-foreground">📦 Product grid loads from your store</span>
@@ -410,7 +410,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "contact":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="p-5 rounded-2xl bg-card/50 border border-border/60 space-y-3 backdrop-blur-sm">
             <h3 className="font-semibold text-sm">{content.title || "Get in Touch"}</h3>
@@ -425,7 +425,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
     case "social": {
       const links = content.links ?? [];
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="flex flex-wrap gap-3 justify-center">
             {links.length > 0 ? links.map((l: { platform: string; url: string }, i: number) => (
@@ -442,7 +442,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
 
     case "embed":
       return (
-        <div className="relative" style={wrapperStyle}>
+        <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           {content.html ? (
             <div dangerouslySetInnerHTML={{ __html: content.html }} />
