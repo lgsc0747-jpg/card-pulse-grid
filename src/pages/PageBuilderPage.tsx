@@ -498,21 +498,20 @@ function PageBuilderPage() {
 
         {/* Page Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {pages.map(page => (
-            <button
-              key={page.id}
-              onClick={() => setSelectedPageId(page.id)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all border",
-                selectedPageId === page.id
-                  ? "bg-primary/10 text-primary border-primary/30"
-                  : "text-muted-foreground border-border/40 hover:border-primary/20"
-              )}
-            >
-              {page.is_homepage && <Home className="w-3 h-3" />}
-              {page.title}
-            </button>
-          ))}
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handlePageSortEnd}>
+            <SortableContext items={pages.map(p => p.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex items-center gap-2">
+                {pages.map(page => (
+                  <SortablePageTab
+                    key={page.id}
+                    page={page}
+                    isActive={selectedPageId === page.id}
+                    onSelect={() => setSelectedPageId(page.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={addPage}>
             <FilePlus className="w-3.5 h-3.5 mr-1" /> Add Page
           </Button>
