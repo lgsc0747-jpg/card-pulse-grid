@@ -29,6 +29,20 @@ export function IdentityPanel({ editing, update, isPro }: StudioPanelProps) {
       <section className="space-y-3">
         <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Profile</h3>
         <div className="space-y-3">
+          <ImageUploadField
+            label="Profile Picture"
+            value={editing?.avatar_url ?? null}
+            onChange={(url) => update("avatar_url", url)}
+            folder="avatars"
+            showFitControls={false}
+          />
+          {editing?.avatar_url && (
+            <AvatarPositioner
+              src={editing.avatar_url}
+              position={avatarPos}
+              onPositionChange={handleAvatarPosChange}
+            />
+          )}
           <div className="space-y-1">
             <Label className="text-xs">Display Name</Label>
             <Input value={editing?.display_name ?? ""} onChange={(e) => update("display_name", e.target.value)} className="rounded-xl" />
