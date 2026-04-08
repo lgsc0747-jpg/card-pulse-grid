@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ImageUploadField } from "@/components/DesignStudio/ImageUploadField";
+import { ProductImageGallery } from "@/components/commerce/ProductImageGallery";
+import { ProductVariantManager } from "@/components/commerce/ProductVariantManager";
 import { Switch } from "@/components/ui/switch";
 import {
   Plus, Trash2, Edit, Loader2, Package, Eye, EyeOff,
@@ -169,7 +171,7 @@ export function ProductStore({ personaId, personaLabel }: ProductStoreProps) {
               <Plus className="w-4 h-4 mr-1" /> Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent className="ios-card border-border/60 max-w-md">
+          <DialogContent className="ios-card max-h-[88vh] max-w-md overflow-y-auto border-border/60">
             <DialogHeader>
               <DialogTitle className="font-display">
                 {editingProduct ? "Edit Product" : "Add Product"}
@@ -195,7 +197,7 @@ export function ProductStore({ personaId, personaLabel }: ProductStoreProps) {
                 </div>
               </div>
               <ImageUploadField
-                label="Product Image"
+                label="Featured Image"
                 value={imageUrl}
                 onChange={setImageUrl}
                 folder="product-images"
@@ -204,6 +206,25 @@ export function ProductStore({ personaId, personaLabel }: ProductStoreProps) {
                 <Label>Visible to customers</Label>
                 <Switch checked={isVisible} onCheckedChange={setIsVisible} />
               </div>
+              {editingProduct ? (
+                <div key={editingProduct.id} className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold">Gallery</p>
+                    <p className="text-[10px] text-muted-foreground">Add extra photos or video to this single product page.</p>
+                  </div>
+                  <ProductImageGallery productId={editingProduct.id} />
+
+                  <div className="border-t border-border/60 pt-4">
+                    <div className="mb-3 space-y-1">
+                      <p className="text-xs font-semibold">Variants</p>
+                      <p className="text-[10px] text-muted-foreground">Create options like color, size, material, or style inside one product.</p>
+                    </div>
+                    <ProductVariantManager productId={editingProduct.id} />
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">Save the product first, then add its gallery and variants.</p>
+              )}
               <Button onClick={handleSave} disabled={saving} className="w-full gradient-primary text-primary-foreground rounded-xl h-11">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
                 {editingProduct ? "Update Product" : "Add Product"}

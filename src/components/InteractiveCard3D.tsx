@@ -147,6 +147,7 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
 
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (isFlipped || !cardRef.current) return;
+    if ("touches" in event) event.preventDefault();
     const rect = cardRef.current.getBoundingClientRect();
     const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
     const clientY = "touches" in event ? event.touches[0].clientY : event.clientY;
@@ -177,7 +178,7 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
       <div
         ref={setCardRef}
         className="w-full max-w-[420px] select-none text-[clamp(14px,3.5vw,18px)]"
-        style={{ perspective: "1500px", aspectRatio: "1.58 / 1" }}
+        style={{ perspective: "1500px", aspectRatio: "1.58 / 1", touchAction: isFlipped ? "manipulation" : "none" }}
         onMouseMove={handlePointerMove}
         onTouchMove={handlePointerMove}
         onMouseLeave={resetTilt}

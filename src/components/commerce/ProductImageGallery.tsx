@@ -117,6 +117,7 @@ export function ProductImageGallery({ productId, onImagesChange }: ProductImageG
             value={null}
             onChange={(url) => addImage(url, true)}
             folder="product-images"
+            accept="video/*"
           />
         </div>
       )}

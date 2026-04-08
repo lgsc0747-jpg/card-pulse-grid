@@ -16,45 +16,115 @@ interface AvatarPositionerProps {
 }
 
 const DEFAULT_POSITION: AvatarPosition = { x: 50, y: 50, scale: 100 };
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+const getDistance = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(b.x - a.x, b.y - a.y);
 
 export function AvatarPositioner({ src, position, onPositionChange }: AvatarPositionerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const startRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const positionRef = useRef(position);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ distance: number; scale: number } | null>(null);
+
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
-    setDragging(true);
-    startRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      posX: position.x,
-      posY: position.y,
-    };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [position.x, position.y]);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size === 1) {
+      setDragging(true);
+      startRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        posX: positionRef.current.x,
+        posY: positionRef.current.y,
+      };
+      pinchRef.current = null;
+      return;
+    }
+
+    if (pointersRef.current.size === 2) {
+      const [first, second] = Array.from(pointersRef.current.values());
+      pinchRef.current = {
+        distance: getDistance(first, second) || 1,
+        scale: positionRef.current.scale,
+      };
+      setDragging(false);
+    }
+  }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragging || !containerRef.current) return;
+    if (!containerRef.current || !pointersRef.current.has(e.pointerId)) return;
+
+    e.preventDefault();
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size >= 2) {
+      const [first, second] = Array.from(pointersRef.current.values());
+      const pinchStart = pinchRef.current;
+      if (!pinchStart) return;
+
+      const distance = getDistance(first, second);
+      const nextScale = clamp(Math.round((pinchStart.scale * distance) / pinchStart.distance), 100, 300);
+
+      if (nextScale !== positionRef.current.scale) {
+        onPositionChange({ ...positionRef.current, scale: nextScale });
+      }
+      return;
+    }
+
+    if (!dragging) return;
+
     const rect = containerRef.current.getBoundingClientRect();
     const dx = ((e.clientX - startRef.current.x) / rect.width) * 100;
     const dy = ((e.clientY - startRef.current.y) / rect.height) * 100;
-    const newX = Math.max(0, Math.min(100, startRef.current.posX - dx));
-    const newY = Math.max(0, Math.min(100, startRef.current.posY - dy));
-    onPositionChange({ ...position, x: Math.round(newX), y: Math.round(newY) });
-  }, [dragging, position, onPositionChange]);
+    const newX = clamp(Math.round(startRef.current.posX - dx), 0, 100);
+    const newY = clamp(Math.round(startRef.current.posY - dy), 0, 100);
 
-  const handlePointerUp = useCallback(() => {
-    setDragging(false);
+    if (newX !== positionRef.current.x || newY !== positionRef.current.y) {
+      onPositionChange({ ...positionRef.current, x: newX, y: newY });
+    }
+  }, [dragging, onPositionChange]);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+
+    pointersRef.current.delete(e.pointerId);
+
+    if (pointersRef.current.size === 1) {
+      const [remaining] = Array.from(pointersRef.current.values());
+      startRef.current = {
+        x: remaining.x,
+        y: remaining.y,
+        posX: positionRef.current.x,
+        posY: positionRef.current.y,
+      };
+      setDragging(true);
+    } else {
+      setDragging(false);
+    }
+
+    if (pointersRef.current.size < 2) {
+      pinchRef.current = null;
+    }
   }, []);
 
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -5 : 5;
-    const newScale = Math.max(100, Math.min(300, position.scale + delta));
-    onPositionChange({ ...position, scale: newScale });
-  }, [position, onPositionChange]);
+    const nextScale = clamp(positionRef.current.scale + delta, 100, 300);
+    onPositionChange({ ...positionRef.current, scale: nextScale });
+  }, [onPositionChange]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -81,10 +151,13 @@ export function AvatarPositioner({ src, position, onPositionChange }: AvatarPosi
         <div className="space-y-2">
           <div
             ref={containerRef}
-            className="relative w-full h-32 rounded-xl overflow-hidden border-2 border-dashed border-primary/40 cursor-grab active:cursor-grabbing select-none"
+            className="relative h-32 w-full select-none overflow-hidden rounded-xl border-2 border-dashed border-primary/40 touch-none overscroll-none cursor-grab active:cursor-grabbing"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onContextMenu={(e) => e.preventDefault()}
+            style={{ touchAction: "none" }}
           >
             <img
               src={src}
@@ -104,7 +177,7 @@ export function AvatarPositioner({ src, position, onPositionChange }: AvatarPosi
             </div>
             <div className="absolute bottom-1 left-1 right-1 text-center">
               <span className="text-[9px] bg-black/60 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
-                Drag to reposition • Scroll to zoom ({position.scale}%)
+                Drag to reposition • Pinch/scroll to zoom ({position.scale}%)
               </span>
             </div>
           </div>

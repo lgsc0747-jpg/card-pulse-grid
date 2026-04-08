@@ -20,6 +20,7 @@ interface ImageUploadFieldProps {
   value: string | null;
   onChange: (url: string | null) => void;
   folder: string;
+  accept?: string;
   showFitControls?: boolean;
   imageFit?: ImageFit;
   onFitChange?: (fit: ImageFit) => void;
@@ -32,7 +33,7 @@ const FIT_OPTIONS = [
   { value: "none", label: "Original" },
 ] as const;
 
-export function ImageUploadField({ label, value, onChange, folder, showFitControls = true, imageFit, onFitChange }: ImageUploadFieldProps) {
+export function ImageUploadField({ label, value, onChange, folder, accept = "image/*", showFitControls = true, imageFit, onFitChange }: ImageUploadFieldProps) {
   const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -42,6 +43,7 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
   const [posX, setPosX] = useState(50);
   const [posY, setPosY] = useState(50);
   const [internalFit, setInternalFit] = useState<ImageFit>({ objectFit: "cover", objectPosition: "50% 50%", scale: 100 });
+  const [previewAspectRatio, setPreviewAspectRatio] = useState<number | null>(null);
 
   const effectiveFit = imageFit ?? internalFit;
   const handleFitChange = (fit: ImageFit) => {
@@ -65,6 +67,34 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
       setPosY(parseInt(parts[1]) || 50);
     }
   }, [effectiveFit?.objectPosition]);
+
+  useEffect(() => {
+    if (!value) {
+      setPreviewAspectRatio(null);
+      return;
+    }
+
+    let isActive = true;
+    const image = new window.Image();
+
+    image.onload = () => {
+      if (!isActive) return;
+      const ratio = image.naturalWidth > 0 && image.naturalHeight > 0
+        ? image.naturalWidth / image.naturalHeight
+        : null;
+      setPreviewAspectRatio(ratio);
+    };
+
+    image.onerror = () => {
+      if (isActive) setPreviewAspectRatio(null);
+    };
+
+    image.src = value;
+
+    return () => {
+      isActive = false;
+    };
+  }, [value]);
 
   const addToRecent = (url: string) => {
     const updated = [url, ...recentUploads.filter((u) => u !== url)].slice(0, 6);
@@ -91,6 +121,7 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
     if (error) {
       console.error("Upload error:", error);
       setUploading(false);
+      e.target.value = "";
       return;
     }
 
@@ -98,6 +129,7 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
     addToRecent(urlData.publicUrl);
     onChange(urlData.publicUrl);
     setUploading(false);
+    e.target.value = "";
   };
 
   const updateFit = (updates: Partial<ImageFit>) => {
@@ -114,6 +146,9 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
 
   const currentFit = effectiveFit?.objectFit ?? "cover";
   const currentScale = effectiveFit?.scale ?? 100;
+  const isVideoUpload = accept.includes("video");
+  const uploadLabel = isVideoUpload ? "Upload Video" : "Upload Image";
+  const previewWidth = `${Math.max(Math.min(previewAspectRatio ?? 1, 1), 0.35) * 100}%`;
 
   const otherRecent = recentUploads.filter((u) => u !== value);
 
@@ -177,10 +212,41 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
           ) : (
             <>
               <Upload className="w-4 h-4" />
-              <span className="text-xs">Upload Image</span>
+              <span className="text-xs">{uploadLabel}</span>
             </>
           )}
         </Button>
+      )}
+
+      {value && (
+        <div
+          className="relative mx-auto overflow-hidden rounded-lg border border-border bg-muted/10"
+          style={{
+            width: previewWidth,
+            maxWidth: "100%",
+            aspectRatio: previewAspectRatio ?? 1,
+          }}
+        >
+          <img
+            src={value}
+            alt={label}
+            className="h-full w-full"
+            style={{
+              objectFit: currentFit,
+              objectPosition: `${posX}% ${posY}%`,
+              transform: currentScale !== 100 ? `scale(${currentScale / 100})` : undefined,
+              transformOrigin: `${posX}% ${posY}%`,
+            }}
+          />
+          <Button
+            size="icon"
+            variant="destructive"
+            className="absolute right-1 top-1 h-6 w-6"
+            onClick={() => onChange(null)}
+          >
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
       )}
 
       {/* Image Adjustment Controls */}
@@ -240,7 +306,7 @@ export function ImageUploadField({ label, value, onChange, folder, showFitContro
         </div>
       )}
 
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+      <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={handleUpload} />
     </div>
   );
 }
