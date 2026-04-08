@@ -9,8 +9,14 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { UpgradeOverlay } from "@/components/UpgradePrompt";
 import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   Loader2, Download, ShoppingBag, DollarSign, TrendingUp,
-  Package, Clock, CheckCircle2, XCircle, BarChart3, Wifi, ArrowRight,
+  Package, Clock, CheckCircle2, XCircle, BarChart3, Wifi, ArrowRight, GripVertical,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip,
