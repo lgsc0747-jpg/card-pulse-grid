@@ -385,7 +385,103 @@ const CommerceDashboardPage = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="breakdown" className="space-y-4">
+          <TabsContent value="conversions" className="space-y-4">
+            {/* Conversion KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <Wifi className="w-4 h-4" />
+                    <span className="text-xs">NFC Taps</span>
+                  </div>
+                  <p className="text-xl font-bold font-display">{nfcTaps}</p>
+                </CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <ShoppingBag className="w-4 h-4" />
+                    <span className="text-xs">Orders from Taps</span>
+                  </div>
+                  <p className="text-xl font-bold font-display">{totalOrders}</p>
+                </CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-xs">Tap → Order</span>
+                  </div>
+                  <p className="text-xl font-bold font-display">{nfcToOrderRate}%</p>
+                </CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-xs">View → Order</span>
+                  </div>
+                  <p className="text-xl font-bold font-display">{viewToOrderRate}%</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Conversion Funnel */}
+            <Card className="glass-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-display">NFC → Commerce Funnel</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {conversionFunnel.some(s => s.count > 0) ? (
+                  <>
+                    <div className="space-y-3 mb-6">
+                      {conversionFunnel.map((step, i) => {
+                        const maxCount = Math.max(...conversionFunnel.map(s => s.count), 1);
+                        const pct = (step.count / maxCount) * 100;
+                        const dropOff = i > 0 && conversionFunnel[i - 1].count > 0
+                          ? (((conversionFunnel[i - 1].count - step.count) / conversionFunnel[i - 1].count) * 100).toFixed(0)
+                          : null;
+                        return (
+                          <div key={step.stage}>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                {i > 0 && <ArrowRight className="w-3 h-3 text-muted-foreground" />}
+                                <span className="text-xs font-medium">{step.stage}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {dropOff && (
+                                  <span className="text-[10px] text-destructive">-{dropOff}%</span>
+                                )}
+                                <span className="text-xs font-bold">{step.count}</span>
+                              </div>
+                            </div>
+                            <div className="h-2 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-primary transition-all"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={conversionFunnel}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="stage" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-12">No conversion data yet. NFC taps and profile views will appear here.</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Order Status Pie */}
               <Card className="glass-card">
