@@ -482,6 +482,7 @@ const CommerceDashboardPage = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="breakdown" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Order Status Pie */}
               <Card className="glass-card">
