@@ -180,20 +180,24 @@ const PublicProfilePage = () => {
           ]);
         }
 
-        // Load page builder blocks
-        const { data: sitePages } = await supabase
+        // Load all site pages for this persona
+        const { data: allSitePages } = await supabase
           .from("site_pages")
-          .select("id")
+          .select("id, title, slug, is_homepage, page_icon")
           .eq("persona_id", personaData.id)
-          .eq("is_homepage", true)
           .eq("is_visible", true)
-          .limit(1);
+          .order("sort_order");
 
-        if (sitePages && sitePages.length > 0) {
+        if (allSitePages && allSitePages.length > 0) {
+          setSitePages(allSitePages);
+          const homepage = allSitePages.find(p => p.is_homepage) || allSitePages[0];
+          setActivePageId(homepage.id);
+
+          // Load blocks for homepage
           const { data: blockData } = await supabase
             .from("page_blocks")
             .select("*")
-            .eq("page_id", sitePages[0].id)
+            .eq("page_id", homepage.id)
             .eq("is_visible", true)
             .order("sort_order");
           if (blockData && blockData.length > 0) {
