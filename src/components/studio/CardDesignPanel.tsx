@@ -17,12 +17,6 @@ const TEXT_ALIGNMENTS = [
   { id: "right", label: "Right", icon: AlignRight },
 ];
 
-const IMAGE_SIZING = [
-  { id: "cover", label: "Stretched", desc: "Fills entire card" },
-  { id: "contain", label: "Fitted", desc: "Fits without cropping" },
-  { id: "center", label: "Centered", desc: "Original size, centered" },
-  { id: "original", label: "Original", desc: "Top-left, no scaling" },
-] as const;
 
 const SHADOW_PRESETS = [
   { id: "none", label: "None", css: "none" },
@@ -196,22 +190,6 @@ export function CardDesignPanel({ editing, update, isPro }: StudioPanelProps) {
               cropAspectRatio={16 / 10}
               cropLabel="Card Background"
             />
-            {editing?.card_bg_image_url && (
-              <div className="grid grid-cols-2 gap-2">
-                {IMAGE_SIZING.map((opt) => (
-                  <button key={opt.id} onClick={() => update("card_bg_size", opt.id)}
-                    className={cn(
-                      "p-2.5 rounded-xl border text-xs text-left transition-all",
-                      (editing?.card_bg_size ?? "cover") === opt.id
-                        ? "border-primary bg-primary/10 ring-1 ring-primary/30"
-                        : "border-border hover:border-primary/40"
-                    )}>
-                    <span className="font-medium block">{opt.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{opt.desc}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </>
         ) : (
           <UpgradePrompt feature="Custom Card Backgrounds" description="Upload images and GIFs for the card face." />
