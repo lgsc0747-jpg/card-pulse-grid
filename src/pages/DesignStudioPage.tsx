@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -334,6 +335,91 @@ const DesignStudioPage = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Mobile Preview FAB + Sheet */}
+          <div className="lg:hidden fixed bottom-6 right-6 z-50">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button size="lg" className="rounded-full h-14 w-14 shadow-xl gradient-primary">
+                  <Eye className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl p-0 overflow-y-auto">
+                <div className="p-4 border-b border-border/40">
+                  <div className="flex items-center justify-center gap-2">
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold">Live Preview</span>
+                  </div>
+                </div>
+                <div className="flex items-start justify-center p-4">
+                  <div
+                    className="w-[300px] min-h-[520px] border-[6px] border-muted-foreground/15 rounded-[2rem] overflow-hidden"
+                    style={{
+                      backgroundColor: editing?.landing_bg_color ?? "hsl(var(--background))",
+                      backgroundImage: editing?.background_image_url
+                        ? `url(${editing.background_image_url})`
+                        : presetCss !== "none" ? presetCss : undefined,
+                      backgroundSize: editing?.background_image_url ? "cover" : undefined,
+                      backgroundPosition: editing?.background_image_url ? "center" : undefined,
+                    }}
+                  >
+                    <div className="relative flex flex-col items-center justify-center min-h-[350px] p-6">
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${editing?.accent_color ?? "#0d9488"}25, transparent 70%)` }}
+                      />
+                      <div className="flex items-center gap-1.5 absolute top-4">
+                        <div className="w-4 h-4 rounded-md flex items-center justify-center" style={{ background: editing?.accent_color ?? "#0d9488" }}>
+                          <Wifi className="w-2 h-2 text-white" />
+                        </div>
+                        <span className="text-[9px] font-display font-semibold tracking-widest uppercase text-muted-foreground">NFC Hub</span>
+                      </div>
+                      <div className="scale-[0.8] origin-center mt-6">
+                        <InteractiveCard3D
+                          name={editing?.display_name ?? "Your Name"}
+                          headline={editing?.headline ?? undefined}
+                          avatarUrl={editing?.avatar_url ?? undefined}
+                          username={username}
+                          accentColor={editing?.accent_color ?? "#0d9488"}
+                          secondaryColor={editing?.secondary_color ?? undefined}
+                          tertiaryColor={editing?.tertiary_color ?? undefined}
+                          textColor={editing?.text_color ?? "#ffffff"}
+                          cardBgImageUrl={editing?.card_bg_image_url ?? undefined}
+                          cardBgSize={editing?.card_bg_size ?? "cover"}
+                          glassOpacity={editing?.glass_opacity ?? 0.15}
+                          linkedinUrl={editing?.linkedin_url ?? undefined}
+                          githubUrl={editing?.github_url ?? undefined}
+                          website={editing?.website ?? undefined}
+                          email={editing?.email_public ?? undefined}
+                          fontFamily={editing?.font_family ?? "Space Grotesk"}
+                          textAlignment={editing?.text_alignment ?? "left"}
+                          cardBlur={editing?.card_blur ?? 12}
+                          cardTexture={editing?.card_texture ?? "none"}
+                        />
+                      </div>
+                      <div className="w-full max-w-[240px] space-y-2 mt-5 opacity-70">
+                        <div className="text-center">
+                          <h2 className="text-xs font-display font-bold" style={{ color: editing?.text_color ?? "#fff" }}>
+                            {editing?.display_name || "Your Name"}
+                          </h2>
+                          {editing?.headline && (
+                            <p className="text-[9px]" style={{ color: `${editing?.text_color ?? "#fff"}99` }}>{editing.headline}</p>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          className="w-full text-[10px] h-8 rounded-xl"
+                          style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}
+                        >
+                          Save Contact
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>

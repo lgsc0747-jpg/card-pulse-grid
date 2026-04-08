@@ -1,20 +1,48 @@
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ImageUploadField } from "@/components/DesignStudio/ImageUploadField";
+import { AvatarPositioner, getAvatarPosition, saveAvatarPosition } from "@/components/DesignStudio/AvatarPositioner";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import type { StudioPanelProps } from "./CardDesignPanel";
 import { FileText } from "lucide-react";
 
 export function IdentityPanel({ editing, update, isPro }: StudioPanelProps) {
+  const [avatarPos, setAvatarPos] = useState({ x: 50, y: 50, scale: 100 });
+
+  useEffect(() => {
+    if (editing?.id) {
+      setAvatarPos(getAvatarPosition(editing.id));
+    }
+  }, [editing?.id]);
+
+  const handleAvatarPosChange = (pos: { x: number; y: number; scale: number }) => {
+    setAvatarPos(pos);
+    if (editing?.id) saveAvatarPosition(editing.id, pos);
+  };
   return (
     <div className="space-y-6">
       {/* Profile Info */}
       <section className="space-y-3">
         <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Profile</h3>
         <div className="space-y-3">
+          <ImageUploadField
+            label="Profile Picture"
+            value={editing?.avatar_url ?? null}
+            onChange={(url) => update("avatar_url", url)}
+            folder="avatars"
+            showFitControls={false}
+          />
+          {editing?.avatar_url && (
+            <AvatarPositioner
+              src={editing.avatar_url}
+              position={avatarPos}
+              onPositionChange={handleAvatarPosChange}
+            />
+          )}
           <div className="space-y-1">
             <Label className="text-xs">Display Name</Label>
             <Input value={editing?.display_name ?? ""} onChange={(e) => update("display_name", e.target.value)} className="rounded-xl" />
