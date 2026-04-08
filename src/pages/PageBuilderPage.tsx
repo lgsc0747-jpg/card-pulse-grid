@@ -622,4 +622,3 @@ const PageBuilderPage = () => {
 };
 
 export default PageBuilderPage;
-
