@@ -428,37 +428,25 @@ function PageBuilderPage() {
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-1">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-2 py-1">Blocks</p>
-                  {blocks.map((block, idx) => {
-                    const meta = BLOCK_TYPES.find(b => b.id === block.block_type);
-                    const Icon = meta ? ICON_MAP[meta.icon] ?? FileText : FileText;
-                    return (
-                      <div
-                        key={block.id}
-                        draggable
-                        onDragStart={() => handleDragStart(idx)}
-                        onDragOver={(e) => handleDragOver(e, idx)}
-                        onDragEnd={handleDragEnd}
-                        onClick={() => setEditingBlockId(block.id)}
-                        className={cn(
-                          "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all",
-                          editingBlockId === block.id
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-muted/50",
-                          !block.is_visible && "opacity-40"
-                        )}
-                      >
-                        <GripVertical className="w-3 h-3 cursor-grab shrink-0" />
-                        <Icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate flex-1">{meta?.label ?? block.block_type}</span>
-                        <div className="flex gap-0.5">
-                          <button onClick={(e) => { e.stopPropagation(); duplicateBlock(block); }} className="p-0.5 hover:text-primary">
-                            <Copy className="w-3 h-3" />
-                          </button>
-                          {!block.is_visible && <EyeOff className="w-3 h-3" />}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSortEnd}>
+                    <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+                      {blocks.map((block) => {
+                        const meta = BLOCK_TYPES.find(b => b.id === block.block_type);
+                        const Icon = meta ? ICON_MAP[meta.icon] ?? FileText : FileText;
+                        return (
+                          <SortableBlockItem
+                            key={block.id}
+                            block={block}
+                            Icon={Icon}
+                            meta={meta}
+                            isActive={editingBlockId === block.id}
+                            onSelect={() => setEditingBlockId(block.id)}
+                            onDuplicate={() => duplicateBlock(block)}
+                          />
+                        );
+                      })}
+                    </SortableContext>
+                  </DndContext>
                 </div>
               </ScrollArea>
 
