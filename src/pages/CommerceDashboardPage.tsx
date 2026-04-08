@@ -283,44 +283,34 @@ const CommerceDashboardPage = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <DollarSign className="w-4 h-4" />
-                <span className="text-xs">Revenue</span>
-              </div>
-              <p className="text-xl font-bold font-display">₱{totalRevenue.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <ShoppingBag className="w-4 h-4" />
-                <span className="text-xs">Orders</span>
-              </div>
-              <p className="text-xl font-bold font-display">{totalOrders}</p>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-xs">Avg Order</span>
-              </div>
-              <p className="text-xl font-bold font-display">₱{avgOrderValue.toFixed(0)}</p>
-            </CardContent>
-          </Card>
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Package className="w-4 h-4" />
-                <span className="text-xs">Items Sold</span>
-              </div>
-              <p className="text-xl font-bold font-display">{totalItemsSold}</p>
-            </CardContent>
-          </Card>
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleKpiSortEnd}>
+          <SortableContext items={kpiOrder} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {kpiOrder.map(key => {
+                const kpiMap: Record<KPIKey, { icon: React.ReactNode; label: string; value: string }> = {
+                  revenue: { icon: <DollarSign className="w-4 h-4" />, label: "Revenue", value: `₱${totalRevenue.toLocaleString()}` },
+                  orders: { icon: <ShoppingBag className="w-4 h-4" />, label: "Orders", value: String(totalOrders) },
+                  avgOrder: { icon: <TrendingUp className="w-4 h-4" />, label: "Avg Order", value: `₱${avgOrderValue.toFixed(0)}` },
+                  itemsSold: { icon: <Package className="w-4 h-4" />, label: "Items Sold", value: String(totalItemsSold) },
+                };
+                const kpi = kpiMap[key];
+                return (
+                  <SortableKPICard key={key} id={key}>
+                    <Card className="glass-card">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                          {kpi.icon}
+                          <span className="text-xs">{kpi.label}</span>
+                        </div>
+                        <p className="text-xl font-bold font-display">{kpi.value}</p>
+                      </CardContent>
+                    </Card>
+                  </SortableKPICard>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
 
         {/* Status badges */}
         <div className="flex items-center gap-2 flex-wrap">
