@@ -253,17 +253,25 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
   );
 });
 
-function getBackgroundStyle(url: string | undefined, size: string, accentColor: string, secondaryColor: string, position?: { x: number; y: number; scale: number } | null) {
-  if (!url) return { background: `linear-gradient(135deg, ${accentColor}dd, ${secondaryColor}88)` };
+function getGradientBackground(accentColor: string, secondaryColor: string) {
+  return { background: `linear-gradient(135deg, ${accentColor}dd, ${secondaryColor}88)` };
+}
+
+function BgImageLayer({ url, position }: { url: string; position?: { x: number; y: number; scale: number } | null }) {
   const pos = position ?? { x: 50, y: 50, scale: 100 };
-  return {
-    backgroundImage: `url(${url})`,
-    backgroundRepeat: "no-repeat" as const,
-    backgroundColor: `${accentColor}22`,
-    backgroundSize: "cover",
-    backgroundPosition: `${pos.x}% ${pos.y}%`,
-    transform: pos.scale !== 100 ? `scale(${pos.scale / 100})` : undefined,
-  };
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        backgroundImage: `url(${url})`,
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: `${pos.x}% ${pos.y}%`,
+        transform: pos.scale !== 100 ? `scale(${pos.scale / 100})` : undefined,
+        transformOrigin: `${pos.x}% ${pos.y}%`,
+      }}
+    />
+  );
 }
 
 function CardFront({
@@ -304,12 +312,13 @@ function CardFront({
       style={{
         ...FACE_STYLE,
         pointerEvents: isFlipped ? "none" : "auto",
-        ...getBackgroundStyle(cardBgImageUrl, cardBgSize, accentColor, secondaryColor, cardBgPosition),
+        ...(cardBgImageUrl ? { backgroundColor: `${accentColor}22` } : getGradientBackground(accentColor, secondaryColor)),
         boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
         fontFamily,
       }}
       onClick={onFlip}
     >
+      {cardBgImageUrl && <BgImageLayer url={cardBgImageUrl} position={cardBgPosition} />}
       {/* Glass overlay */}
       <div
         className="absolute inset-0"
