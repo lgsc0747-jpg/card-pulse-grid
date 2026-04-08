@@ -186,6 +186,7 @@ export type Database = {
           product_id: string
           quantity: number
           unit_price: number
+          variant_info: string | null
         }
         Insert: {
           id?: string
@@ -193,6 +194,7 @@ export type Database = {
           product_id: string
           quantity?: number
           unit_price?: number
+          variant_info?: string | null
         }
         Update: {
           id?: string
@@ -200,6 +202,7 @@ export type Database = {
           product_id?: string
           quantity?: number
           unit_price?: number
+          variant_info?: string | null
         }
         Relationships: [
           {
@@ -316,6 +319,7 @@ export type Database = {
         Row: {
           accent_color: string | null
           availability_status: string | null
+          avatar_position: Json | null
           avatar_url: string | null
           background_image_url: string | null
           background_preset: string | null
@@ -361,6 +365,7 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           availability_status?: string | null
+          avatar_position?: Json | null
           avatar_url?: string | null
           background_image_url?: string | null
           background_preset?: string | null
@@ -406,6 +411,7 @@ export type Database = {
         Update: {
           accent_color?: string | null
           availability_status?: string | null
+          avatar_position?: Json | null
           avatar_url?: string | null
           background_image_url?: string | null
           background_preset?: string | null
