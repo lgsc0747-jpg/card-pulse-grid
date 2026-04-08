@@ -361,10 +361,12 @@ function PageBuilderPage() {
 
   const deletePage = async (id: string) => {
     if (pages.length <= 1) { toast({ title: "Can't delete last page" }); return; }
+    await supabase.from("page_blocks").delete().eq("page_id", id);
     await supabase.from("site_pages").delete().eq("id", id);
     const remaining = pages.filter(p => p.id !== id);
     setPages(remaining);
     if (selectedPageId === id) setSelectedPageId(remaining[0]?.id ?? null);
+    setConfirmDeletePage(null);
   };
 
   const updatePageTitle = async (id: string, title: string) => {
@@ -404,6 +406,28 @@ function PageBuilderPage() {
     setBlocks(newBlocks);
     pushHistory(newBlocks);
     setEditingBlockId(null);
+    setConfirmDeleteBlock(null);
+  };
+
+  const bulkDeleteBlocks = async () => {
+    if (selectedBlockIds.size === 0) return;
+    for (const id of selectedBlockIds) {
+      await supabase.from("page_blocks").delete().eq("id", id);
+    }
+    const newBlocks = blocks.filter(b => !selectedBlockIds.has(b.id));
+    setBlocks(newBlocks);
+    pushHistory(newBlocks);
+    if (editingBlockId && selectedBlockIds.has(editingBlockId)) setEditingBlockId(null);
+    toast({ title: `${selectedBlockIds.size} block(s) deleted` });
+    setSelectedBlockIds(new Set());
+    setBulkMode(false);
+    setConfirmBulkDelete(false);
+  };
+
+  const bulkToggleVisibility = (visible: boolean) => {
+    const newBlocks = blocks.map(b => selectedBlockIds.has(b.id) ? { ...b, is_visible: visible } : b);
+    setBlocks(newBlocks);
+    pushHistory(newBlocks);
   };
 
   const duplicateBlock = async (block: PageBlock) => {
