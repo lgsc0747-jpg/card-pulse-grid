@@ -34,13 +34,14 @@ const ICON_MAP: Record<string, any> = {
   HelpCircle, Grid3x3, ShoppingBag, CreditCard, Mail, Share2, Code,
 };
 
-function SortableBlockItem({ block, Icon, meta, isActive, onSelect, onDuplicate }: {
+function SortableBlockItem({ block, Icon, meta, isActive, onSelect, onDuplicate, onDelete }: {
   block: PageBlock;
   Icon: any;
   meta: (typeof BLOCK_TYPES)[number] | undefined;
   isActive: boolean;
   onSelect: () => void;
   onDuplicate: () => void;
+  onDelete: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
   const style: React.CSSProperties = {
