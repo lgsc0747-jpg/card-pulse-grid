@@ -55,7 +55,7 @@ const PublicProductPage = () => {
   const pageThemeStyles = useMemo(() => getPageThemeStyles(pageThemeId), [pageThemeId]);
   const hasPageTheme = pageThemeId !== "default" && Object.keys(pageThemeStyles).length > 0;
 
-    // Strip dashboard theme classes for clean public page
+    useEffect(() => {
     const root = document.documentElement;
     const themeClasses = Array.from(root.classList).filter((c) => c.startsWith("theme-"));
     themeClasses.forEach((c) => root.classList.remove(c));
