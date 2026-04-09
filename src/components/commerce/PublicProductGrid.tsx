@@ -94,11 +94,11 @@ export function PublicProductGrid({ personaId, sellerUserId, accentColor, textCo
               className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md text-left group"
             >
               {p.image_url ? (
-                <div className="aspect-square overflow-hidden">
+                <div className="aspect-[4/5] overflow-hidden">
                   <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 </div>
               ) : (
-                <div className="aspect-square bg-muted/20 flex items-center justify-center">
+                <div className="aspect-[4/5] bg-muted/20 flex items-center justify-center">
                   <Package className="w-8 h-8 text-muted-foreground/30" />
                 </div>
               )}
