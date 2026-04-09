@@ -43,6 +43,7 @@ export function ProductVariantManager({ productId }: ProductVariantManagerProps)
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [expandedVariant, setExpandedVariant] = useState<string | null>(null);
   const [newType, setNewType] = useState<string>("Color");
   const [newValue, setNewValue] = useState("");
   const [newPrice, setNewPrice] = useState("0");
