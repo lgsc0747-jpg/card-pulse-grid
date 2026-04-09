@@ -36,12 +36,16 @@ export function useChartPalette() {
 
 interface ChartPaletteContextValueFull extends ChartPaletteContextValue {
   setPaletteId: (id: PaletteId) => void;
+  customColors: string[];
+  setCustomColors: (colors: string[]) => void;
 }
 
 const ChartPaletteContextFull = createContext<ChartPaletteContextValueFull>({
   colors: PALETTES[0].colors as unknown as string[],
   paletteId: "default",
   setPaletteId: () => {},
+  customColors: DEFAULT_CUSTOM,
+  setCustomColors: () => {},
 });
 
 export function useChartPaletteFull() {
@@ -52,16 +56,21 @@ export function ChartPaletteProvider({ children }: { children: React.ReactNode }
   const [paletteId, setPaletteId] = useState<PaletteId>(() => {
     return (localStorage.getItem(STORAGE_KEY) as PaletteId) || "default";
   });
+  const [customColors, setCustomColors] = useState<string[]>(() => {
+    try { const r = localStorage.getItem(CUSTOM_COLORS_KEY); if (r) return JSON.parse(r); } catch {}
+    return DEFAULT_CUSTOM;
+  });
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, paletteId);
-  }, [paletteId]);
+  useEffect(() => { localStorage.setItem(STORAGE_KEY, paletteId); }, [paletteId]);
+  useEffect(() => { localStorage.setItem(CUSTOM_COLORS_KEY, JSON.stringify(customColors)); }, [customColors]);
 
-  const palette = PALETTES.find((p) => p.id === paletteId) ?? PALETTES[0];
+  const resolvedColors = paletteId === "custom"
+    ? customColors
+    : [...(PALETTES.find((p) => p.id === paletteId) ?? PALETTES[0]).colors];
 
   return (
-    <ChartPaletteContextFull.Provider value={{ colors: [...palette.colors], paletteId, setPaletteId }}>
-      <ChartPaletteContext.Provider value={{ colors: [...palette.colors], paletteId }}>
+    <ChartPaletteContextFull.Provider value={{ colors: resolvedColors, paletteId, setPaletteId, customColors, setCustomColors }}>
+      <ChartPaletteContext.Provider value={{ colors: resolvedColors, paletteId }}>
         {children}
       </ChartPaletteContext.Provider>
     </ChartPaletteContextFull.Provider>
