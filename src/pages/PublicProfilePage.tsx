@@ -400,7 +400,7 @@ const PublicProfilePage = () => {
     }).catch(() => {});
   }, [merged.user_id, persona?.slug]);
 
-  if (loading) {
+  const pageThemeStyles = useMemo(() => getPageThemeStyles(pageThemeId), [pageThemeId]);
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -696,7 +696,6 @@ const PublicProfilePage = () => {
   // Find the NFC card section index for full-bleed rendering
   const nfcCardIdx = visibleSections.findIndex(s => s.section_type === "nfc_card");
 
-  const pageThemeStyles = useMemo(() => getPageThemeStyles(pageThemeId), [pageThemeId]);
   const hasPageTheme = pageThemeId !== "default" && Object.keys(pageThemeStyles).length > 0;
 
   return (
