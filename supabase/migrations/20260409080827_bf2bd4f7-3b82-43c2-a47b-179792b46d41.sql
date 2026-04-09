@@ -1,0 +1,1 @@
+ALTER TABLE public.personas ADD COLUMN page_theme text NOT NULL DEFAULT 'default';
