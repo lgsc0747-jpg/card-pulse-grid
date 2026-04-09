@@ -82,7 +82,22 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
     paddingBottom: styles.paddingY ?? 24,
     paddingLeft: styles.paddingX ?? 16,
     paddingRight: styles.paddingX ?? 16,
-    backgroundColor: styles.bgColor ?? "transparent",
+    backgroundColor: styles.bgTransparencyEnabled && styles.bgColor
+      ? (() => {
+          const opacity = (styles.bgOpacity ?? 100) / 100;
+          const c = styles.bgColor;
+          if (c.startsWith("rgba")) return c.replace(/[\d.]+\)$/, `${opacity})`);
+          if (c.startsWith("rgb")) return c.replace("rgb(", "rgba(").replace(")", `,${opacity})`);
+          if (c.startsWith("#")) {
+            const hex = c.slice(1);
+            const r = parseInt(hex.length === 3 ? hex[0]+hex[0] : hex.slice(0,2), 16);
+            const g = parseInt(hex.length === 3 ? hex[1]+hex[1] : hex.slice(2,4), 16);
+            const b = parseInt(hex.length === 3 ? hex[2]+hex[2] : hex.slice(4,6), 16);
+            return `rgba(${r},${g},${b},${opacity})`;
+          }
+          return c;
+        })()
+      : (styles.bgColor ?? "transparent"),
     borderRadius: styles.borderRadius ?? 0,
     textAlign: (styles.alignment ?? "left") as any,
     maxWidth: styles.maxWidth ?? "100%",

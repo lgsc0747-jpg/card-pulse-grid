@@ -726,7 +726,10 @@ const PublicProfilePage = () => {
 
         {/* If Page Builder blocks exist, render those instead of legacy sections */}
         {hasPageBuilder ? (
-          <div style={{ color: textColor }}>
+          <div style={{
+            color: hasPageTheme ? (pageThemeStyles as any)["--page-text"] || textColor : textColor,
+            ...(hasPageTheme ? pageThemeStyles : {}),
+          }}>
             {pageBlocks.map(block => (
               <BlockRenderer key={block.id} block={block} persona={persona} />
             ))}

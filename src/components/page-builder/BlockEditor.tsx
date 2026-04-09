@@ -94,6 +94,25 @@ export function BlockEditor({ block, onChange, onDelete, onClose }: BlockEditorP
         </div>
         <ColorPickerField label="Background" value={block.styles.bgColor ?? "transparent"} onChange={(v) => updateStyles("bgColor", v === "transparent" ? undefined : v)} />
         <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Background Transparency</Label>
+            <Switch
+              checked={block.styles.bgTransparencyEnabled ?? false}
+              onCheckedChange={(v) => updateStyles("bgTransparencyEnabled", v)}
+            />
+          </div>
+          {block.styles.bgTransparencyEnabled && (
+            <Slider
+              value={[block.styles.bgOpacity ?? 100]}
+              onValueChange={([v]) => updateStyles("bgOpacity", v)}
+              min={0} max={100} step={5}
+            />
+          )}
+          {block.styles.bgTransparencyEnabled && (
+            <span className="text-[10px] text-muted-foreground">{block.styles.bgOpacity ?? 100}% opacity</span>
+          )}
+        </div>
+        <div className="space-y-2">
           <Label className="text-xs">Border Radius</Label>
           <Slider
             value={[block.styles.borderRadius ?? 0]}
