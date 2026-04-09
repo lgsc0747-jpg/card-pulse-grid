@@ -169,7 +169,7 @@ const PublicProductPage = () => {
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen ${hasPageTheme ? PAGE_THEME_CLASS : ''}`} style={hasPageTheme ? { backgroundColor: (pageThemeStyles as any)["--page-bg"], color: (pageThemeStyles as any)["--page-text"], ...pageThemeStyles } : {}}>
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/40">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 h-12">
