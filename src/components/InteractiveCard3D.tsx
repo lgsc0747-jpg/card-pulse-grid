@@ -35,6 +35,7 @@ interface InteractiveCard3DProps {
   textAlignment?: string;
   cardBlur?: number;
   cardTexture?: string;
+  borderRadius?: number;
   onFlipToBack?: () => void;
   onLinkClick?: (linkType: string) => void;
 }
@@ -58,6 +59,7 @@ interface CardFrontProps {
   textAlignment: string;
   cardBlur: number;
   cardTexture: string;
+  borderRadius: number;
 }
 
 interface CardBackProps {
@@ -115,6 +117,7 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
     textAlignment = "left",
     cardBlur = 12,
     cardTexture = "none",
+    borderRadius = 24,
     onFlipToBack,
     onLinkClick,
   },
@@ -221,6 +224,7 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
               textAlignment={textAlignment}
               cardBlur={cardBlur}
               cardTexture={cardTexture}
+              borderRadius={borderRadius}
             />
             <CardBack
               accentColor={accentColor}
@@ -293,6 +297,7 @@ function CardFront({
   textAlignment,
   cardBlur,
   cardTexture,
+  borderRadius,
 }: CardFrontProps) {
   const textureCss = getTextureCss(cardTexture);
 
@@ -308,12 +313,12 @@ function CardFront({
 
   return (
     <div
-      className="absolute inset-0 cursor-pointer overflow-hidden rounded-2xl border border-white/20"
+      className="absolute inset-0 cursor-pointer overflow-hidden border border-white/20"
       style={{
         ...FACE_STYLE,
+        borderRadius: `${borderRadius}px`,
         pointerEvents: isFlipped ? "none" : "auto",
         ...(cardBgImageUrl ? { backgroundColor: `${accentColor}22` } : getGradientBackground(accentColor, secondaryColor)),
-        boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
         fontFamily,
       }}
       onClick={onFlip}
@@ -416,13 +421,13 @@ function CardBack({
 }: CardBackProps) {
   return (
     <div
-      className="absolute inset-0 overflow-hidden rounded-2xl border border-white/20"
+      className="absolute inset-0 overflow-hidden border border-white/20"
       style={{
         ...FACE_STYLE,
+        borderRadius: "16px",
         pointerEvents: isFlipped ? "auto" : "none",
         transform: "rotateY(180deg)",
         background: `linear-gradient(135deg, ${secondaryColor}cc, ${accentColor}66)`,
-        boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
       }}
       onClick={(event) => event.stopPropagation()}
     >

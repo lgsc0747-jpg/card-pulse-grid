@@ -442,7 +442,10 @@ const PublicProfilePage = () => {
   }
 
   const accentColor = merged.accent_color;
-  const textColor = persona?.text_color ?? "#ffffff";
+  const rawTextColor = persona?.text_color ?? "#ffffff";
+  // If a page theme is active and has --page-text, use that for readability
+  const themeTextColor = pageThemeId !== "default" ? (pageThemeStyles as any)["--page-text"] : null;
+  const textColor = themeTextColor || rawTextColor;
   const landingBgColor = persona?.landing_bg_color || "#0a0a0f";
   const bgPresetCss = getPresetCss(persona?.background_preset);
   const bgImageUrl = persona?.background_image_url;
@@ -573,6 +576,7 @@ const PublicProfilePage = () => {
             textAlignment={persona?.text_alignment ?? "left"}
             cardBlur={persona?.card_blur ?? 12}
             cardTexture={persona?.card_texture ?? "none"}
+            borderRadius={(persona as any)?.border_radius ?? 24}
             onFlipToBack={trackCardFlip}
             onLinkClick={trackLinkClick}
           />

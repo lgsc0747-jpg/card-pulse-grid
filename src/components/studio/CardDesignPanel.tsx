@@ -8,31 +8,13 @@ import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { CARD_TEXTURE_PRESETS } from "@/components/DesignStudio/CardTexturePresets";
 import { FONT_PRESETS } from "@/components/DesignStudio/FontPresets";
 import type { PersonaDesign } from "@/components/DesignStudio/types";
-import { AlignLeft, AlignCenter, AlignRight, RectangleHorizontal, Square, Circle, Sparkles, RotateCcw, Zap, MousePointer } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TEXT_ALIGNMENTS = [
   { id: "left", label: "Left", icon: AlignLeft },
   { id: "center", label: "Center", icon: AlignCenter },
   { id: "right", label: "Right", icon: AlignRight },
-];
-
-
-const SHADOW_PRESETS = [
-  { id: "none", label: "None", css: "none" },
-  { id: "subtle", label: "Subtle", css: "0 4px 12px -2px rgba(0,0,0,0.15)" },
-  { id: "medium", label: "Medium", css: "0 8px 24px -4px rgba(0,0,0,0.25)" },
-  { id: "strong", label: "Strong", css: "0 16px 48px -8px rgba(0,0,0,0.4)" },
-  { id: "glow", label: "Glow", css: "0 0 30px -5px var(--accent)" },
-  { id: "neon", label: "Neon", css: "0 0 20px 0 var(--accent), 0 0 40px 0 var(--accent)" },
-];
-
-const CARD_ANIMATIONS = [
-  { id: "tilt", label: "3D Tilt", desc: "Follows cursor", icon: MousePointer },
-  { id: "float", label: "Float", desc: "Gentle hover", icon: Sparkles },
-  { id: "flip", label: "Flip", desc: "Card flip on click", icon: RotateCcw },
-  { id: "pulse", label: "Pulse", desc: "Breathing glow", icon: Zap },
-  { id: "none", label: "Static", desc: "No animation", icon: Square },
 ];
 
 export interface StudioPanelProps {
@@ -84,66 +66,6 @@ export function CardDesignPanel({ editing, update, isPro }: StudioPanelProps) {
               </button>
             ))}
           </div>
-        </div>
-      </section>
-
-      <Separator className="opacity-40" />
-
-      {/* Shadow Presets */}
-      <section className="space-y-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Shadow</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {SHADOW_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => update("shadow_preset", preset.id)}
-              className={cn(
-                "relative rounded-xl border-2 p-3 text-center transition-all",
-                editing?.shadow_preset === preset.id
-                  ? "border-primary ring-1 ring-primary/30"
-                  : "border-border hover:border-primary/40"
-              )}
-            >
-              <div
-                className="w-8 h-5 mx-auto mb-1.5 rounded-md bg-muted-foreground/20"
-                style={{
-                  boxShadow: preset.css !== "none" ? preset.css.replace(/var\(--accent\)/g, editing?.accent_color ?? "#0d9488") : "none",
-                  borderRadius: `${Math.min((editing?.border_radius ?? 24) / 4, 8)}px`,
-                }}
-              />
-              <span className="text-[10px] font-medium">{preset.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <Separator className="opacity-40" />
-
-      {/* Card Animation */}
-      <section className="space-y-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Animation</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {CARD_ANIMATIONS.map((anim) => {
-            const Icon = anim.icon;
-            return (
-              <button
-                key={anim.id}
-                onClick={() => update("card_animation", anim.id)}
-                className={cn(
-                  "flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all",
-                  (editing?.card_animation ?? "tilt") === anim.id
-                    ? "border-primary bg-primary/10 ring-1 ring-primary/30"
-                    : "border-border hover:border-primary/40"
-                )}
-              >
-                <Icon className="w-4 h-4 shrink-0 text-muted-foreground" />
-                <div>
-                  <span className="text-xs font-medium block">{anim.label}</span>
-                  <span className="text-[10px] text-muted-foreground">{anim.desc}</span>
-                </div>
-              </button>
-            );
-          })}
         </div>
       </section>
 

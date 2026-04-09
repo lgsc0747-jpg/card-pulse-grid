@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -14,18 +13,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Plus, Trash2, Check, Edit3, Shield, Lock, Users, Loader2,
-  Palette, Image as ImageIcon, Eye,
+  Plus, Trash2, Check, Edit3, Shield, Lock, Users, Loader2, Eye,
 } from "lucide-react";
-
-const BACKGROUND_PRESETS = [
-  { id: "default", label: "Default", css: "none" },
-  { id: "carbon", label: "Carbon Fiber", css: "repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.02) 3px, rgba(255,255,255,0.02) 6px)" },
-  { id: "mesh", label: "Mesh Gradient", css: "radial-gradient(at 40% 20%, hsla(178,80%,40%,0.3) 0px, transparent 50%), radial-gradient(at 80% 60%, hsla(280,60%,50%,0.2) 0px, transparent 50%)" },
-  { id: "cyberpunk", label: "Cyberpunk Grid", css: "linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px)" },
-  { id: "marble", label: "Minimalist Marble", css: "linear-gradient(135deg, rgba(255,255,255,0.05) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.05) 25%, transparent 25%)" },
-  { id: "holo", label: "Holographic", css: "linear-gradient(135deg, rgba(255,0,128,0.15), rgba(0,255,255,0.15), rgba(128,0,255,0.15))" },
-];
 
 interface Persona {
   id: string;
@@ -320,9 +309,9 @@ const PersonasPage = () => {
           </DialogHeader>
           {editingPersona && (
             <div className="space-y-6">
-              {/* Identity */}
+              {/* Basic Info */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Identity</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Basic</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label>Label</Label>
@@ -332,103 +321,10 @@ const PersonasPage = () => {
                     <Label>Slug (URL path)</Label>
                     <Input value={editingPersona.slug} onChange={(e) => updateField("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} />
                   </div>
-                  <div className="space-y-1">
-                    <Label>Display Name</Label>
-                    <Input value={editingPersona.display_name ?? ""} onChange={(e) => updateField("display_name", e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Headline</Label>
-                    <Input value={editingPersona.headline ?? ""} onChange={(e) => updateField("headline", e.target.value)} placeholder="Full-Stack Developer" />
-                  </div>
-                  <div className="space-y-1 md:col-span-2">
-                    <Label>Bio</Label>
-                    <Input value={editingPersona.bio ?? ""} onChange={(e) => updateField("bio", e.target.value)} />
-                  </div>
                 </div>
-              </div>
-
-              {/* Contact */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Contact & Socials</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>Email</Label>
-                    <Input value={editingPersona.email_public ?? ""} onChange={(e) => updateField("email_public", e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Phone</Label>
-                    <Input value={editingPersona.phone ?? ""} onChange={(e) => updateField("phone", e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Location</Label>
-                    <Input value={editingPersona.location ?? ""} onChange={(e) => updateField("location", e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Website</Label>
-                    <Input value={editingPersona.website ?? ""} onChange={(e) => updateField("website", e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>LinkedIn</Label>
-                    <Input value={editingPersona.linkedin_url ?? ""} onChange={(e) => updateField("linkedin_url", e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>GitHub</Label>
-                    <Input value={editingPersona.github_url ?? ""} onChange={(e) => updateField("github_url", e.target.value)} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Design */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                  <Palette className="w-4 h-4" /> Design Studio
-                </h3>
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <Label>Accent Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={editingPersona.accent_color ?? "#0d9488"}
-                        onChange={(e) => updateField("accent_color", e.target.value)}
-                        className="w-10 h-10 rounded-lg border border-border cursor-pointer"
-                      />
-                      <Input
-                        value={editingPersona.accent_color ?? "#0d9488"}
-                        onChange={(e) => updateField("accent_color", e.target.value)}
-                        className="w-28 font-mono text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Background Preset</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {BACKGROUND_PRESETS.map((preset) => (
-                        <button
-                          key={preset.id}
-                          onClick={() => updateField("background_preset", preset.id)}
-                          className={`p-3 rounded-lg border text-xs text-center transition-colors ${
-                            editingPersona.background_preset === preset.id
-                              ? "border-primary bg-primary/10"
-                              : "border-border hover:border-primary/40"
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Glass Opacity: {Math.round((editingPersona.glass_opacity ?? 0.15) * 100)}%</Label>
-                    <Slider
-                      value={[(editingPersona.glass_opacity ?? 0.15) * 100]}
-                      onValueChange={([v]) => updateField("glass_opacity", v / 100)}
-                      min={0}
-                      max={80}
-                      step={5}
-                    />
-                  </div>
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Identity, contact info, and design are managed in the <a href="/page-builder" className="text-primary underline">Page Builder</a> and <a href="/design-studio" className="text-primary underline">Card Studio</a>.
+                </p>
               </div>
 
               {/* Security */}
