@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Plus, Package } from "lucide-react";
 import { CheckoutSheet, type CartItem } from "./CheckoutSheet";
-import { ProductDetailSheet } from "./ProductDetailSheet";
 
 interface Product {
   id: string;
@@ -22,13 +22,15 @@ interface PublicProductGridProps {
   accentColor: string;
   textColor?: string;
   gcashQrUrl?: string | null;
+  selectedProductIds?: string[];
 }
 
-export function PublicProductGrid({ personaId, sellerUserId, accentColor, textColor, gcashQrUrl }: PublicProductGridProps) {
+export function PublicProductGrid({ personaId, sellerUserId, accentColor, textColor, gcashQrUrl, selectedProductIds }: PublicProductGridProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,25 +41,29 @@ export function PublicProductGrid({ personaId, sellerUserId, accentColor, textCo
       .eq("is_visible", true)
       .order("sort_order")
       .then(({ data }) => {
-        setProducts((data as Product[]) ?? []);
+        let list = (data as Product[]) ?? [];
+        if (selectedProductIds && selectedProductIds.length > 0) {
+          list = list.filter(p => selectedProductIds.includes(p.id));
+        }
+        setProducts(list);
         setLoading(false);
       });
-  }, [personaId]);
+  }, [personaId, selectedProductIds?.join(",")]);
 
-  const addToCart = (p: Product, variantLabel?: string, _priceModifier?: number) => {
+  const addToCart = (p: Product) => {
     setCart((prev) => {
-      // Unique key = product id + variant label
-      const key = `${p.id}|${variantLabel ?? ""}`;
-      const exists = prev.find((c) => `${c.id}|${c.variantLabel ?? ""}` === key);
+      const exists = prev.find((c) => c.id === p.id);
       if (exists) {
-        return prev.map((c) =>
-          `${c.id}|${c.variantLabel ?? ""}` === key
-            ? { ...c, quantity: Math.min(c.quantity + 1, p.stock) }
-            : c
-        );
+        return prev.map((c) => c.id === p.id ? { ...c, quantity: Math.min(c.quantity + 1, p.stock) } : c);
       }
-      return [...prev, { id: p.id, name: p.name, price: p.price, image_url: p.image_url, quantity: 1, stock: p.stock, variantLabel }];
+      return [...prev, { id: p.id, name: p.name, price: p.price, image_url: p.image_url, quantity: 1, stock: p.stock }];
     });
+  };
+
+  const openProductPage = (p: Product) => {
+    // Navigate to dedicated product page
+    const basePath = location.pathname.replace(/\/+$/, "");
+    navigate(`${basePath}/product/${p.id}`);
   };
 
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
@@ -84,7 +90,7 @@ export function PublicProductGrid({ personaId, sellerUserId, accentColor, textCo
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              onClick={() => setDetailProduct(p)}
+              onClick={() => openProductPage(p)}
               className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md text-left group"
             >
               {p.image_url ? (
@@ -114,15 +120,6 @@ export function PublicProductGrid({ personaId, sellerUserId, accentColor, textCo
           ))}
         </div>
       </div>
-
-      <ProductDetailSheet
-        product={detailProduct}
-        open={!!detailProduct}
-        onClose={() => setDetailProduct(null)}
-        onAddToCart={addToCart}
-        accentColor={accentColor}
-        textColor={textColor}
-      />
 
       <CheckoutSheet
         open={checkoutOpen}
