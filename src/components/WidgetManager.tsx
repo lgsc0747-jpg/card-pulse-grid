@@ -16,7 +16,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  Zap, Users, Smartphone, Eye, FileText, Settings2, GripVertical, LayoutGrid,
+  Zap, Users, Smartphone, Eye, FileText, GripVertical, LayoutGrid,
   Clock, Shield, BarChart3, MousePointerClick, RotateCcw,
 } from "lucide-react";
 
