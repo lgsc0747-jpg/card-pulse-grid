@@ -8,7 +8,7 @@ import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { CARD_TEXTURE_PRESETS } from "@/components/DesignStudio/CardTexturePresets";
 import { FONT_PRESETS } from "@/components/DesignStudio/FontPresets";
 import type { PersonaDesign } from "@/components/DesignStudio/types";
-import { AlignLeft, AlignCenter, AlignRight, RectangleHorizontal, Square, Circle, Sparkles, RotateCcw, Zap, MousePointer } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TEXT_ALIGNMENTS = [
