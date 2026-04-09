@@ -17,8 +17,6 @@ const TEXT_ALIGNMENTS = [
   { id: "right", label: "Right", icon: AlignRight },
 ];
 
-
-
 export interface StudioPanelProps {
   editing: PersonaDesign | null;
   update: (field: keyof PersonaDesign, value: unknown) => void;
@@ -68,66 +66,6 @@ export function CardDesignPanel({ editing, update, isPro }: StudioPanelProps) {
               </button>
             ))}
           </div>
-        </div>
-      </section>
-
-      <Separator className="opacity-40" />
-
-      {/* Shadow Presets */}
-      <section className="space-y-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Shadow</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {SHADOW_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => update("shadow_preset", preset.id)}
-              className={cn(
-                "relative rounded-xl border-2 p-3 text-center transition-all",
-                editing?.shadow_preset === preset.id
-                  ? "border-primary ring-1 ring-primary/30"
-                  : "border-border hover:border-primary/40"
-              )}
-            >
-              <div
-                className="w-8 h-5 mx-auto mb-1.5 rounded-md bg-muted-foreground/20"
-                style={{
-                  boxShadow: preset.css !== "none" ? preset.css.replace(/var\(--accent\)/g, editing?.accent_color ?? "#0d9488") : "none",
-                  borderRadius: `${Math.min((editing?.border_radius ?? 24) / 4, 8)}px`,
-                }}
-              />
-              <span className="text-[10px] font-medium">{preset.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <Separator className="opacity-40" />
-
-      {/* Card Animation */}
-      <section className="space-y-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Animation</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {CARD_ANIMATIONS.map((anim) => {
-            const Icon = anim.icon;
-            return (
-              <button
-                key={anim.id}
-                onClick={() => update("card_animation", anim.id)}
-                className={cn(
-                  "flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all",
-                  (editing?.card_animation ?? "tilt") === anim.id
-                    ? "border-primary bg-primary/10 ring-1 ring-primary/30"
-                    : "border-border hover:border-primary/40"
-                )}
-              >
-                <Icon className="w-4 h-4 shrink-0 text-muted-foreground" />
-                <div>
-                  <span className="text-xs font-medium block">{anim.label}</span>
-                  <span className="text-[10px] text-muted-foreground">{anim.desc}</span>
-                </div>
-              </button>
-            );
-          })}
         </div>
       </section>
 
