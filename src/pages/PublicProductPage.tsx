@@ -52,6 +52,22 @@ const PublicProductPage = () => {
   const [personaData, setPersonaData] = useState<{ accent_color: string; text_color: string; gcash_qr_url: string | null } | null>(null);
 
   useEffect(() => {
+    // Strip dashboard theme classes for clean public page
+    const root = document.documentElement;
+    const themeClasses = Array.from(root.classList).filter((c) => c.startsWith("theme-"));
+    themeClasses.forEach((c) => root.classList.remove(c));
+    root.classList.remove("dark");
+    return () => {
+      const stored = localStorage.getItem("admin_theme");
+      if (stored) root.classList.add(`theme-${stored}`);
+      const colorMode = localStorage.getItem("admin_color_mode");
+      if (colorMode === "dark" || (!colorMode && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        root.classList.add("dark");
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!productId) return;
     loadProduct();
   }, [productId]);
