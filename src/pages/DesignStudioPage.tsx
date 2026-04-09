@@ -160,13 +160,7 @@ const DesignStudioPage = () => {
               >
                 <div className="relative flex flex-col items-center justify-center min-h-[350px] p-6">
                   <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${editing?.accent_color ?? "#0d9488"}25, transparent 70%)` }} />
-                  <div className="flex items-center gap-1.5 absolute top-4">
-                    <div className="w-4 h-4 rounded-md flex items-center justify-center" style={{ background: editing?.accent_color ?? "#0d9488" }}>
-                      <Wifi className="w-2 h-2 text-white" />
-                    </div>
-                    <span className="text-[9px] font-display font-semibold tracking-widest uppercase text-muted-foreground">NFC Hub</span>
-                  </div>
-                  <div className="scale-[0.85] origin-center mt-6">
+                  <div className="scale-[0.9] origin-center">
                     <InteractiveCard3D
                       name={editing?.display_name ?? "Your Name"}
                       headline={editing?.headline ?? undefined}
@@ -189,19 +183,17 @@ const DesignStudioPage = () => {
                       cardTexture={editing?.card_texture ?? "none"}
                     />
                   </div>
-                  <div className="w-full max-w-[260px] space-y-2 mt-5 opacity-70">
-                    <div className="text-center">
-                      <h2 className="text-xs font-display font-bold" style={{ color: editing?.text_color ?? "#fff" }}>
-                        {editing?.display_name || "Your Name"}
-                      </h2>
-                      {editing?.headline && (
-                        <p className="text-[9px]" style={{ color: `${editing?.text_color ?? "#fff"}99` }}>{editing.headline}</p>
-                      )}
-                    </div>
-                    <Button size="sm" className="w-full text-[10px] h-8 rounded-xl" style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}>
-                      Save Contact
+                  <div className="flex items-center gap-2 mt-5">
+                    <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
+                      Flip Card
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
+                      Share
                     </Button>
                   </div>
+                  <Button size="sm" className="mt-3 text-[9px] h-6 rounded-lg px-3" style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}>
+                    Save Contact
+                  </Button>
                 </div>
               </div>
             </div>
@@ -236,13 +228,7 @@ const DesignStudioPage = () => {
                   >
                     <div className="relative flex flex-col items-center justify-center min-h-[350px] p-6">
                       <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${editing?.accent_color ?? "#0d9488"}25, transparent 70%)` }} />
-                      <div className="flex items-center gap-1.5 absolute top-4">
-                        <div className="w-4 h-4 rounded-md flex items-center justify-center" style={{ background: editing?.accent_color ?? "#0d9488" }}>
-                          <Wifi className="w-2 h-2 text-white" />
-                        </div>
-                        <span className="text-[9px] font-display font-semibold tracking-widest uppercase text-muted-foreground">NFC Hub</span>
-                      </div>
-                      <div className="scale-[0.8] origin-center mt-6">
+                      <div className="scale-[0.8] origin-center">
                         <InteractiveCard3D
                           name={editing?.display_name ?? "Your Name"}
                           headline={editing?.headline ?? undefined}
@@ -265,19 +251,17 @@ const DesignStudioPage = () => {
                           cardTexture={editing?.card_texture ?? "none"}
                         />
                       </div>
-                      <div className="w-full max-w-[240px] space-y-2 mt-5 opacity-70">
-                        <div className="text-center">
-                          <h2 className="text-xs font-display font-bold" style={{ color: editing?.text_color ?? "#fff" }}>
-                            {editing?.display_name || "Your Name"}
-                          </h2>
-                          {editing?.headline && (
-                            <p className="text-[9px]" style={{ color: `${editing?.text_color ?? "#fff"}99` }}>{editing.headline}</p>
-                          )}
-                        </div>
-                        <Button size="sm" className="w-full text-[10px] h-8 rounded-xl" style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}>
-                          Save Contact
+                      <div className="flex items-center gap-2 mt-4">
+                        <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
+                          Flip
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
+                          Share
                         </Button>
                       </div>
+                      <Button size="sm" className="mt-2 text-[9px] h-6 rounded-lg px-3" style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}>
+                        Save Contact
+                      </Button>
                     </div>
                   </div>
                 </div>
