@@ -101,6 +101,7 @@ const PublicProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [gateUnlocked, setGateUnlocked] = useState(false);
+  const [pageThemeId, setPageThemeId] = useState<string>("default");
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({ target: containerRef });
