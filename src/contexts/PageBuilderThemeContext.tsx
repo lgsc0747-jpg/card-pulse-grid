@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface PageTheme {
   id: string;
   label: string;
   description: string;
-  preview: string; // swatch color
+  preview: string;
   type: "color" | "layout";
-  vars: Record<string, string>; // CSS custom properties
+  vars: Record<string, string>;
 }
 
 export const PAGE_THEMES: PageTheme[] = [
@@ -243,8 +244,21 @@ export const PAGE_THEMES: PageTheme[] = [
   },
 ];
 
-import { supabase } from "@/integrations/supabase/client";
+interface Ctx {
+  themeId: string;
+  theme: PageTheme;
+  setThemeId: (id: string) => void;
+  personaId: string | null;
+  setPersonaId: (id: string | null) => void;
+}
 
+const PageThemeContext = createContext<Ctx>({
+  themeId: "default",
+  theme: PAGE_THEMES[0],
+  setThemeId: () => {},
+  personaId: null,
+  setPersonaId: () => {},
+});
 
 export function PageThemeProvider({ children, initialPersonaId, initialThemeId }: { children: ReactNode; initialPersonaId?: string | null; initialThemeId?: string }) {
   const [personaId, setPersonaId] = useState<string | null>(initialPersonaId ?? null);
@@ -252,7 +266,6 @@ export function PageThemeProvider({ children, initialPersonaId, initialThemeId }
 
   const setThemeId = (id: string) => {
     setThemeIdState(id);
-    // Persist to DB
     if (personaId) {
       supabase.from("personas").update({ page_theme: id } as any).eq("id", personaId).then(() => {});
     }
@@ -261,7 +274,6 @@ export function PageThemeProvider({ children, initialPersonaId, initialThemeId }
   const handleSetPersonaId = (id: string | null) => {
     setPersonaId(id);
     if (id) {
-      // Load theme from DB
       supabase.from("personas").select("page_theme").eq("id", id).single().then(({ data }) => {
         setThemeIdState((data as any)?.page_theme ?? "default");
       });
