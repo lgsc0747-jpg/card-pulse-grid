@@ -1,9 +1,11 @@
 import type { PageBlock } from "./types";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Globe, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, ExternalLink, MapPin, Quote as QuoteIcon, Star, ChevronDown, ChevronUp } from "lucide-react";
+import { Mail, Phone, Globe, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, ExternalLink, MapPin, Quote as QuoteIcon, Star, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { InteractiveCard3D } from "@/components/InteractiveCard3D";
 import { PublicProductGrid } from "@/components/commerce/PublicProductGrid";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const ANIMATION_PRESETS: Record<string, { initial: any; animate: any; transition: any }> = {
   none: { initial: {}, animate: {}, transition: {} },
