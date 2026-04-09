@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, ShoppingBag, Store, BarChart3, FileText, GripVertical, RotateCcw, ClipboardList } from "lucide-react";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, ShoppingBag, Store, BarChart3, FileText, GripVertical, RotateCcw } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
