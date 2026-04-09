@@ -28,8 +28,13 @@ import {
   MousePointerClick, Quote, Users, BarChart3, MessageSquareQuote,
   HelpCircle, Grid3x3, ShoppingBag, ShoppingCart, CreditCard, Mail, Share2, Code,
   Home, PanelLeftClose, PanelLeft, FilePlus, Undo2, Redo2, BookTemplate,
-  CheckSquare, Square, ArrowLeft, Wifi,
+  CheckSquare, Square, ArrowLeft, Wifi, Paintbrush, Check,
 } from "lucide-react";
+import { PageBuilderThemeProvider, usePageBuilderTheme, PB_THEMES, type PBTheme } from "@/contexts/PageBuilderThemeContext";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const ICON_MAP: Record<string, any> = {
   Type, AlignLeft, Image, LayoutGrid, Play, Minus, SeparatorHorizontal,
@@ -542,6 +547,7 @@ function PageBuilderPage() {
           <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={redo} title="Redo">
             <Redo2 className="w-3.5 h-3.5" />
           </Button>
+          <PBThemeSwitcher />
           <div className="w-px h-5 bg-border mx-1 hidden sm:block" />
           <div className="hidden sm:flex items-center gap-0.5 bg-muted/50 rounded-lg p-0.5">
             <Button size="sm" variant={deviceMode === "desktop" ? "default" : "ghost"} className="h-6 w-6 p-0" onClick={() => setDeviceMode("desktop")}>
@@ -849,4 +855,38 @@ function PageBuilderPage() {
   );
 }
 
-export default PageBuilderPage;
+function PBThemeSwitcher() {
+  const { theme, setTheme } = usePageBuilderTheme();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Builder Theme">
+          <Paintbrush className="w-3.5 h-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44 max-h-64 overflow-y-auto">
+        <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Builder Theme
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {(Object.entries(PB_THEMES) as [PBTheme, { label: string; preview: string }][]).map(([key, cfg]) => (
+          <DropdownMenuItem key={key} onClick={() => setTheme(key)} className="flex items-center gap-2 cursor-pointer text-xs">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0 border border-border" style={{ background: cfg.preview }} />
+            <span className="flex-1">{cfg.label}</span>
+            {theme === key && <Check className="w-3 h-3 text-primary shrink-0" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function PageBuilderWithTheme() {
+  return (
+    <PageBuilderThemeProvider>
+      <PageBuilderPage />
+    </PageBuilderThemeProvider>
+  );
+}
+
+export default PageBuilderWithTheme;
