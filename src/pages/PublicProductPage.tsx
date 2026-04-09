@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckoutSheet, type CartItem } from "@/components/commerce/CheckoutSheet";
+import { getPageThemeStyles, PAGE_THEME_CLASS } from "@/contexts/PageBuilderThemeContext";
 import {
   ArrowLeft, ShoppingBag, Minus, Plus, Package, ChevronLeft, ChevronRight,
   Loader2,
@@ -49,10 +50,12 @@ const PublicProductPage = () => {
   const [notFound, setNotFound] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [personaData, setPersonaData] = useState<{ accent_color: string; text_color: string; gcash_qr_url: string | null } | null>(null);
+  const [personaData, setPersonaData] = useState<{ accent_color: string; text_color: string; gcash_qr_url: string | null; page_theme: string } | null>(null);
+  const pageThemeId = personaData?.page_theme ?? "default";
+  const pageThemeStyles = useMemo(() => getPageThemeStyles(pageThemeId), [pageThemeId]);
+  const hasPageTheme = pageThemeId !== "default" && Object.keys(pageThemeStyles).length > 0;
 
-  useEffect(() => {
-    // Strip dashboard theme classes for clean public page
+    useEffect(() => {
     const root = document.documentElement;
     const themeClasses = Array.from(root.classList).filter((c) => c.startsWith("theme-"));
     themeClasses.forEach((c) => root.classList.remove(c));
@@ -86,7 +89,7 @@ const PublicProductPage = () => {
     // Load persona colors
     const { data: persona } = await supabase
       .from("personas")
-      .select("accent_color, text_color, gcash_qr_url")
+      .select("accent_color, text_color, gcash_qr_url, page_theme")
       .eq("id", prod.persona_id)
       .single();
     if (persona) setPersonaData(persona as any);
@@ -166,7 +169,7 @@ const PublicProductPage = () => {
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen ${hasPageTheme ? PAGE_THEME_CLASS : ''}`} style={hasPageTheme ? { backgroundColor: (pageThemeStyles as any)["--page-bg"], color: (pageThemeStyles as any)["--page-text"], ...pageThemeStyles } : {}}>
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/40">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 h-12">

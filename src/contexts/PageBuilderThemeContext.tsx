@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface PageTheme {
   id: string;
   label: string;
   description: string;
-  preview: string; // swatch color
+  preview: string;
   type: "color" | "layout";
-  vars: Record<string, string>; // CSS custom properties
+  vars: Record<string, string>;
 }
 
 export const PAGE_THEMES: PageTheme[] = [
@@ -243,16 +244,6 @@ export const PAGE_THEMES: PageTheme[] = [
   },
 ];
 
-const STORAGE_PREFIX = "page_theme_";
-
-function getStoredTheme(personaId: string): string {
-  return localStorage.getItem(`${STORAGE_PREFIX}${personaId}`) || "default";
-}
-
-function storeTheme(personaId: string, themeId: string) {
-  localStorage.setItem(`${STORAGE_PREFIX}${personaId}`, themeId);
-}
-
 interface Ctx {
   themeId: string;
   theme: PageTheme;
@@ -269,23 +260,26 @@ const PageThemeContext = createContext<Ctx>({
   setPersonaId: () => {},
 });
 
-export function PageThemeProvider({ children, initialPersonaId }: { children: ReactNode; initialPersonaId?: string | null }) {
+export function PageThemeProvider({ children, initialPersonaId, initialThemeId }: { children: ReactNode; initialPersonaId?: string | null; initialThemeId?: string }) {
   const [personaId, setPersonaId] = useState<string | null>(initialPersonaId ?? null);
-  const [themeId, setThemeIdState] = useState<string>(() => {
-    if (initialPersonaId) return getStoredTheme(initialPersonaId);
-    return "default";
-  });
+  const [themeId, setThemeIdState] = useState<string>(initialThemeId ?? "default");
 
   const setThemeId = (id: string) => {
     setThemeIdState(id);
-    if (personaId) storeTheme(personaId, id);
+    if (personaId) {
+      supabase.from("personas").update({ page_theme: id } as any).eq("id", personaId).then(() => {});
+    }
   };
 
-  // When persona changes, load that persona's theme
   const handleSetPersonaId = (id: string | null) => {
     setPersonaId(id);
-    if (id) setThemeIdState(getStoredTheme(id));
-    else setThemeIdState("default");
+    if (id) {
+      supabase.from("personas").select("page_theme").eq("id", id).single().then(({ data }) => {
+        setThemeIdState((data as any)?.page_theme ?? "default");
+      });
+    } else {
+      setThemeIdState("default");
+    }
   };
 
   const theme = PAGE_THEMES.find(t => t.id === themeId) || PAGE_THEMES[0];

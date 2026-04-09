@@ -155,9 +155,8 @@ const PublicProfilePage = () => {
       const personaData = Array.isArray(personaRows) ? personaRows[0] : personaRows;
       if (personaData) {
         setPersona(personaData as PersonaData);
-        // Load page theme from localStorage
-        const storedTheme = localStorage.getItem(`page_theme_${personaData.id}`);
-        if (storedTheme) setPageThemeId(storedTheme);
+        // Load page theme from persona data (stored in DB)
+        if ((personaData as any).page_theme) setPageThemeId((personaData as any).page_theme);
         // Also fetch gcash_qr_url directly (not in RPC)
         const { data: gcashData } = await supabase
           .from("personas")
