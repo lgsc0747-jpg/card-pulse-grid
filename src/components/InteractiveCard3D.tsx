@@ -421,13 +421,13 @@ function CardBack({
 }: CardBackProps) {
   return (
     <div
-      className="absolute inset-0 overflow-hidden rounded-2xl border border-white/20"
+      className="absolute inset-0 overflow-hidden border border-white/20"
       style={{
         ...FACE_STYLE,
+        borderRadius: "16px",
         pointerEvents: isFlipped ? "auto" : "none",
         transform: "rotateY(180deg)",
         background: `linear-gradient(135deg, ${secondaryColor}cc, ${accentColor}66)`,
-        boxShadow: `0 25px 50px -12px ${accentColor}44, 0 0 40px ${accentColor}22`,
       }}
       onClick={(event) => event.stopPropagation()}
     >
