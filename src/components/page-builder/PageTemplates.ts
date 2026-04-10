@@ -89,7 +89,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
     pageSlug: "faq",
     blocks: [
       { block_type: "heading", content: { text: "Frequently Asked Questions", fontSize: 32 }, styles: { alignment: "center", paddingY: 48 } },
-      { block_type: "faq", content: { items: [{ q: "What is NFC Hub?", a: "NFC Hub is a platform for creating digital business cards and professional landing pages." }, { q: "How do I get started?", a: "Simply sign up, create a persona, and customize your page using the Page Builder." }, { q: "Can I sell products?", a: "Yes! With a Pro plan, you can set up a storefront and manage orders directly." }] }, styles: { maxWidth: "640px", paddingY: 16 } },
+      { block_type: "faq", content: { items: [{ q: "What is NFC Hub?", a: "NFC Hub is a platform for creating digital business cards and professional landing pages." }, { q: "How do I get started?", a: "Simply sign up, create a persona, and customize your page using the Page Builder." }, { q: "Is there a Pro plan?", a: "Yes! Pro unlocks unlimited personas, advanced analytics, page builder, and more." }] }, styles: { maxWidth: "640px", paddingY: 16 } },
     ],
   },
 ];
