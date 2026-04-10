@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 
 const features = [
-  { label: "Personas", free: "Up to 2", pro: "Unlimited", icon: Users },
+  { label: "Personas", free: "1", pro: "Unlimited", icon: Users },
   { label: "Analytics History", free: "7 days", pro: "365 days", icon: BarChart3 },
   { label: "Analytics Depth", free: "Total Taps Only", pro: "Full Dashboard (Device, Location, CTR, Funnel)", icon: BarChart3 },
+  { label: "Page Builder", free: false, pro: true, icon: FileText },
   { label: "Private Mode / PIN Lock", free: false, pro: true, icon: Shield },
   { label: "Lead Gen Form", free: false, pro: true, icon: Zap },
   { label: "Custom Backgrounds & Fonts", free: false, pro: true, icon: Palette },

@@ -26,7 +26,7 @@ import {
   GripVertical, ChevronLeft, ChevronRight, Trash2, Copy, EyeOff,
   Type, AlignLeft, Image, LayoutGrid, Play, Minus, SeparatorHorizontal,
   MousePointerClick, Quote, Users, BarChart3, MessageSquareQuote,
-  HelpCircle, Grid3x3, ShoppingBag, ShoppingCart, CreditCard, Mail, Share2, Code,
+  HelpCircle, Grid3x3, CreditCard, Mail, Share2, Code,
   Home, PanelLeftClose, PanelLeft, FilePlus, Undo2, Redo2, BookTemplate,
   CheckSquare, Square, ArrowLeft, Wifi, Paintbrush, Check,
 } from "lucide-react";
@@ -39,7 +39,7 @@ import {
 const ICON_MAP: Record<string, any> = {
   Type, AlignLeft, Image, LayoutGrid, Play, Minus, SeparatorHorizontal,
   MousePointerClick, Quote, Users, BarChart3, MessageSquareQuote,
-  HelpCircle, Grid3x3, ShoppingBag, CreditCard, Mail, Share2, Code,
+  HelpCircle, Grid3x3, CreditCard, Mail, Share2, Code,
 };
 
 function SortableBlockItem({ block, Icon, meta, isActive, onSelect, onDuplicate, onDelete }: {
@@ -465,7 +465,7 @@ function PageBuilderPage() {
 
   const editingBlock = blocks.find(b => b.id === editingBlockId) ?? null;
   const selectedPage = pages.find(p => p.id === selectedPageId);
-  const hasProductBlocks = blocks.some(b => b.block_type === "products" && b.is_visible);
+  
 
   if (loading) {
     return (
@@ -561,14 +561,6 @@ function PageBuilderPage() {
               <Smartphone className="w-3 h-3" />
             </Button>
           </div>
-          {hasProductBlocks && (
-            <div className="flex items-center gap-1 px-1 border-l border-border/40 ml-1">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <ShoppingCart className="w-3 h-3" />
-                <span className="hidden sm:inline">Cart enabled</span>
-              </div>
-            </div>
-          )}
           <Button onClick={saveAll} disabled={saving} size="sm" className="gradient-primary text-primary-foreground rounded-lg h-7 text-xs px-3">
             {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />}
             Save

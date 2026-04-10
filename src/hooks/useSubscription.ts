@@ -6,7 +6,6 @@ export type Plan = "free" | "pro";
 
 export interface PlanLimits {
   maxPersonas: number;
-  maxProducts: number;
   analyticsAccess: "basic" | "full";
   analyticsDaysHistory: number;
   privateMode: boolean;
@@ -17,14 +16,12 @@ export interface PlanLimits {
   removeBranding: boolean;
   exportReports: boolean;
   customShortLinks: boolean;
-  commerce: boolean;
   pageBuilder: boolean;
 }
 
 const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   free: {
     maxPersonas: 1,
-    maxProducts: 3,
     analyticsAccess: "basic",
     analyticsDaysHistory: 7,
     privateMode: false,
@@ -35,12 +32,10 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     removeBranding: false,
     exportReports: false,
     customShortLinks: false,
-    commerce: false,
     pageBuilder: false,
   },
   pro: {
     maxPersonas: Infinity,
-    maxProducts: Infinity,
     analyticsAccess: "full",
     analyticsDaysHistory: 365,
     privateMode: true,
@@ -51,7 +46,6 @@ const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     removeBranding: true,
     exportReports: true,
     customShortLinks: true,
-    commerce: true,
     pageBuilder: true,
   },
 };
@@ -78,8 +72,6 @@ export function useSubscription() {
       if (data?.plan) {
         setPlan(data.plan as Plan);
       } else {
-        // Subscription is auto-created by DB trigger on signup
-        // If missing, default to free without client-side insert
         setPlan("free");
       }
       setLoading(false);

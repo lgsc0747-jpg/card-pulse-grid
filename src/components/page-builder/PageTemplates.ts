@@ -54,17 +54,16 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
     ],
   },
   {
-    id: "products",
-    label: "Products Showcase",
-    icon: "🛍️",
-    description: "Feature your products and store",
-    pageTitle: "Products",
-    pageSlug: "products",
+    id: "portfolio",
+    label: "Portfolio",
+    icon: "🎨",
+    description: "Showcase your work and testimonials",
+    pageTitle: "Portfolio",
+    pageSlug: "portfolio",
     blocks: [
-      { block_type: "heading", content: { text: "Our Products", subtitle: "Browse our collection", fontSize: 36 }, styles: { alignment: "center", paddingY: 48 } },
-      { block_type: "text", content: { text: "Handpicked and curated just for you. Every product is crafted with care and quality.", fontSize: 16 }, styles: { alignment: "center", maxWidth: "640px", paddingY: 8 } },
-      { block_type: "products", content: {}, styles: { paddingY: 24 } },
-      { block_type: "testimonial", content: { text: "Amazing quality and fast delivery!", name: "Happy Customer", company: "Verified Buyer", rating: 5 }, styles: { paddingY: 16, maxWidth: "640px" } },
+      { block_type: "heading", content: { text: "My Work", subtitle: "Browse my portfolio", fontSize: 36 }, styles: { alignment: "center", paddingY: 48 } },
+      { block_type: "gallery", content: { images: [] }, styles: { paddingY: 24 } },
+      { block_type: "testimonial", content: { text: "Amazing quality and fast delivery!", name: "Happy Client", company: "Verified", rating: 5 }, styles: { paddingY: 16, maxWidth: "640px" } },
     ],
   },
   {
@@ -90,7 +89,7 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
     pageSlug: "faq",
     blocks: [
       { block_type: "heading", content: { text: "Frequently Asked Questions", fontSize: 32 }, styles: { alignment: "center", paddingY: 48 } },
-      { block_type: "faq", content: { items: [{ q: "What is NFC Hub?", a: "NFC Hub is a platform for creating digital business cards and professional landing pages." }, { q: "How do I get started?", a: "Simply sign up, create a persona, and customize your page using the Page Builder." }, { q: "Can I sell products?", a: "Yes! With a Pro plan, you can set up a storefront and manage orders directly." }] }, styles: { maxWidth: "640px", paddingY: 16 } },
+      { block_type: "faq", content: { items: [{ q: "What is NFC Hub?", a: "NFC Hub is a platform for creating digital business cards and professional landing pages." }, { q: "How do I get started?", a: "Simply sign up, create a persona, and customize your page using the Page Builder." }, { q: "Is there a Pro plan?", a: "Yes! Pro unlocks unlimited personas, advanced analytics, page builder, and more." }] }, styles: { maxWidth: "640px", paddingY: 16 } },
     ],
   },
 ];

@@ -11,9 +11,8 @@ import { InteractiveCard3D } from "@/components/InteractiveCard3D";
 import { getPresetCss } from "@/components/DesignStudio/BackgroundPresets";
 import type { PersonaDesign } from "@/components/DesignStudio/types";
 import { CardDesignPanel } from "@/components/studio/CardDesignPanel";
-import { cn } from "@/lib/utils";
 import {
-  Loader2, Monitor, Smartphone, Save, Eye, CreditCard,
+  Loader2, Save, Eye, CreditCard,
 } from "lucide-react";
 
 const DesignStudioPage = () => {
@@ -26,7 +25,6 @@ const DesignStudioPage = () => {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deviceMode, setDeviceMode] = useState<"desktop" | "mobile">("mobile");
 
   useEffect(() => {
     if (!user) return;
@@ -117,38 +115,25 @@ const DesignStudioPage = () => {
           </Button>
         </div>
 
-        {/* Main Layout: Panel + Preview — no side nav, direct content */}
+        {/* Main Layout: Panel + Preview */}
         <div className="flex flex-col lg:flex-row gap-0 rounded-2xl border border-border/60 bg-card/30 backdrop-blur-sm overflow-hidden" style={{ height: "calc(100vh - 180px)" }}>
           {/* Panel Content — Card Design */}
           <div className="flex-1 min-h-0 overflow-y-auto p-5 lg:max-w-md lg:border-r lg:border-border/40">
             <CardDesignPanel editing={editing} update={update} isPro={isPro} />
           </div>
 
-          {/* Live Preview — Desktop */}
+          {/* Live Preview — Desktop: just the card, scaled up */}
           <div className="flex-1 hidden lg:flex flex-col overflow-y-auto bg-background/50">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
               <div className="flex items-center gap-2">
                 <Eye className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Preview</span>
               </div>
-              <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
-                <Button size="sm" variant={deviceMode === "desktop" ? "default" : "ghost"} className="h-6 w-6 p-0" onClick={() => setDeviceMode("desktop")}>
-                  <Monitor className="w-3 h-3" />
-                </Button>
-                <Button size="sm" variant={deviceMode === "mobile" ? "default" : "ghost"} className="h-6 w-6 p-0" onClick={() => setDeviceMode("mobile")}>
-                  <Smartphone className="w-3 h-3" />
-                </Button>
-              </div>
             </div>
 
-            <div className="flex-1 flex items-start justify-center p-6">
+            <div className="flex-1 flex items-center justify-center p-6">
               <div
-                className={cn(
-                  "relative overflow-hidden transition-all duration-300",
-                  deviceMode === "mobile"
-                    ? "w-[320px] min-h-[580px] border-[6px] border-muted-foreground/15 rounded-[2rem]"
-                    : "w-full min-h-[400px] rounded-2xl border border-border/60"
-                )}
+                className="relative overflow-hidden rounded-2xl w-full max-w-lg"
                 style={{
                   backgroundColor: editing?.landing_bg_color ?? "hsl(var(--background))",
                   backgroundImage: editing?.background_image_url
@@ -158,9 +143,9 @@ const DesignStudioPage = () => {
                   backgroundPosition: editing?.background_image_url ? "center" : undefined,
                 }}
               >
-                <div className="relative flex flex-col items-center justify-center min-h-[350px] p-6">
+                <div className="relative flex flex-col items-center justify-center min-h-[420px] p-8">
                   <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${editing?.accent_color ?? "#0d9488"}25, transparent 70%)` }} />
-                  <div className="scale-[0.9] origin-center">
+                  <div className="scale-[1.05] origin-center">
                     <InteractiveCard3D
                       name={editing?.display_name ?? "Your Name"}
                       headline={editing?.headline ?? undefined}
@@ -184,17 +169,6 @@ const DesignStudioPage = () => {
                       borderRadius={editing?.border_radius ?? 24}
                     />
                   </div>
-                  <div className="flex items-center gap-2 mt-5">
-                    <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
-                      Flip Card
-                    </Button>
-                    <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
-                      Share
-                    </Button>
-                  </div>
-                  <Button size="sm" className="mt-3 text-[9px] h-6 rounded-lg px-3" style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}>
-                    Save Contact
-                  </Button>
                 </div>
               </div>
             </div>
@@ -215,9 +189,9 @@ const DesignStudioPage = () => {
                     <span className="text-sm font-semibold">Live Preview</span>
                   </div>
                 </div>
-                <div className="flex items-start justify-center p-4">
+                <div className="flex items-center justify-center p-4">
                   <div
-                    className="w-[300px] min-h-[520px] border-[6px] border-muted-foreground/15 rounded-[2rem] overflow-hidden"
+                    className="relative overflow-hidden rounded-2xl w-full max-w-sm"
                     style={{
                       backgroundColor: editing?.landing_bg_color ?? "hsl(var(--background))",
                       backgroundImage: editing?.background_image_url
@@ -229,7 +203,7 @@ const DesignStudioPage = () => {
                   >
                     <div className="relative flex flex-col items-center justify-center min-h-[350px] p-6">
                       <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${editing?.accent_color ?? "#0d9488"}25, transparent 70%)` }} />
-                      <div className="scale-[0.8] origin-center">
+                      <div className="scale-[0.95] origin-center">
                         <InteractiveCard3D
                           name={editing?.display_name ?? "Your Name"}
                           headline={editing?.headline ?? undefined}
@@ -253,17 +227,6 @@ const DesignStudioPage = () => {
                           borderRadius={editing?.border_radius ?? 24}
                         />
                       </div>
-                      <div className="flex items-center gap-2 mt-4">
-                        <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
-                          Flip
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-[10px] h-7 rounded-xl border-white/20" style={{ color: editing?.text_color ?? "#fff" }}>
-                          Share
-                        </Button>
-                      </div>
-                      <Button size="sm" className="mt-2 text-[9px] h-6 rounded-lg px-3" style={{ background: editing?.accent_color ?? "#0d9488", color: editing?.text_color ?? "#fff" }}>
-                        Save Contact
-                      </Button>
                     </div>
                   </div>
                 </div>
