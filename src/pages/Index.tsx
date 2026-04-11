@@ -158,6 +158,11 @@ const Dashboard = () => {
         <LinkCTRChart data={stats.linkCTR} />
       </SortableChartCard>
     ),
+    ctaClicks: (
+      <SortableChartCard id="ctaClicks" editMode={editMode}>
+        <CTAClickChart data={stats.ctaClicks} />
+      </SortableChartCard>
+    ),
     liveFeed: (
       <SortableChartCard id="liveFeed" editMode={editMode}>
         <div className="glass-card rounded-lg p-4 animate-fade-in">
