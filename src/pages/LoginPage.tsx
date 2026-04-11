@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wifi, LogIn } from "lucide-react";
+import { Wifi, LogIn, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -28,6 +29,46 @@ const LoginPage = () => {
     setLoading(false);
   };
 
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
+    // Verify admin role
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({ title: "Login failed", description: "Could not verify user", variant: "destructive" });
+      await supabase.auth.signOut();
+      setLoading(false);
+      return;
+    }
+
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleData) {
+      toast({ title: "Access denied", description: "This account does not have admin privileges.", variant: "destructive" });
+      await supabase.auth.signOut();
+      setLoading(false);
+      return;
+    }
+
+    toast({ title: "Welcome, Admin!" });
+    navigate("/admin");
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md glass-elevated animate-fade-in">
@@ -39,20 +80,52 @@ const LoginPage = () => {
           <CardDescription>Sign in to your NFC Hub account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-sm text-muted-foreground">Email</label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm text-muted-foreground">Password</label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
-            </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
-              <LogIn className="w-4 h-4 mr-1.5" />
-              {loading ? "Signing in…" : "Sign In"}
-            </Button>
-          </form>
+          <Tabs defaultValue="user" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="user">User Login</TabsTrigger>
+              <TabsTrigger value="admin" className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" /> Admin
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="user">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm text-muted-foreground">Email</label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm text-muted-foreground">Password</label>
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+                </div>
+                <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
+                  <LogIn className="w-4 h-4 mr-1.5" />
+                  {loading ? "Signing in…" : "Sign In"}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="admin">
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-2">
+                  <p className="text-xs text-amber-500 font-medium">Admin accounts require an admin role in the database. Only users with the admin role can sign in here.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm text-muted-foreground">Admin Email</label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@example.com" required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm text-muted-foreground">Password</label>
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+                </div>
+                <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700 text-white" disabled={loading}>
+                  <ShieldCheck className="w-4 h-4 mr-1.5" />
+                  {loading ? "Verifying…" : "Admin Sign In"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+
           <div className="mt-4 text-center text-sm space-y-2">
             <Link to="/forgot-password" className="text-primary hover:underline block">Forgot password?</Link>
             <p className="text-muted-foreground">

@@ -647,7 +647,6 @@ export type Database = {
           display_name: string
           email_public: string
           font_family: string
-          gcash_qr_url: string
           github_url: string
           glass_opacity: number
           has_pin: boolean

@@ -186,7 +186,7 @@ export const InteractiveCard3D = forwardRef<HTMLDivElement, InteractiveCard3DPro
     <div className="flex w-full flex-col items-center gap-4">
       <div
         ref={setCardRef}
-        className="w-full max-w-[420px] select-none text-[clamp(14px,3.5vw,18px)]"
+        className="w-full max-w-[520px] select-none text-[clamp(14px,4vw,20px)]"
         style={{ perspective: "1500px", aspectRatio: "1.58 / 1", touchAction: isFlipped ? "manipulation" : "none" }}
         onMouseMove={handlePointerMove}
         onTouchMove={handlePointerMove}

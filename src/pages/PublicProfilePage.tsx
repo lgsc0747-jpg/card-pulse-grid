@@ -59,7 +59,6 @@ interface PersonaData {
   show_availability: boolean | null;
   show_location: boolean | null;
   user_id: string;
-  gcash_qr_url?: string | null;
   avatar_position?: { x: number; y: number; scale: number } | null;
   card_bg_position?: { x: number; y: number; scale: number } | null;
   bg_image_position?: { x: number; y: number; scale: number } | null;
@@ -157,15 +156,7 @@ const PublicProfilePage = () => {
         setPersona(personaData as PersonaData);
         // Load page theme from persona data (stored in DB)
         if ((personaData as any).page_theme) setPageThemeId((personaData as any).page_theme);
-        // Also fetch gcash_qr_url directly (not in RPC)
-        const { data: gcashData } = await supabase
-          .from("personas")
-          .select("gcash_qr_url")
-          .eq("id", personaData.id)
-          .single();
-        if (gcashData) {
-          setPersona(prev => prev ? { ...prev, gcash_qr_url: (gcashData as any).gcash_qr_url } : prev);
-        }
+        // persona data loaded from RPC
 
         // Load sections
         const { data: sectionData } = await supabase

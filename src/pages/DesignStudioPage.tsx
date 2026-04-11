@@ -131,9 +131,9 @@ const DesignStudioPage = () => {
               </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center p-6">
+            <div className="flex-1 flex items-center justify-center p-4">
               <div
-                className="relative overflow-hidden rounded-2xl w-full max-w-lg"
+                className="relative overflow-hidden rounded-2xl w-full"
                 style={{
                   backgroundColor: editing?.landing_bg_color ?? "hsl(var(--background))",
                   backgroundImage: editing?.background_image_url
@@ -143,9 +143,9 @@ const DesignStudioPage = () => {
                   backgroundPosition: editing?.background_image_url ? "center" : undefined,
                 }}
               >
-                <div className="relative flex flex-col items-center justify-center min-h-[420px] p-8">
+                <div className="relative flex flex-col items-center justify-center min-h-[480px] p-8">
                   <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${editing?.accent_color ?? "#0d9488"}25, transparent 70%)` }} />
-                  <div className="scale-[1.05] origin-center">
+                  <div className="w-full max-w-xl">
                     <InteractiveCard3D
                       name={editing?.display_name ?? "Your Name"}
                       headline={editing?.headline ?? undefined}
