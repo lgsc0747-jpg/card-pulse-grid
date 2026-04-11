@@ -222,7 +222,8 @@ const Dashboard = () => {
           <div className="space-y-1.5 text-xs sm:text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Save Rate</span><span className="font-bold">{stats.contactSaveRate}%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">vCards</span><span className="font-bold">{stats.vcardDownloads}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">CVs</span><span className="font-bold">{stats.cvDownloads}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Contact Forms</span><span className="font-bold">{stats.contactFormSubmissions}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Video Plays</span><span className="font-bold">{stats.videoPlays}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Return</span><span className="font-bold">{stats.returnVisitorRate}%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Depth</span><span className="font-bold">{stats.interactionDepthRate}%</span></div>
           </div>
