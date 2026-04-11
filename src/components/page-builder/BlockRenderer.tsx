@@ -214,7 +214,9 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           {content.url ? (
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden" onClick={() => {
+              if (!isEditing) onTrackInteraction?.("video_play", { url: content.url });
+            }}>
               <iframe
                 src={content.url.replace("watch?v=", "embed/")}
                 className="absolute inset-0 w-full h-full"
@@ -261,7 +263,9 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative flex" style={{ ...wrapperStyle, justifyContent: styles.alignment === "center" ? "center" : styles.alignment === "right" ? "flex-end" : "flex-start" }}>
           {editOverlay}
-          <a href={content.url ?? "#"} target="_blank" rel="noopener noreferrer" className="inline-block">
+          <a href={content.url ?? "#"} target="_blank" rel="noopener noreferrer" className="inline-block" onClick={() => {
+            if (!isEditing) onTrackInteraction?.("cta_click", { label: content.text || "Click Me", url: content.url });
+          }}>
             <Button
               size="lg"
               className="rounded-xl font-semibold"
@@ -410,6 +414,8 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
                   cardBlur={persona.card_blur ?? 12}
                   cardTexture={persona.card_texture ?? "none"}
                   borderRadius={persona.border_radius ?? 24}
+                  onFlipToBack={() => onTrackInteraction?.("card_flip")}
+                  onLinkClick={(linkType) => onTrackInteraction?.("link_click", { link_type: linkType })}
                 />
               </div>
             </div>
