@@ -57,6 +57,9 @@ export interface NfcStats {
   personaPerformance: PersonaPerf[];
   connectionSources: { nfc: number; qr: number; direct: number };
   tapVelocity: { label: string; taps: number }[];
+  ctaClicks: { label: string; clicks: number }[];
+  videoPlays: number;
+  contactFormSubmissions: number;
 }
 
 const DEVICE_COLORS: Record<string, string> = {
@@ -84,6 +87,7 @@ export function useNfcData() {
     hourlyHeat: [], linkCTR: [], personaPerformance: [],
     connectionSources: { nfc: 0, qr: 0, direct: 0 },
     tapVelocity: [],
+    ctaClicks: [], videoPlays: 0, contactFormSubmissions: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -162,6 +166,8 @@ export function useNfcData() {
     let securitySuccess = 0, securityTotal = 0, unauthorizedAttempts = 0;
     let nfcSource = 0, qrSource = 0, directSource = 0;
     let returnVisitors = 0;
+    let videoPlays = 0, contactFormSubmissions = 0;
+    const ctaClicksMap = new Map<string, number>();
     const visitorsWithInteractions = new Set<string>();
 
     logs.forEach((log) => {
@@ -196,6 +202,13 @@ export function useNfcData() {
         visitorsWithInteractions.add(log.entity_id);
       }
       if (log.interaction_type === "dwell_time" && meta.seconds) { totalDwell += Number(meta.seconds); dwellCount++; }
+      if (log.interaction_type === "cta_click") {
+        const label = meta.label || "Unknown CTA";
+        ctaClicksMap.set(label, (ctaClicksMap.get(label) ?? 0) + 1);
+        visitorsWithInteractions.add(log.entity_id);
+      }
+      if (log.interaction_type === "video_play") { videoPlays++; visitorsWithInteractions.add(log.entity_id); }
+      if (log.interaction_type === "contact_form_submit") { contactFormSubmissions++; visitorsWithInteractions.add(log.entity_id); }
       if (log.interaction_type === "security_attempt") {
         securityTotal++;
         if (meta.result === "success") securitySuccess++;
@@ -272,6 +285,9 @@ export function useNfcData() {
       personaPerformance,
       connectionSources: { nfc: nfcSource, qr: qrSource, direct: directSource },
       tapVelocity,
+      ctaClicks: Array.from(ctaClicksMap.entries()).map(([label, clicks]) => ({ label, clicks })).sort((a, b) => b.clicks - a.clicks),
+      videoPlays,
+      contactFormSubmissions,
     });
 
     setLoading(false);

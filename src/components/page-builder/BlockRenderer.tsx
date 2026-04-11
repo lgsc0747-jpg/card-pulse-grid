@@ -69,9 +69,10 @@ interface BlockRendererProps {
   isEditing?: boolean;
   onClick?: () => void;
   persona?: any;
+  onTrackInteraction?: (type: string, metadata?: Record<string, any>) => void;
 }
 
-export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRendererProps) {
+export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInteraction }: BlockRendererProps) {
   const { block_type, content, styles } = block;
   const animRef = useRef<HTMLDivElement>(null);
   const inView = useInView(animRef);
@@ -213,7 +214,9 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           {content.url ? (
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden" onClick={() => {
+              if (!isEditing) onTrackInteraction?.("video_play", { url: content.url });
+            }}>
               <iframe
                 src={content.url.replace("watch?v=", "embed/")}
                 className="absolute inset-0 w-full h-full"
@@ -260,7 +263,9 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
       return (
         <div ref={animRef} className="relative flex" style={{ ...wrapperStyle, justifyContent: styles.alignment === "center" ? "center" : styles.alignment === "right" ? "flex-end" : "flex-start" }}>
           {editOverlay}
-          <a href={content.url ?? "#"} target="_blank" rel="noopener noreferrer" className="inline-block">
+          <a href={content.url ?? "#"} target="_blank" rel="noopener noreferrer" className="inline-block" onClick={() => {
+            if (!isEditing) onTrackInteraction?.("cta_click", { label: content.text || "Click Me", url: content.url });
+          }}>
             <Button
               size="lg"
               className="rounded-xl font-semibold"
@@ -409,6 +414,8 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
                   cardBlur={persona.card_blur ?? 12}
                   cardTexture={persona.card_texture ?? "none"}
                   borderRadius={persona.border_radius ?? 24}
+                  onFlipToBack={() => onTrackInteraction?.("card_flip")}
+                  onLinkClick={(linkType) => onTrackInteraction?.("link_click", { link_type: linkType })}
                 />
               </div>
             </div>
@@ -425,7 +432,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <ContactFormBlock content={content} isEditing={isEditing} persona={persona} />
+          <ContactFormBlock content={content} isEditing={isEditing} persona={persona} onTrackInteraction={onTrackInteraction} />
         </div>
       );
 
@@ -436,7 +443,9 @@ export function BlockRenderer({ block, isEditing, onClick, persona }: BlockRende
           {editOverlay}
           <div className="flex flex-wrap gap-3 justify-center">
             {links.length > 0 ? links.map((l: { platform: string; url: string }, i: number) => (
-              <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors">
+              <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors" onClick={() => {
+                if (!isEditing) onTrackInteraction?.("link_click", { link_type: l.platform.toLowerCase() });
+              }}>
                 <span className="text-sm">{getSocialIcon(l.platform)}</span>
               </a>
             )) : (
@@ -512,7 +521,7 @@ function cssTransition(t: Record<string, any>): string {
   return `all ${dur}s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
 }
 
-function ContactFormBlock({ content, isEditing, persona }: { content: Record<string, any>; isEditing?: boolean; persona?: any }) {
+function ContactFormBlock({ content, isEditing, persona, onTrackInteraction }: { content: Record<string, any>; isEditing?: boolean; persona?: any; onTrackInteraction?: (type: string, metadata?: Record<string, any>) => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -537,6 +546,7 @@ function ContactFormBlock({ content, isEditing, persona }: { content: Record<str
       if (error) throw error;
       setSubmitted(true);
       toast.success("Message sent successfully!");
+      onTrackInteraction?.("contact_form_submit", { visitor_email: email });
     } catch {
       toast.error("Failed to send. Please try again.");
     } finally {

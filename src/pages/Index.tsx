@@ -6,6 +6,7 @@ import { PersonaPieChart } from "@/components/PersonaPieChart";
 import { DeviceDonutChart } from "@/components/dashboard/DeviceDonutChart";
 import { ActivityHeatmap } from "@/components/dashboard/ActivityHeatmap";
 import { LinkCTRChart } from "@/components/dashboard/LinkCTRChart";
+import { CTAClickChart } from "@/components/dashboard/CTAClickChart";
 import { SecurityMetrics } from "@/components/dashboard/SecurityMetrics";
 import { ConnectionSourceChart } from "@/components/dashboard/ConnectionSourceChart";
 import { PersonaBarChart } from "@/components/dashboard/PersonaBarChart";
@@ -44,11 +45,11 @@ const TIMEFRAME_LABELS: Record<string, string> = {
 };
 
 /* ─── Chart card keys per tab ─── */
-type EngagementCard = "analytics" | "funnel" | "linkCTR" | "liveFeed";
+type EngagementCard = "analytics" | "funnel" | "linkCTR" | "ctaClicks" | "liveFeed";
 type TechnicalCard = "deviceType" | "browser" | "os" | "tapVelocity" | "heatmap" | "connections";
 type SecurityCard = "securityMetrics" | "handshake" | "leadGen";
 
-const DEFAULT_ENGAGEMENT: EngagementCard[] = ["analytics", "funnel", "linkCTR", "liveFeed"];
+const DEFAULT_ENGAGEMENT: EngagementCard[] = ["analytics", "funnel", "linkCTR", "ctaClicks", "liveFeed"];
 const DEFAULT_TECHNICAL: TechnicalCard[] = ["deviceType", "browser", "os", "tapVelocity", "heatmap", "connections"];
 const DEFAULT_SECURITY: SecurityCard[] = ["securityMetrics", "handshake", "leadGen"];
 
@@ -157,6 +158,11 @@ const Dashboard = () => {
         <LinkCTRChart data={stats.linkCTR} />
       </SortableChartCard>
     ),
+    ctaClicks: (
+      <SortableChartCard id="ctaClicks" editMode={editMode}>
+        <CTAClickChart data={stats.ctaClicks} />
+      </SortableChartCard>
+    ),
     liveFeed: (
       <SortableChartCard id="liveFeed" editMode={editMode}>
         <div className="glass-card rounded-lg p-4 animate-fade-in">
@@ -216,7 +222,8 @@ const Dashboard = () => {
           <div className="space-y-1.5 text-xs sm:text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Save Rate</span><span className="font-bold">{stats.contactSaveRate}%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">vCards</span><span className="font-bold">{stats.vcardDownloads}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">CVs</span><span className="font-bold">{stats.cvDownloads}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Contact Forms</span><span className="font-bold">{stats.contactFormSubmissions}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Video Plays</span><span className="font-bold">{stats.videoPlays}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Return</span><span className="font-bold">{stats.returnVisitorRate}%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Depth</span><span className="font-bold">{stats.interactionDepthRate}%</span></div>
           </div>
