@@ -87,6 +87,7 @@ export function useNfcData() {
     hourlyHeat: [], linkCTR: [], personaPerformance: [],
     connectionSources: { nfc: 0, qr: 0, direct: 0 },
     tapVelocity: [],
+    ctaClicks: [], videoPlays: 0, contactFormSubmissions: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -165,6 +166,8 @@ export function useNfcData() {
     let securitySuccess = 0, securityTotal = 0, unauthorizedAttempts = 0;
     let nfcSource = 0, qrSource = 0, directSource = 0;
     let returnVisitors = 0;
+    let videoPlays = 0, contactFormSubmissions = 0;
+    const ctaClicksMap = new Map<string, number>();
     const visitorsWithInteractions = new Set<string>();
 
     logs.forEach((log) => {
