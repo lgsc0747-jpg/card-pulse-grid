@@ -111,7 +111,7 @@ const NfcManagerPage = () => {
           <Smartphone className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">
             Set a username in your{" "}
-            <a href="/profile" className="text-primary underline">Profile</a>{" "}
+            <Link to="/profile" className="text-primary underline">Profile</Link>{" "}
             to configure your NFC link.
           </p>
         </div>

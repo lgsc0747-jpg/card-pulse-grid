@@ -481,7 +481,7 @@ function PageBuilderPage() {
         <div className="text-center space-y-4">
           <FileText className="w-10 h-10 text-muted-foreground mx-auto" />
           <p className="text-muted-foreground">
-            Create a persona in the <a href="/personas" className="text-primary underline">Persona Vault</a> first.
+            Create a persona in the <Link to="/personas" className="text-primary underline">Persona Vault</Link> first.
           </p>
           <Button variant="outline" onClick={() => navigate("/")}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard

@@ -323,7 +323,7 @@ const PersonasPage = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Identity, contact info, and design are managed in the <a href="/page-builder" className="text-primary underline">Page Builder</a> and <a href="/design-studio" className="text-primary underline">Card Studio</a>.
+                  Identity, contact info, and design are managed in the <Link to="/page-builder" className="text-primary underline">Page Builder</Link> and <Link to="/design-studio" className="text-primary underline">Card Studio</Link>.
                 </p>
               </div>
 
