@@ -534,14 +534,15 @@ function ContactFormBlock({ content, isEditing, persona, onTrackInteraction }: {
     if (!email || !persona?.id || !persona?.user_id) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("lead_captures").insert({
-        owner_user_id: persona.user_id,
-        persona_id: persona.id,
-        visitor_name: name || null,
-        visitor_email: email,
-        visitor_phone: phone || null,
-        visitor_company: company || null,
-        visitor_message: message || null,
+      const { error } = await (supabase.rpc as any)("insert_lead_capture", {
+        p_owner_user_id: persona.user_id,
+        p_persona_id: persona.id,
+        p_visitor_name: name || null,
+        p_visitor_email: email,
+        p_visitor_phone: phone || null,
+        p_visitor_company: company || null,
+        p_visitor_message: message || null,
+        p_metadata: { source: "contact_form", ua: navigator.userAgent },
       });
       if (error) throw error;
       setSubmitted(true);
