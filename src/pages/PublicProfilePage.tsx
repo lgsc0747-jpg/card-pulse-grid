@@ -529,7 +529,7 @@ const PublicProfilePage = () => {
           <Wifi className="w-3 h-3 text-white" />
         </div>
         <span className="text-xs font-display font-semibold tracking-widest uppercase" style={{ color: `${textColor}99` }}>
-          NFC Hub
+          Handshake
         </span>
         {persona && <Badge variant="secondary" className="text-[10px] ml-1 bg-white/10 text-white/70 border-0">{persona.label}</Badge>}
       </motion.div>
@@ -750,7 +750,7 @@ const PublicProfilePage = () => {
         {!ownerIsPro && (
           <div className="max-w-lg mx-auto px-4 pb-8">
             <p className="text-center text-xs" style={{ color: `${textColor}44` }}>
-              Powered by <span className="font-display font-semibold">NFC Hub</span>
+              Powered by <span className="font-display font-semibold">Handshake</span>
             </p>
           </div>
         )}

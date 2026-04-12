@@ -29,6 +29,10 @@ Deno.serve(async (req) => {
       "dwell_time",
       "security_attempt",
       "card_flip",
+      "cta_click",
+      "video_play",
+      "contact_form_submit",
+      "page_view",
     ];
     if (!allowedTypes.includes(interaction_type)) {
       return new Response(

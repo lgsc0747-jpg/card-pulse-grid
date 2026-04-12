@@ -161,9 +161,7 @@ export function AppSidebar() {
           <Wifi className="w-4 h-4 text-primary-foreground" />
         </div>
         {!collapsed && (
-          <span className="font-display text-lg font-bold tracking-tight text-foreground">
-            NFC Hub
-          </span>
+          <SidebarBrandName />
         )}
       </div>
 
