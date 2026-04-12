@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -42,7 +42,7 @@ const ShortUrlRedirect = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
         <p className="text-muted-foreground">This short link is invalid or expired.</p>
-        <a href="/" className="text-primary underline text-sm">Go home</a>
+        <Link to="/" className="text-primary underline text-sm">Go home</Link>
       </div>
     );
   }

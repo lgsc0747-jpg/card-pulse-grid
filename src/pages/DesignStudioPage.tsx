@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,7 +85,7 @@ const DesignStudioPage = () => {
         <div className="glass-card rounded-2xl p-12 text-center">
           <CreditCard className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">
-            Create a persona in the <a href="/personas" className="text-primary underline">Persona Vault</a> first.
+            Create a persona in the <Link to="/personas" className="text-primary underline">Persona Vault</Link> first.
           </p>
         </div>
       </DashboardLayout>
