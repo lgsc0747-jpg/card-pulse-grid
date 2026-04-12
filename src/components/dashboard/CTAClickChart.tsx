@@ -33,10 +33,10 @@ export function CTAClickChart({ data }: CTAClickChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={200}>
+        <ResponsiveContainer width="100%" height={Math.max(200, data.length * 32 + 40)}>
           <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
             <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-            <YAxis dataKey="label" type="category" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} width={80} />
+            <YAxis dataKey="label" type="category" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} width={80} interval={0} />
             <Tooltip
               contentStyle={{
                 background: "hsl(var(--card))",
@@ -49,7 +49,7 @@ export function CTAClickChart({ data }: CTAClickChartProps) {
               itemStyle={{ color: "hsl(var(--foreground))" }}
               formatter={(value: number) => [`${value} clicks`, ""]}
             />
-            <Bar dataKey="clicks" radius={[0, 4, 4, 0]} barSize={20}>
+            <Bar dataKey="clicks" radius={[0, 4, 4, 0]} barSize={18}>
               {data.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}

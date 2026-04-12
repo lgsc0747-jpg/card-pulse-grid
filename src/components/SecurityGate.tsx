@@ -40,11 +40,23 @@ export function SecurityGate({
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const trackSecurityAttempt = (result: string) => {
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        target_user_id: ownerUserId,
+        interaction_type: "security_attempt",
+        metadata: { result, method: pinRequired ? "pin" : "contact_exchange", ua: navigator.userAgent },
+      }),
+    }).catch(() => {});
+  };
+
   const handlePinSubmit = async () => {
     setVerifying(true);
     setPinError(false);
 
-    // Verify PIN server-side via secure RPC (never exposes stored PIN)
     const { data, error } = await (supabase.rpc as any)("verify_persona_pin", {
       p_persona_id: personaId,
       p_pin: pin,
@@ -52,8 +64,10 @@ export function SecurityGate({
 
     if (error || !data) {
       setPinError(true);
+      trackSecurityAttempt("failed");
       toast({ title: "Incorrect PIN", description: "Please try again.", variant: "destructive" });
     } else {
+      trackSecurityAttempt("success");
       onUnlocked();
     }
     setVerifying(false);
@@ -66,20 +80,21 @@ export function SecurityGate({
     }
     setSubmitting(true);
 
-    const { error } = await supabase.from("lead_captures").insert({
-      persona_id: personaId,
-      owner_user_id: ownerUserId,
-      visitor_name: contact.name || null,
-      visitor_email: contact.email,
-      visitor_phone: contact.phone || null,
-      visitor_company: contact.company || null,
-      visitor_message: contact.message || null,
-      metadata: { ua: navigator.userAgent },
+    const { error } = await (supabase.rpc as any)("insert_lead_capture", {
+      p_owner_user_id: ownerUserId,
+      p_persona_id: personaId,
+      p_visitor_name: contact.name || null,
+      p_visitor_email: contact.email,
+      p_visitor_phone: contact.phone || null,
+      p_visitor_company: contact.company || null,
+      p_visitor_message: contact.message || null,
+      p_metadata: { ua: navigator.userAgent, source: "security_gate" },
     });
 
     if (error) {
       toast({ title: "Error", description: "Could not submit your info. Try again.", variant: "destructive" });
     } else {
+      trackSecurityAttempt("success");
       toast({ title: "Access granted!", description: `${ownerName} will see your contact info.` });
       onUnlocked();
     }

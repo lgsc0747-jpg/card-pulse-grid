@@ -29,6 +29,10 @@ Deno.serve(async (req) => {
       "dwell_time",
       "security_attempt",
       "card_flip",
+      "cta_click",
+      "video_play",
+      "contact_form_submit",
+      "page_view",
     ];
     if (!allowedTypes.includes(interaction_type)) {
       return new Response(
@@ -106,6 +110,10 @@ Deno.serve(async (req) => {
     else if (interaction_type === "link_click") occasion = `Link: ${metadata?.link_type || "unknown"}`;
     else if (interaction_type === "dwell_time") occasion = "Dwell Time";
     else if (interaction_type === "security_attempt") occasion = `Security: ${metadata?.result || "unknown"}`;
+    else if (interaction_type === "cta_click") occasion = `CTA: ${metadata?.label || "unknown"}`;
+    else if (interaction_type === "video_play") occasion = "Video Play";
+    else if (interaction_type === "contact_form_submit") occasion = "Contact Form";
+    else if (interaction_type === "page_view") occasion = `Page: ${metadata?.page_title || "unknown"}`;
 
     // Location tracking removed
 

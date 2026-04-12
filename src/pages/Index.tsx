@@ -15,7 +15,7 @@ import { ExportButton } from "@/components/dashboard/ExportButton";
 import { LeadGenTracker } from "@/components/dashboard/LeadGenTracker";
 import { TapVelocityChart } from "@/components/dashboard/TapVelocityChart";
 import { TimeframeSelector } from "@/components/dashboard/TimeframeSelector";
-import { SortableChartCard } from "@/components/dashboard/SortableChartCard";
+import { SortableChartCard, resetChartSizes } from "@/components/dashboard/SortableChartCard";
 
 import { ChartPaletteProvider, ChartPaletteSelector } from "@/components/dashboard/ChartPaletteSelector";
 import { useNfcData } from "@/hooks/useNfcData";
@@ -134,6 +134,8 @@ const Dashboard = () => {
     localStorage.removeItem(LS_ENG);
     localStorage.removeItem(LS_TECH);
     localStorage.removeItem(LS_SEC);
+    resetChartSizes();
+    window.location.reload();
   };
 
   /* ─── Render helpers for each card ─── */
@@ -258,6 +260,9 @@ const Dashboard = () => {
           <div className="flex items-center gap-1.5 flex-wrap">
             <TimeframeSelector value={timeframe} onChange={setTimeframe} />
             <ChartPaletteSelector />
+            <Button variant="ghost" size="sm" className="text-[10px] text-muted-foreground" onClick={resetAll} title="Reset layout & sizes">
+              Reset
+            </Button>
             {isPro && <ExportButton stats={stats} chartData={chartData} />}
           </div>
         </div>

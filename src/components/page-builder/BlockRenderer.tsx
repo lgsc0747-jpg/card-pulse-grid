@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone, Globe, Linkedin, Github, Twitter, Instagram, Facebook, Youtube, ExternalLink, MapPin, Quote as QuoteIcon, Star, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { InteractiveCard3D } from "@/components/InteractiveCard3D";
+import { downloadVCard } from "@/lib/vcard";
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -438,10 +439,51 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
 
     case "social": {
       const links = content.links ?? [];
+      const showVcard = content.showVcard !== false;
+      const showCvDownload = content.showCvDownload ?? false;
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
           <div className="flex flex-wrap gap-3 justify-center">
+            {showVcard && persona && (
+              <button
+                className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors"
+                title="Save Contact"
+                onClick={() => {
+                  if (!isEditing) {
+                    onTrackInteraction?.("vcard_download", { source: "social_block" });
+                    // Trigger vCard download
+                    const { downloadVCard } = require("@/lib/vcard");
+                    downloadVCard({
+                      displayName: persona.display_name ?? undefined,
+                      email: persona.email_public ?? undefined,
+                      phone: persona.phone ?? undefined,
+                      website: persona.website ?? undefined,
+                      linkedin: persona.linkedin_url ?? undefined,
+                      github: persona.github_url ?? undefined,
+                      headline: persona.headline ?? undefined,
+                      location: persona.location ?? undefined,
+                    });
+                  }
+                }}
+              >
+                <span className="text-sm">📇</span>
+              </button>
+            )}
+            {showCvDownload && persona?.cv_url && (
+              <a
+                href={persona.cv_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors"
+                title="Download CV"
+                onClick={() => {
+                  if (!isEditing) onTrackInteraction?.("cv_download", { source: "social_block" });
+                }}
+              >
+                <span className="text-sm">📄</span>
+              </a>
+            )}
             {links.length > 0 ? links.map((l: { platform: string; url: string }, i: number) => (
               <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors" onClick={() => {
                 if (!isEditing) onTrackInteraction?.("link_click", { link_type: l.platform.toLowerCase() });
@@ -534,14 +576,15 @@ function ContactFormBlock({ content, isEditing, persona, onTrackInteraction }: {
     if (!email || !persona?.id || !persona?.user_id) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("lead_captures").insert({
-        owner_user_id: persona.user_id,
-        persona_id: persona.id,
-        visitor_name: name || null,
-        visitor_email: email,
-        visitor_phone: phone || null,
-        visitor_company: company || null,
-        visitor_message: message || null,
+      const { error } = await (supabase.rpc as any)("insert_lead_capture", {
+        p_owner_user_id: persona.user_id,
+        p_persona_id: persona.id,
+        p_visitor_name: name || null,
+        p_visitor_email: email,
+        p_visitor_phone: phone || null,
+        p_visitor_company: company || null,
+        p_visitor_message: message || null,
+        p_metadata: { source: "contact_form", ua: navigator.userAgent },
       });
       if (error) throw error;
       setSubmitted(true);

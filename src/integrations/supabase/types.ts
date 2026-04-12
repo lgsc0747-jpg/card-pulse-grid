@@ -701,6 +701,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_lead_capture: {
+        Args: {
+          p_metadata?: Json
+          p_owner_user_id: string
+          p_persona_id: string
+          p_visitor_company?: string
+          p_visitor_email?: string
+          p_visitor_message?: string
+          p_visitor_name?: string
+          p_visitor_phone?: string
+        }
+        Returns: string
+      }
       is_user_pro: { Args: { p_user_id: string }; Returns: boolean }
       verify_persona_pin: {
         Args: { p_persona_id: string; p_pin: string }
