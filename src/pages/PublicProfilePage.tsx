@@ -630,6 +630,16 @@ const PublicProfilePage = () => {
 
       {/* Actions */}
       <div className="space-y-3">
+        {persona && (
+          <Button
+            onClick={() => setContactModalOpen(true)}
+            className="w-full h-12 rounded-2xl text-sm font-semibold border-2"
+            variant="outline"
+            style={{ borderColor: accentColor, color: accentColor }}
+          >
+            <Mail className="w-4 h-4 mr-2" /> Contact Me
+          </Button>
+        )}
         <Button
           onClick={handleDownloadVCard}
           className="w-full h-12 rounded-2xl text-sm font-semibold"
