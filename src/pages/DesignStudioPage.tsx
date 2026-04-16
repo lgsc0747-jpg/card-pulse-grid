@@ -167,17 +167,6 @@ const DesignStudioPage = () => {
             </Select>
           </div>
           <div className="flex items-center gap-4">
-            {/* Page Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground cursor-pointer" htmlFor="page-mode-toggle">
-                {isPageBuilder ? "Page Builder" : "Personal Profile"}
-              </Label>
-              <Switch
-                id="page-mode-toggle"
-                checked={isPageBuilder}
-                onCheckedChange={(checked) => update("page_mode", checked ? "builder" : "personal")}
-              />
-            </div>
             <Button onClick={handleSave} disabled={saving} size="sm" className="gradient-primary text-primary-foreground rounded-xl h-9">
               {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
               Save
