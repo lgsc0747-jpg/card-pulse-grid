@@ -282,8 +282,8 @@ const Dashboard = () => {
           <TabsContent value="engagement" className="space-y-3">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragHandler(setEngOrder)}>
               <SortableContext items={engOrder} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                  {engOrder.map(k => <div key={k}>{engCards[k]}</div>)}
+                <div className="flex flex-wrap gap-3">
+                  {engOrder.map(k => <div key={k} className="flex-1 min-w-[280px]">{engCards[k]}</div>)}
                 </div>
               </SortableContext>
             </DndContext>
@@ -309,17 +309,17 @@ const Dashboard = () => {
             {isPro ? (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragHandler(setTechOrder)}>
                 <SortableContext items={techOrder} strategy={rectSortingStrategy}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {techOrder.map(k => <div key={k} className={k === "tapVelocity" || k === "heatmap" || k === "connections" ? "" : ""}>{techCards[k]}</div>)}
+                  <div className="flex flex-wrap gap-3">
+                    {techOrder.map(k => <div key={k} className="flex-1 min-w-[280px]">{techCards[k]}</div>)}
                   </div>
                 </SortableContext>
               </DndContext>
             ) : (
               <UpgradeOverlay feature="Technical Analytics" description="Upgrade to Pro for device, tap velocity, and heatmap insights.">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <DeviceDonutChart data={stats.deviceBreakdown} title="Device Type" />
-                  <DeviceDonutChart data={stats.browserBreakdown} title="Browser" />
-                  <DeviceDonutChart data={stats.osBreakdown} title="Operating System" />
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex-1 min-w-[280px]"><DeviceDonutChart data={stats.deviceBreakdown} title="Device Type" /></div>
+                  <div className="flex-1 min-w-[280px]"><DeviceDonutChart data={stats.browserBreakdown} title="Browser" /></div>
+                  <div className="flex-1 min-w-[280px]"><DeviceDonutChart data={stats.osBreakdown} title="Operating System" /></div>
                 </div>
               </UpgradeOverlay>
             )}
@@ -328,8 +328,8 @@ const Dashboard = () => {
           <TabsContent value="security" className="space-y-3">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeDragHandler(setSecOrder)}>
               <SortableContext items={secOrder} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {secOrder.map(k => <div key={k}>{secCards[k]}</div>)}
+                <div className="flex flex-wrap gap-3">
+                  {secOrder.map(k => <div key={k} className="flex-1 min-w-[280px]">{secCards[k]}</div>)}
                 </div>
               </SortableContext>
             </DndContext>
