@@ -779,8 +779,38 @@ const PublicProfilePage = () => {
           </div>
         )}
       </div>
+
+      {/* Floating Contact Me CTA */}
+      {persona && scrolledPastHero && (
+        <motion.div
+          className="fixed bottom-6 right-6 z-40"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          <Button
+            onClick={() => setContactModalOpen(true)}
+            className="h-12 px-5 rounded-2xl text-sm font-semibold shadow-lg"
+            style={{ backgroundColor: accentColor, color: "#fff", boxShadow: `0 8px 30px ${accentColor}40` }}
+          >
+            <Mail className="w-4 h-4 mr-2" /> Contact Me
+          </Button>
+        </motion.div>
+      )}
+
+      {/* Contact Me Modal */}
+      {persona && (
+        <ContactMeModal
+          open={contactModalOpen}
+          onClose={() => setContactModalOpen(false)}
+          personaId={persona.id}
+          ownerUserId={merged.user_id}
+          ownerName={merged.display_name || username || ""}
+          accentColor={accentColor}
+        />
+      )}
     </>
-  );
 };
 
 function ContactRow({ icon, label, href, external, textColor, onClick }: {
