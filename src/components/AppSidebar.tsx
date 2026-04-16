@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, FileText, GripVertical, RotateCcw } from "lucide-react";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, FileText, GripVertical, RotateCcw, Contact } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -36,6 +36,7 @@ const DEFAULT_NFC: NavItem[] = [
   { title: "NFC Cards", url: "/cards", icon: CreditCard },
   { title: "NFC Manager", url: "/nfc-manager", icon: Smartphone },
   { title: "Card Studio", url: "/design-studio", icon: Palette },
+  { title: "Personal Page", url: "/personal-page", icon: Contact },
   { title: "Page Builder", url: "/page-builder", icon: FileText },
   { title: "Interaction Logs", url: "/logs", icon: List },
   { title: "Categories", url: "/categories", icon: Tag },
@@ -51,7 +52,7 @@ const DEFAULT_GENERAL: NavItem[] = [
 
 const ICON_MAP: Record<string, any> = {
   LayoutDashboard, CreditCard, Smartphone, Palette, FileText, List, Tag,
-  Users, Mail, Settings, Crown, ShieldCheck,
+  Users, Mail, Settings, Crown, ShieldCheck, Contact,
 };
 
 function reorderFromStorage(key: string, defaults: NavItem[]): NavItem[] {
