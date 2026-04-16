@@ -11,7 +11,7 @@ interface SortableChartCardProps {
 }
 
 const LS_KEY = "nfc_chart_sizes";
-const MAX_WIDTH = 800;
+const MAX_WIDTH = 9999;
 const MAX_HEIGHT = 600;
 const MIN_WIDTH = 200;
 const MIN_HEIGHT = 120;
