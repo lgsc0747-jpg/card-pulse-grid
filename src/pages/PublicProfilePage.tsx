@@ -811,6 +811,7 @@ const PublicProfilePage = () => {
         />
       )}
     </>
+  );
 };
 
 function ContactRow({ icon, label, href, external, textColor, onClick }: {
