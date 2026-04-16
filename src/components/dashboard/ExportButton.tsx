@@ -8,143 +8,313 @@ interface ExportButtonProps {
 }
 
 export function ExportButton({ stats, chartData }: ExportButtonProps) {
-  const handleExport = () => {
-    const rows: string[][] = [];
-    const sep = () => rows.push([]);
+  const handleExport = async () => {
+    const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "Handshake";
+    wb.created = new Date();
 
-    // Header
-    rows.push(["HANDSHAKE — NFC ANALYTICS REPORT"]);
-    rows.push([`Generated: ${new Date().toLocaleString()}`]);
-    sep();
+    const headerFont = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
+    const headerFill = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FF0D9488" } };
+    const sectionFont = { bold: true, size: 11, color: { argb: "FF0D9488" } };
+    const borderThin = { top: { style: "thin" as const }, bottom: { style: "thin" as const }, left: { style: "thin" as const }, right: { style: "thin" as const } };
 
-    // ─── OVERVIEW ───
-    rows.push(["═══ OVERVIEW ═══"]);
-    rows.push(["Metric", "Value"]);
-    rows.push(["Total Profile Views", String(stats.totalTaps)]);
-    rows.push(["Unique Visitors", String(stats.uniqueVisitors)]);
-    rows.push(["Return Visitor Rate", `${stats.returnVisitorRate}%`]);
-    rows.push(["Interaction Depth", `${stats.interactionDepthRate}%`]);
-    rows.push(["Contact Save Rate", `${stats.contactSaveRate}%`]);
-    rows.push(["Avg Dwell Time", `${stats.avgDwellTime}s`]);
-    sep();
+    const applyHeader = (ws: any, row: number, cols: number) => {
+      const r = ws.getRow(row);
+      for (let c = 1; c <= cols; c++) {
+        const cell = r.getCell(c);
+        cell.font = headerFont;
+        cell.fill = headerFill;
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+        cell.border = borderThin;
+      }
+      r.height = 24;
+    };
 
-    // ─── ENGAGEMENT ───
-    rows.push(["═══ ENGAGEMENT ═══"]);
-    rows.push(["Metric", "Value"]);
-    rows.push(["vCard Downloads", String(stats.vcardDownloads)]);
-    rows.push(["CV Downloads", String(stats.cvDownloads)]);
-    rows.push(["Card Flips", String(stats.cardFlips)]);
-    rows.push(["Video Plays", String(stats.videoPlays)]);
-    rows.push(["Contact Form Submissions", String(stats.contactFormSubmissions)]);
-    rows.push(["Leads Captured", String(stats.leadGenCount)]);
-    sep();
-
-    // ─── SECURITY ───
-    rows.push(["═══ SECURITY ═══"]);
-    rows.push(["Metric", "Value"]);
-    rows.push(["Auth Success Rate", `${stats.authSuccessRate}%`]);
-    rows.push(["Unauthorized Attempts", String(stats.unauthorizedAttempts)]);
-    sep();
-
-    // ─── DEVICE BREAKDOWN ───
-    if (stats.deviceBreakdown.length > 0) {
-      rows.push(["═══ DEVICE BREAKDOWN ═══"]);
-      rows.push(["Device", "Count", "Share %"]);
-      const total = stats.deviceBreakdown.reduce((s, d) => s + d.value, 0);
-      stats.deviceBreakdown.forEach((d) =>
-        rows.push([d.name, String(d.value), `${total > 0 ? Math.round((d.value / total) * 100) : 0}%`])
-      );
-      // ASCII bar chart
-      const max = Math.max(...stats.deviceBreakdown.map((d) => d.value));
-      rows.push([]);
-      rows.push(["Device", "Distribution"]);
-      stats.deviceBreakdown.forEach((d) => {
-        const bars = max > 0 ? Math.round((d.value / max) * 20) : 0;
-        rows.push([d.name, "█".repeat(bars) + "░".repeat(20 - bars) + ` (${d.value})`]);
+    const autoWidth = (ws: any) => {
+      ws.columns?.forEach((col: any) => {
+        let maxLen = 12;
+        col.eachCell?.({ includeEmpty: false }, (cell: any) => {
+          const len = String(cell.value ?? "").length;
+          if (len > maxLen) maxLen = len;
+        });
+        col.width = Math.min(maxLen + 4, 40);
       });
-      sep();
-    }
+    };
 
-    // ─── BROWSER BREAKDOWN ───
-    if (stats.browserBreakdown.length > 0) {
-      rows.push(["═══ BROWSER BREAKDOWN ═══"]);
-      rows.push(["Browser", "Count", "Share %"]);
-      const total = stats.browserBreakdown.reduce((s, d) => s + d.value, 0);
-      stats.browserBreakdown.forEach((d) =>
-        rows.push([d.name, String(d.value), `${total > 0 ? Math.round((d.value / total) * 100) : 0}%`])
-      );
-      sep();
-    }
+    // ═══ OVERVIEW SHEET ═══
+    const wsOverview = wb.addWorksheet("Overview");
+    wsOverview.addRow(["HANDSHAKE — ANALYTICS REPORT"]).font = { bold: true, size: 14, color: { argb: "FF0D9488" } };
+    wsOverview.addRow([`Generated: ${new Date().toLocaleString()}`]).font = { size: 10, italic: true, color: { argb: "FF666666" } };
+    wsOverview.addRow([]);
 
-    // ─── OS BREAKDOWN ───
-    if (stats.osBreakdown.length > 0) {
-      rows.push(["═══ OS BREAKDOWN ═══"]);
-      rows.push(["OS", "Count", "Share %"]);
-      const total = stats.osBreakdown.reduce((s, d) => s + d.value, 0);
-      stats.osBreakdown.forEach((d) =>
-        rows.push([d.name, String(d.value), `${total > 0 ? Math.round((d.value / total) * 100) : 0}%`])
-      );
-      sep();
-    }
+    // KPIs
+    wsOverview.addRow(["KEY METRICS"]).font = sectionFont;
+    wsOverview.addRow(["Metric", "Value"]);
+    applyHeader(wsOverview, 5, 2);
+    const kpis = [
+      ["Total Profile Views", stats.totalTaps],
+      ["Unique Visitors", stats.uniqueVisitors],
+      ["Return Visitor Rate", `${stats.returnVisitorRate}%`],
+      ["Interaction Depth", `${stats.interactionDepthRate}%`],
+      ["Contact Save Rate", `${stats.contactSaveRate}%`],
+      ["Avg Dwell Time", `${stats.avgDwellTime}s`],
+      ["vCard Downloads", stats.vcardDownloads],
+      ["CV Downloads", stats.cvDownloads],
+      ["Card Flips", stats.cardFlips],
+      ["Video Plays", stats.videoPlays],
+      ["Contact Form Submissions", stats.contactFormSubmissions],
+      ["Leads Captured", stats.leadGenCount],
+    ];
+    kpis.forEach(([m, v]) => {
+      const r = wsOverview.addRow([m, v]);
+      r.getCell(1).border = borderThin;
+      r.getCell(2).border = borderThin;
+      r.getCell(2).alignment = { horizontal: "right" };
+    });
+    autoWidth(wsOverview);
 
-    // ─── LINK CTR ───
-    if (stats.linkCTR.length > 0) {
-      rows.push(["═══ LINK CLICK-THROUGH RATES ═══"]);
-      rows.push(["Link", "Clicks", "CTR %", "Performance"]);
-      const maxClicks = Math.max(...stats.linkCTR.map((l) => l.clicks));
-      stats.linkCTR.forEach((l) => {
-        const bars = maxClicks > 0 ? Math.round((l.clicks / maxClicks) * 15) : 0;
-        rows.push([l.name, String(l.clicks), `${l.percentage}%`, "█".repeat(bars)]);
-      });
-      sep();
-    }
-
-    // ─── CTA CLICKS ───
-    if (stats.ctaClicks.length > 0) {
-      rows.push(["═══ CTA CLICK BREAKDOWN ═══"]);
-      rows.push(["CTA Label", "Clicks"]);
-      stats.ctaClicks.forEach((c) => rows.push([c.label, String(c.clicks)]));
-      sep();
-    }
-
-    // ─── PERSONA PERFORMANCE ───
-    if (stats.personaPerformance.length > 0) {
-      rows.push(["═══ PERSONA PERFORMANCE ═══"]);
-      rows.push(["Persona", "Profile Views", "Save Rate %", "Performance"]);
-      const maxTaps = Math.max(...stats.personaPerformance.map((p) => p.taps));
-      stats.personaPerformance.forEach((p) => {
-        const bars = maxTaps > 0 ? Math.round((p.taps / maxTaps) * 15) : 0;
-        rows.push([p.name, String(p.taps), `${p.saveRate}%`, "█".repeat(bars)]);
-      });
-      sep();
-    }
-
-    // ─── CONNECTION SOURCES ───
-    rows.push(["═══ CONNECTION SOURCES ═══"]);
-    rows.push(["Source", "Count"]);
-    rows.push(["NFC Tap", String(stats.connectionSources.nfc)]);
-    rows.push(["QR Scan", String(stats.connectionSources.qr)]);
-    rows.push(["Direct Link", String(stats.connectionSources.direct)]);
-    sep();
-
-    // ─── TIMELINE DATA ───
+    // ═══ TIMELINE SHEET WITH CHART ═══
     if (chartData.length > 0) {
-      rows.push(["═══ TIMELINE DATA ═══"]);
-      rows.push(["Period", "Profile Views", "vCard Saves", "Trend"]);
-      const maxT = Math.max(...chartData.map((p) => p.taps));
+      const wsTl = wb.addWorksheet("Timeline");
+      wsTl.addRow(["TIMELINE DATA"]).font = sectionFont;
+      wsTl.addRow(["Period", "Profile Views", "vCard Saves"]);
+      applyHeader(wsTl, 2, 3);
       chartData.forEach((p) => {
-        const bars = maxT > 0 ? Math.round((p.taps / maxT) * 10) : 0;
-        rows.push([p.label, String(p.taps), String(p.vcards), "▓".repeat(bars)]);
+        const r = wsTl.addRow([p.label, p.taps, p.vcards]);
+        r.eachCell((c: any) => { c.border = borderThin; });
       });
+      autoWidth(wsTl);
+
+      // Add area chart
+      const chart = wsTl.addChart("area", {
+        title: "Profile Views & vCard Saves Over Time",
+        legend: { position: "bottom" },
+      } as any) as any;
+      const dataEnd = chartData.length + 2;
+      chart.addSeries({
+        name: "Profile Views",
+        categories: [`Timeline!$A$3:$A$${dataEnd}`],
+        values: [`Timeline!$B$3:$B$${dataEnd}`],
+      });
+      chart.addSeries({
+        name: "vCard Saves",
+        categories: [`Timeline!$A$3:$A$${dataEnd}`],
+        values: [`Timeline!$C$3:$C$${dataEnd}`],
+      });
+      chart.setPosition("E", 1, "N", 18);
     }
 
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const bom = "\uFEFF";
-    const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
+    // ═══ DEVICES SHEET WITH PIE CHART ═══
+    if (stats.deviceBreakdown.length > 0 || stats.browserBreakdown.length > 0) {
+      const wsDev = wb.addWorksheet("Devices & Browsers");
+      let row = 1;
+      if (stats.deviceBreakdown.length > 0) {
+        wsDev.getRow(row).values = ["DEVICE BREAKDOWN"];
+        wsDev.getRow(row).font = sectionFont;
+        row++;
+        wsDev.getRow(row).values = ["Device", "Count", "Share"];
+        applyHeader(wsDev, row, 3);
+        row++;
+        const total = stats.deviceBreakdown.reduce((s, d) => s + d.value, 0);
+        stats.deviceBreakdown.forEach((d) => {
+          const r = wsDev.getRow(row);
+          r.values = [d.name, d.value, total > 0 ? d.value / total : 0];
+          r.getCell(3).numFmt = "0%";
+          r.eachCell((c: any) => { c.border = borderThin; });
+          row++;
+        });
+
+        // Pie chart for devices
+        const devChart = wsDev.addChart("pie", {
+          title: "Device Breakdown",
+          legend: { position: "right" },
+        } as any) as any;
+        devChart.addSeries({
+          name: "Devices",
+          categories: [`'Devices & Browsers'!$A$3:$A$${2 + stats.deviceBreakdown.length}`],
+          values: [`'Devices & Browsers'!$B$3:$B$${2 + stats.deviceBreakdown.length}`],
+        });
+        devChart.setPosition("E", 1, "L", 16);
+        row++;
+      }
+
+      if (stats.browserBreakdown.length > 0) {
+        row++;
+        wsDev.getRow(row).values = ["BROWSER BREAKDOWN"];
+        wsDev.getRow(row).font = sectionFont;
+        row++;
+        const bStart = row;
+        wsDev.getRow(row).values = ["Browser", "Count", "Share"];
+        applyHeader(wsDev, row, 3);
+        row++;
+        const total = stats.browserBreakdown.reduce((s, d) => s + d.value, 0);
+        stats.browserBreakdown.forEach((d) => {
+          const r = wsDev.getRow(row);
+          r.values = [d.name, d.value, total > 0 ? d.value / total : 0];
+          r.getCell(3).numFmt = "0%";
+          r.eachCell((c: any) => { c.border = borderThin; });
+          row++;
+        });
+
+        const bChart = wsDev.addChart("bar", {
+          title: "Browser Distribution",
+          legend: { position: "bottom" },
+        } as any) as any;
+        bChart.addSeries({
+          name: "Browsers",
+          categories: [`'Devices & Browsers'!$A$${bStart + 2}:$A$${bStart + 1 + stats.browserBreakdown.length}`],
+          values: [`'Devices & Browsers'!$B$${bStart + 2}:$B$${bStart + 1 + stats.browserBreakdown.length}`],
+        });
+        bChart.setPosition("E", bStart, "L", bStart + 15);
+      }
+
+      if (stats.osBreakdown.length > 0) {
+        row += 2;
+        wsDev.getRow(row).values = ["OS BREAKDOWN"];
+        wsDev.getRow(row).font = sectionFont;
+        row++;
+        wsDev.getRow(row).values = ["OS", "Count", "Share"];
+        applyHeader(wsDev, row, 3);
+        row++;
+        const total = stats.osBreakdown.reduce((s, d) => s + d.value, 0);
+        stats.osBreakdown.forEach((d) => {
+          const r = wsDev.getRow(row);
+          r.values = [d.name, d.value, total > 0 ? d.value / total : 0];
+          r.getCell(3).numFmt = "0%";
+          r.eachCell((c: any) => { c.border = borderThin; });
+          row++;
+        });
+      }
+      autoWidth(wsDev);
+    }
+
+    // ═══ ENGAGEMENT SHEET ═══
+    if (stats.linkCTR.length > 0 || stats.ctaClicks.length > 0) {
+      const wsEng = wb.addWorksheet("Engagement");
+      let row = 1;
+
+      if (stats.linkCTR.length > 0) {
+        wsEng.getRow(row).values = ["LINK CLICK-THROUGH RATES"];
+        wsEng.getRow(row).font = sectionFont;
+        row++;
+        wsEng.getRow(row).values = ["Link", "Clicks", "CTR %"];
+        applyHeader(wsEng, row, 3);
+        row++;
+        const linkStart = row;
+        stats.linkCTR.forEach((l) => {
+          const r = wsEng.getRow(row);
+          r.values = [l.name, l.clicks, l.percentage / 100];
+          r.getCell(3).numFmt = "0.0%";
+          r.eachCell((c: any) => { c.border = borderThin; });
+          row++;
+        });
+
+        const linkChart = wsEng.addChart("bar", {
+          title: "Link Click-Through Rates",
+          legend: { position: "bottom" },
+        } as any) as any;
+        linkChart.addSeries({
+          name: "Clicks",
+          categories: [`Engagement!$A$${linkStart}:$A$${linkStart + stats.linkCTR.length - 1}`],
+          values: [`Engagement!$B$${linkStart}:$B$${linkStart + stats.linkCTR.length - 1}`],
+        });
+        linkChart.setPosition("E", 1, "L", 16);
+        row++;
+      }
+
+      if (stats.ctaClicks.length > 0) {
+        row++;
+        wsEng.getRow(row).values = ["CTA CLICK BREAKDOWN"];
+        wsEng.getRow(row).font = sectionFont;
+        row++;
+        wsEng.getRow(row).values = ["CTA Label", "Clicks"];
+        applyHeader(wsEng, row, 2);
+        row++;
+        stats.ctaClicks.forEach((c) => {
+          const r = wsEng.getRow(row);
+          r.values = [c.label, c.clicks];
+          r.eachCell((ce: any) => { ce.border = borderThin; });
+          row++;
+        });
+      }
+      autoWidth(wsEng);
+    }
+
+    // ═══ CONNECTIONS SHEET ═══
+    const wsConn = wb.addWorksheet("Connections");
+    wsConn.addRow(["CONNECTION SOURCES"]).font = sectionFont;
+    wsConn.addRow(["Source", "Count"]);
+    applyHeader(wsConn, 2, 2);
+    [
+      ["NFC Tap", stats.connectionSources.nfc],
+      ["QR Scan", stats.connectionSources.qr],
+      ["Direct Link", stats.connectionSources.direct],
+    ].forEach(([name, val]) => {
+      const r = wsConn.addRow([name, val]);
+      r.eachCell((c: any) => { c.border = borderThin; });
+    });
+
+    // Pie chart for connections
+    const connChart = wsConn.addChart("pie", {
+      title: "Connection Sources",
+      legend: { position: "right" },
+    } as any) as any;
+    connChart.addSeries({
+      name: "Sources",
+      categories: ["Connections!$A$3:$A$5"],
+      values: ["Connections!$B$3:$B$5"],
+    });
+    connChart.setPosition("D", 1, "K", 16);
+    autoWidth(wsConn);
+
+    // ═══ SECURITY SHEET ═══
+    const wsSec = wb.addWorksheet("Security");
+    wsSec.addRow(["SECURITY METRICS"]).font = sectionFont;
+    wsSec.addRow(["Metric", "Value"]);
+    applyHeader(wsSec, 2, 2);
+    [
+      ["Auth Success Rate", `${stats.authSuccessRate}%`],
+      ["Unauthorized Attempts", stats.unauthorizedAttempts],
+    ].forEach(([m, v]) => {
+      const r = wsSec.addRow([m, v]);
+      r.eachCell((c: any) => { c.border = borderThin; });
+    });
+    autoWidth(wsSec);
+
+    // ═══ PERSONA SHEET ═══
+    if (stats.personaPerformance.length > 0) {
+      const wsPer = wb.addWorksheet("Personas");
+      wsPer.addRow(["PERSONA PERFORMANCE"]).font = sectionFont;
+      wsPer.addRow(["Persona", "Profile Views", "Save Rate %"]);
+      applyHeader(wsPer, 2, 3);
+      const perStart = 3;
+      stats.personaPerformance.forEach((p) => {
+        const r = wsPer.addRow([p.name, p.taps, p.saveRate / 100]);
+        r.getCell(3).numFmt = "0.0%";
+        r.eachCell((c: any) => { c.border = borderThin; });
+      });
+
+      const perChart = wsPer.addChart("bar", {
+        title: "Persona Performance",
+        legend: { position: "bottom" },
+      } as any) as any;
+      perChart.addSeries({
+        name: "Profile Views",
+        categories: [`Personas!$A$${perStart}:$A$${perStart + stats.personaPerformance.length - 1}`],
+        values: [`Personas!$B$${perStart}:$B$${perStart + stats.personaPerformance.length - 1}`],
+      });
+      perChart.setPosition("E", 1, "L", 16);
+      autoWidth(wsPer);
+    }
+
+    // Download
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `handshake-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `handshake-report-${new Date().toISOString().slice(0, 10)}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -152,7 +322,7 @@ export function ExportButton({ stats, chartData }: ExportButtonProps) {
   return (
     <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={handleExport}>
       <Download className="w-3 h-3" />
-      Export CSV
+      Export XLSX
     </Button>
   );
 }

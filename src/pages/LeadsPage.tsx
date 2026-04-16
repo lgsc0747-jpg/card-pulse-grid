@@ -50,20 +50,36 @@ const LeadsPage = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  const exportLeadsCSV = () => {
+  const exportLeadsXLSX = async () => {
     if (leads.length === 0) return;
-    const rows: string[][] = [];
+    const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "Handshake";
 
-    rows.push(["HANDSHAKE — LEAD CAPTURES REPORT"]);
-    rows.push([`Generated: ${new Date().toLocaleString()}`]);
-    rows.push([`Total Leads: ${leads.length}`]);
-    rows.push([]);
+    const headerFont = { bold: true, size: 11, color: { argb: "FFFFFFFF" } };
+    const headerFill = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FF0D9488" } };
+    const borderThin = { top: { style: "thin" as const }, bottom: { style: "thin" as const }, left: { style: "thin" as const }, right: { style: "thin" as const } };
 
-    rows.push(["═══ LEAD DATA ═══"]);
-    rows.push(["#", "Date", "Name", "Email", "Phone", "Company", "Message"]);
+    const ws = wb.addWorksheet("Leads");
+    ws.addRow(["HANDSHAKE — LEAD CAPTURES"]).font = { bold: true, size: 14, color: { argb: "FF0D9488" } };
+    ws.addRow([`Generated: ${new Date().toLocaleString()}`, "", "", `Total: ${leads.length}`]).font = { size: 10, italic: true, color: { argb: "FF666666" } };
+    ws.addRow([]);
+
+    ws.addRow(["#", "Date", "Name", "Email", "Phone", "Company", "Message"]);
+    const hRow = 4;
+    const hr = ws.getRow(hRow);
+    for (let c = 1; c <= 7; c++) {
+      const cell = hr.getCell(c);
+      cell.font = headerFont;
+      cell.fill = headerFill;
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = borderThin;
+    }
+    hr.height = 24;
+
     leads.forEach((lead, i) => {
-      rows.push([
-        String(i + 1),
+      const r = ws.addRow([
+        i + 1,
         new Date(lead.created_at).toLocaleString(),
         lead.visitor_name || "—",
         lead.visitor_email,
@@ -71,24 +87,67 @@ const LeadsPage = () => {
         lead.visitor_company || "—",
         (lead.visitor_message || "—").replace(/\n/g, " "),
       ]);
+      r.eachCell((c: any) => { c.border = borderThin; });
     });
 
-    rows.push([]);
-    rows.push(["═══ SUMMARY ═══"]);
+    // Summary sheet
+    const wsSummary = wb.addWorksheet("Summary");
+    wsSummary.addRow(["LEAD SUMMARY"]).font = { bold: true, size: 14, color: { argb: "FF0D9488" } };
+    wsSummary.addRow([]);
+    wsSummary.addRow(["Metric", "Count", "Percentage"]);
+    const shr = wsSummary.getRow(3);
+    for (let c = 1; c <= 3; c++) {
+      const cell = shr.getCell(c);
+      cell.font = headerFont;
+      cell.fill = headerFill;
+      cell.border = borderThin;
+    }
+
     const withPhone = leads.filter((l) => l.visitor_phone).length;
     const withCompany = leads.filter((l) => l.visitor_company).length;
     const withMessage = leads.filter((l) => l.visitor_message).length;
-    rows.push(["Leads with Phone", String(withPhone), `${Math.round((withPhone / leads.length) * 100)}%`]);
-    rows.push(["Leads with Company", String(withCompany), `${Math.round((withCompany / leads.length) * 100)}%`]);
-    rows.push(["Leads with Message", String(withMessage), `${Math.round((withMessage / leads.length) * 100)}%`]);
 
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const bom = "\uFEFF";
-    const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
+    [
+      ["Total Leads", leads.length, 1],
+      ["With Phone", withPhone, withPhone / leads.length],
+      ["With Company", withCompany, withCompany / leads.length],
+      ["With Message", withMessage, withMessage / leads.length],
+    ].forEach(([m, v, p]) => {
+      const r = wsSummary.addRow([m, v, p]);
+      r.getCell(3).numFmt = "0%";
+      r.eachCell((c: any) => { c.border = borderThin; });
+    });
+
+    // Pie chart
+    const sumChart = wsSummary.addChart("pie", {
+      title: "Lead Data Completeness",
+      legend: { position: "right" },
+    } as any) as any;
+    sumChart.addSeries({
+      name: "Completeness",
+      categories: ["Summary!$A$4:$A$7"],
+      values: ["Summary!$B$4:$B$7"],
+    });
+    sumChart.setPosition("E", 1, "L", 16);
+
+    // Auto-width
+    [ws, wsSummary].forEach((sheet) => {
+      sheet.columns?.forEach((col: any) => {
+        let maxLen = 12;
+        col.eachCell?.({ includeEmpty: false }, (cell: any) => {
+          const len = String(cell.value ?? "").length;
+          if (len > maxLen) maxLen = len;
+        });
+        col.width = Math.min(maxLen + 4, 40);
+      });
+    });
+
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `handshake-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `handshake-leads-${new Date().toISOString().slice(0, 10)}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -114,9 +173,9 @@ const LeadsPage = () => {
             </p>
           </div>
           {leads.length > 0 && (
-            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={exportLeadsCSV}>
+            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={exportLeadsXLSX}>
               <Download className="w-3 h-3" />
-              Export CSV
+              Export XLSX
             </Button>
           )}
         </div>
@@ -130,7 +189,6 @@ const LeadsPage = () => {
           </Card>
         ) : (
           <>
-            {/* Summary badges */}
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary" className="text-xs">{leads.length} total leads</Badge>
               <Badge variant="secondary" className="text-xs">{leads.filter((l) => l.visitor_phone).length} with phone</Badge>
