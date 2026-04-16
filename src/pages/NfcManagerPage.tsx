@@ -9,9 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
 import { QRCodeSVG } from "qrcode.react";
 import {
-  Link2, Copy, Check, Download, Smartphone, ExternalLink, Info, Loader2, LayoutPanelLeft, User,
+  Link2, Copy, Check, Download, Smartphone, ExternalLink, Info, Loader2, LayoutPanelLeft, User, Crown,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
