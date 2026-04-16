@@ -114,6 +114,15 @@ const PublicProfilePage = () => {
   const cardOpacity = useTransform(scrollYProgress, [0.2, 0.4], [1, 0.6]);
   const chevronOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
 
+  // Track scroll for floating Contact Me CTA
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolledPastHero(window.scrollY > window.innerHeight * 0.6);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     const root = document.documentElement;
     const themeClasses = Array.from(root.classList).filter((c) => c.startsWith("theme-"));
