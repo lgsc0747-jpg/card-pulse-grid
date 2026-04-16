@@ -469,10 +469,34 @@ function PageBuilderPage() {
   const selectedPage = pages.find(p => p.id === selectedPageId);
   
 
-  if (loading) {
+  if (loading || subLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isPro) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
+        <div className="text-center space-y-4 max-w-sm px-4">
+          <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
+            <Crown className="w-6 h-6 text-amber-500" />
+          </div>
+          <h2 className="text-xl font-display font-bold">Page Builder — Pro Only</h2>
+          <p className="text-sm text-muted-foreground">
+            The Page Builder is available exclusively on the Handshake+ plan. Upgrade to create fully customizable multi-page landing sites.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" onClick={() => navigate("/")}>
+              <ArrowLeft className="w-4 h-4 mr-2" /> Dashboard
+            </Button>
+            <Button onClick={() => navigate("/plans")} className="bg-amber-500 hover:bg-amber-600 text-white">
+              <Crown className="w-4 h-4 mr-2" /> Upgrade
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
