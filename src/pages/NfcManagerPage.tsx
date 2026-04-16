@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 const NfcManagerPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isPro } = useSubscription();
   const [username, setUsername] = useState<string | null>(null);
   const [shortCode, setShortCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
