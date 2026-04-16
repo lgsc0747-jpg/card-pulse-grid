@@ -107,15 +107,14 @@ export function SortableChartCard({ id, children, className }: SortableChartCard
   const hasCustom = customSize.w !== null || customSize.h !== null;
 
   return (
-    <div ref={setNodeRef} style={style} className={`relative group ${className ?? ""}`}>
+    <div ref={setNodeRef} style={style} className={`relative group w-full ${className ?? ""}`}>
       <div
         ref={cardRef}
-        className="h-full"
+        className="h-full w-full"
         style={{
           height: customSize.h ?? DEFAULT_HEIGHT,
           maxHeight: MAX_HEIGHT,
           overflow: "auto",
-          ...(customSize.w ? { width: customSize.w, maxWidth: MAX_WIDTH } : {}),
         }}
       >
         <div {...attributes} {...listeners} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab touch-none z-10 flex items-center gap-1">
