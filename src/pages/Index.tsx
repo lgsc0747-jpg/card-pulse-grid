@@ -47,11 +47,11 @@ const TIMEFRAME_LABELS: Record<string, string> = {
 };
 
 /* ─── Chart card keys per tab ─── */
-type EngagementCard = "analytics" | "funnel" | "linkCTR" | "ctaClicks" | "liveFeed";
+type EngagementCard = "aiInsights" | "analytics" | "funnel" | "linkCTR" | "ctaClicks" | "liveFeed";
 type TechnicalCard = "deviceType" | "browser" | "os" | "tapVelocity" | "heatmap" | "connections";
 type SecurityCard = "securityMetrics" | "handshake" | "leadGen";
 
-const DEFAULT_ENGAGEMENT: EngagementCard[] = ["analytics", "funnel", "linkCTR", "ctaClicks", "liveFeed"];
+const DEFAULT_ENGAGEMENT: EngagementCard[] = ["aiInsights", "analytics", "funnel", "linkCTR", "ctaClicks", "liveFeed"];
 const DEFAULT_TECHNICAL: TechnicalCard[] = ["deviceType", "browser", "os", "tapVelocity", "heatmap", "connections"];
 const DEFAULT_SECURITY: SecurityCard[] = ["securityMetrics", "handshake", "leadGen"];
 
@@ -142,6 +142,11 @@ const Dashboard = () => {
 
   /* ─── Render helpers for each card ─── */
   const engCards: Record<EngagementCard, React.ReactNode> = {
+    aiInsights: (
+      <SortableChartCard id="aiInsights" editMode={editMode} className="lg:col-span-2">
+        <AIInsightsCard />
+      </SortableChartCard>
+    ),
     analytics: (
       <SortableChartCard id="analytics" editMode={editMode} className="lg:col-span-2">
         <AnalyticsChart data={chartData} />
