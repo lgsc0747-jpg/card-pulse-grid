@@ -89,7 +89,8 @@ export function AdminActivityLog() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [entitySearch, setEntitySearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-
+  const [userSearchInput, setUserSearchInput] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.functions.invoke("admin-manage", {
