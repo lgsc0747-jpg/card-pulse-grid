@@ -110,7 +110,7 @@ export function AdminActivityLog() {
       setTotal(data.total ?? 0);
     }
     setLoading(false);
-  }, [page, typeFilter, entitySearch, toast]);
+  }, [page, typeFilter, entitySearch, userSearch, toast]);
 
   useEffect(() => {
     fetchLogs();
