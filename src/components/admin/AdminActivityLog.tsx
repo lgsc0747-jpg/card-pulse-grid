@@ -49,6 +49,8 @@ interface ActivityLog {
   } | null;
 }
 
+const USER_SEARCH_PLACEHOLDER = "Search by user (name, username, email)…";
+
 const INTERACTION_TYPES = [
   "all",
   "profile_view",
