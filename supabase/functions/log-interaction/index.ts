@@ -134,10 +134,8 @@ Deno.serve(async (req) => {
     else if (interaction_type === "contact_form_submit") occasion = "Contact Form";
     else if (interaction_type === "page_view") occasion = `Page: ${metadata?.page_title || "unknown"}`;
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    // (supabase client already created above for user validation)
+
 
     // Build a privacy-safe context label for the `location` column.
     // We never use IP / GPS — instead we describe the digital context:
