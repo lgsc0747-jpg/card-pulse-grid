@@ -90,10 +90,11 @@ export function useNfcData() {
     ctaClicks: [], videoPlays: 0, contactFormSubmissions: 0,
   });
   const [loading, setLoading] = useState(true);
+  const hasLoadedOnce = useRef(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
-    setLoading(true);
+    if (!hasLoadedOnce.current) setLoading(true);
 
     const now = new Date();
     let since: Date;
