@@ -42,7 +42,7 @@ function detectEnvironment(hostname: string | undefined): "dev" | "preview" | "p
 }
 
 async function getTurnstileSecret(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: any,
   env: "dev" | "preview" | "prod",
 ): Promise<string> {
   // Prefer DB-managed config; fall back to env-var TURNSTILE_SECRET_KEY for prod.
