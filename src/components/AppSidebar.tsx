@@ -157,13 +157,22 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { signOut, user } = useAuth();
   const { isAdmin } = useIsAdmin();
+  const { isSuperAdmin } = useIsSuperAdmin();
+  const location = useLocation();
+  const onAdminRoute = location.pathname.startsWith("/admin");
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } });
   const sensors = useSensors(pointerSensor, touchSensor);
 
-  const generalItems = isAdmin
-    ? [...DEFAULT_GENERAL, { title: "Admin Panel", url: "/admin", icon: ShieldCheck }]
+  const generalItems: NavItem[] = isAdmin
+    ? [
+        ...DEFAULT_GENERAL,
+        { title: "Admin Panel", url: "/admin", icon: ShieldCheck },
+        ...(isSuperAdmin
+          ? [{ title: "Turnstile Settings", url: "/admin/turnstile", icon: Sliders }]
+          : []),
+      ]
     : DEFAULT_GENERAL;
 
   return (
