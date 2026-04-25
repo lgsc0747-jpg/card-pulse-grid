@@ -172,9 +172,11 @@ const Dashboard = () => {
     setEngOrder(DEFAULT_ENGAGEMENT);
     setTechOrder(DEFAULT_TECHNICAL);
     setSecOrder(DEFAULT_SECURITY);
+    setVisibility({});
     localStorage.removeItem(LS_ENG);
     localStorage.removeItem(LS_TECH);
     localStorage.removeItem(LS_SEC);
+    localStorage.removeItem(LS_VIS);
     resetChartSizes();
     window.location.reload();
   };
