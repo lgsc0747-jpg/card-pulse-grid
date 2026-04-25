@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, FileText, GripVertical, RotateCcw, Contact } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Tag, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, FileText, GripVertical, RotateCcw, Contact, Sliders } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { useSubscription } from "@/hooks/useSubscription";
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
@@ -155,13 +157,22 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { signOut, user } = useAuth();
   const { isAdmin } = useIsAdmin();
+  const { isSuperAdmin } = useIsSuperAdmin();
+  const location = useLocation();
+  const onAdminRoute = location.pathname.startsWith("/admin");
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } });
   const sensors = useSensors(pointerSensor, touchSensor);
 
-  const generalItems = isAdmin
-    ? [...DEFAULT_GENERAL, { title: "Admin Panel", url: "/admin", icon: ShieldCheck }]
+  const generalItems: NavItem[] = isAdmin
+    ? [
+        ...DEFAULT_GENERAL,
+        { title: "Admin Panel", url: "/admin", icon: ShieldCheck },
+        ...(isSuperAdmin
+          ? [{ title: "Turnstile Settings", url: "/admin/turnstile", icon: Sliders }]
+          : []),
+      ]
     : DEFAULT_GENERAL;
 
   return (
@@ -179,6 +190,48 @@ export function AppSidebar() {
         <SortableNavGroup label="NFC" storageKey="sidebar_nfc_order" defaults={DEFAULT_NFC} collapsed={collapsed} sensors={sensors} />
         
         <SortableNavGroup label="General" storageKey="sidebar_general_order" defaults={generalItems} collapsed={collapsed} sensors={sensors} />
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs uppercase tracking-widest text-muted-foreground/70">
+              View Mode
+            </SidebarGroupLabel>
+            <SidebarGroupContent className="px-2 pb-2">
+              <div className={cn(
+                "rounded-xl bg-muted/40 border border-border p-1 grid",
+                collapsed ? "grid-cols-1 gap-1" : "grid-cols-2 gap-1",
+              )}>
+                <NavLink
+                  to="/"
+                  end
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-all",
+                    !onAdminRoute
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  activeClassName=""
+                >
+                  <User className="w-3.5 h-3.5" />
+                  {!collapsed && <span>User</span>}
+                </NavLink>
+                <NavLink
+                  to="/admin"
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-all",
+                    onAdminRoute
+                      ? "bg-amber-500 text-white shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  activeClassName=""
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  {!collapsed && <span>Admin</span>}
+                </NavLink>
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-3">
