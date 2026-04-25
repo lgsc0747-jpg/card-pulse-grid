@@ -16,6 +16,7 @@ import { LeadGenTracker } from "@/components/dashboard/LeadGenTracker";
 import { TapVelocityChart } from "@/components/dashboard/TapVelocityChart";
 import { TimeframeSelector } from "@/components/dashboard/TimeframeSelector";
 import { SortableChartCard, resetChartSizes } from "@/components/dashboard/SortableChartCard";
+import { ChartVisibilityManager } from "@/components/dashboard/ChartVisibilityManager";
 
 import { ChartPaletteProvider, ChartPaletteSelector } from "@/components/dashboard/ChartPaletteSelector";
 import { ChartTitleWithInfo } from "@/components/dashboard/ChartTitleWithInfo";
