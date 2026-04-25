@@ -49,6 +49,7 @@ const TIMEFRAME_LABELS: Record<string, string> = {
 
 /* ─── Chart card keys per tab ─── */
 type EngagementCard = "aiInsights" | "analytics" | "funnel" | "linkCTR" | "ctaClicks" | "liveFeed";
+type PersonaCard = "personaPie" | "personaBar";
 type TechnicalCard = "deviceType" | "browser" | "os" | "tapVelocity" | "heatmap" | "connections";
 type SecurityCard = "securityMetrics" | "handshake" | "leadGen";
 
@@ -56,13 +57,45 @@ const DEFAULT_ENGAGEMENT: EngagementCard[] = ["aiInsights", "analytics", "funnel
 const DEFAULT_TECHNICAL: TechnicalCard[] = ["deviceType", "browser", "os", "tapVelocity", "heatmap", "connections"];
 const DEFAULT_SECURITY: SecurityCard[] = ["securityMetrics", "handshake", "leadGen"];
 
+const ENGAGEMENT_LABELS: Record<EngagementCard, string> = {
+  aiInsights: "AI Insights",
+  analytics: "Analytics Trend",
+  funnel: "Conversion Funnel",
+  linkCTR: "Link CTR",
+  ctaClicks: "CTA Clicks",
+  liveFeed: "Live Feed",
+};
+const PERSONA_LABELS: Record<PersonaCard, string> = {
+  personaPie: "Persona Distribution",
+  personaBar: "Persona Performance",
+};
+const TECHNICAL_LABELS: Record<TechnicalCard, string> = {
+  deviceType: "Device Type",
+  browser: "Browser",
+  os: "Operating System",
+  tapVelocity: "Tap Velocity",
+  heatmap: "Activity Heatmap",
+  connections: "Connection Sources",
+};
+const SECURITY_LABELS: Record<SecurityCard, string> = {
+  securityMetrics: "Security Metrics",
+  handshake: "Digital Handshake",
+  leadGen: "Lead Gen Tracker",
+};
+
 const LS_ENG = "nfc_dash_engagement_order";
 const LS_TECH = "nfc_dash_technical_order";
 const LS_SEC = "nfc_dash_security_order";
+const LS_VIS = "nfc_dash_chart_visibility";
 
 function loadArr<T extends string>(key: string, def: T[]): T[] {
   try { const r = localStorage.getItem(key); if (r) return JSON.parse(r); } catch {}
   return def;
+}
+
+function loadVisibility(): Record<string, boolean> {
+  try { const r = localStorage.getItem(LS_VIS); if (r) return JSON.parse(r); } catch {}
+  return {};
 }
 
 const Dashboard = () => {
