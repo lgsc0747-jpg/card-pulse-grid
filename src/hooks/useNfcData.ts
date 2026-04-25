@@ -292,6 +292,7 @@ export function useNfcData() {
     });
 
     setLoading(false);
+    hasLoadedOnce.current = true;
   }, [user, timeframe]);
 
   useEffect(() => {
