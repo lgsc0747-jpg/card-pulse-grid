@@ -655,6 +655,42 @@ export type Database = {
           },
         ]
       }
+      turnstile_config: {
+        Row: {
+          allowed_hostnames: string[]
+          created_at: string
+          enabled: boolean
+          environment: string
+          id: string
+          notes: string | null
+          secret_key: string
+          site_key: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_hostnames?: string[]
+          created_at?: string
+          enabled?: boolean
+          environment: string
+          id?: string
+          notes?: string | null
+          secret_key: string
+          site_key: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_hostnames?: string[]
+          created_at?: string
+          enabled?: boolean
+          environment?: string
+          id?: string
+          notes?: string | null
+          secret_key?: string
+          site_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
