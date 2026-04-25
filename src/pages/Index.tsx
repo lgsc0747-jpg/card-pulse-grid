@@ -318,6 +318,16 @@ const Dashboard = () => {
           <div className="flex items-center gap-1.5 flex-wrap">
             <TimeframeSelector value={timeframe} onChange={setTimeframe} />
             <ChartPaletteSelector />
+            <ChartVisibilityManager
+              visibility={visibility}
+              onChange={toggleVisibility}
+              sections={[
+                { title: "Engagement", options: DEFAULT_ENGAGEMENT.map((k) => ({ key: k, label: ENGAGEMENT_LABELS[k] })) },
+                { title: "Personas", options: (Object.keys(PERSONA_LABELS) as PersonaCard[]).map((k) => ({ key: k, label: PERSONA_LABELS[k] })) },
+                { title: "Technical", options: DEFAULT_TECHNICAL.map((k) => ({ key: k, label: TECHNICAL_LABELS[k] })) },
+                { title: "Security", options: DEFAULT_SECURITY.map((k) => ({ key: k, label: SECURITY_LABELS[k] })) },
+              ]}
+            />
             <Button variant="ghost" size="sm" className="text-[10px] text-muted-foreground" onClick={resetAll} title="Reset layout & sizes">
               Reset
             </Button>
