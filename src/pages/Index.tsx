@@ -109,10 +109,15 @@ const Dashboard = () => {
   const [engOrder, setEngOrder] = useState<EngagementCard[]>(() => loadArr(LS_ENG, DEFAULT_ENGAGEMENT));
   const [techOrder, setTechOrder] = useState<TechnicalCard[]>(() => loadArr(LS_TECH, DEFAULT_TECHNICAL));
   const [secOrder, setSecOrder] = useState<SecurityCard[]>(() => loadArr(LS_SEC, DEFAULT_SECURITY));
+  const [visibility, setVisibility] = useState<Record<string, boolean>>(loadVisibility);
 
   useEffect(() => { localStorage.setItem(LS_ENG, JSON.stringify(engOrder)); }, [engOrder]);
   useEffect(() => { localStorage.setItem(LS_TECH, JSON.stringify(techOrder)); }, [techOrder]);
   useEffect(() => { localStorage.setItem(LS_SEC, JSON.stringify(secOrder)); }, [secOrder]);
+  useEffect(() => { localStorage.setItem(LS_VIS, JSON.stringify(visibility)); }, [visibility]);
+
+  const isVisible = (key: string) => visibility[key] ?? true;
+  const toggleVisibility = (key: string, v: boolean) => setVisibility((prev) => ({ ...prev, [key]: v }));
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } });
