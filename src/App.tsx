@@ -4,7 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { PreferencesProvider } from "@/contexts/PreferencesContext";
 import { DashboardThemeProvider } from "@/contexts/DashboardThemeContext";
+import { NotificationListener } from "@/components/NotificationListener";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import CardsPage from "./pages/CardsPage.tsx";
@@ -45,7 +47,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PreferencesProvider>
           <DashboardThemeProvider>
+          <NotificationListener />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -61,7 +65,7 @@ const App = () => (
             <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
             <Route path="/design-studio" element={<ProtectedRoute><DesignStudioPage /></ProtectedRoute>} />
             <Route path="/page-builder" element={<ProtectedRoute><PageBuilderPage /></ProtectedRoute>} />
-            
+
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
@@ -75,6 +79,7 @@ const App = () => (
           </Routes>
           </DashboardThemeProvider>
           <CookieConsentBanner />
+          </PreferencesProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
