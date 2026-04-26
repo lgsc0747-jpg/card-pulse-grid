@@ -45,21 +45,35 @@ async function getTurnstileSecret(
   adminClient: any,
   env: "dev" | "preview" | "prod",
 ): Promise<string> {
-  // Prefer DB-managed config; fall back to env-var TURNSTILE_SECRET_KEY for prod.
+  // Production: ALWAYS prefer the TURNSTILE_SECRET_KEY env var (managed via Supabase secrets).
+  // This is the source of truth and avoids drift between DB config and the real Cloudflare secret.
+  if (env === "prod") {
+    const envSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
+    if (envSecret) return envSecret;
+
+    // Fallback only if env var is somehow missing — try DB-managed config.
+    const { data } = await adminClient
+      .from("turnstile_config")
+      .select("secret_key, enabled")
+      .eq("environment", "prod")
+      .maybeSingle();
+    if (data && (data as any).enabled && (data as any).secret_key) {
+      return (data as any).secret_key as string;
+    }
+    console.error("TURNSTILE_SECRET_KEY missing for prod environment");
+    return "";
+  }
+
+  // Dev/preview: try DB config first (lets super-admins override), else use Cloudflare's test secret.
   const { data } = await adminClient
     .from("turnstile_config")
     .select("secret_key, enabled")
     .eq("environment", env)
     .maybeSingle();
-
   if (data && (data as any).enabled && (data as any).secret_key) {
     return (data as any).secret_key as string;
   }
-
-  // Dev/preview always fall back to the test secret if nothing in DB.
-  if (env !== "prod") return CF_TEST_SECRET_KEY;
-
-  return Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
+  return CF_TEST_SECRET_KEY;
 }
 
 async function verifyTurnstile(token: string, ip: string, secret: string): Promise<boolean> {
