@@ -186,11 +186,12 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (data) {
-        const cloudPrefs = (data.prefs ?? {}) as PrefsBlob;
+        const cloudPrefs = (data.prefs ?? {}) as unknown as PrefsBlob;
         const merged: PrefsBlob = { ...prefs, ...cloudPrefs };
         setPrefs(merged);
         saveLocal(merged);
-        setNotifications(((data.notifications ?? []) as AppNotification[]).slice(0, 50));
+        const cloudNotifs = (data.notifications ?? []) as unknown as AppNotification[];
+        setNotifications(Array.isArray(cloudNotifs) ? cloudNotifs.slice(0, 50) : []);
       } else {
         // First time — push current local cache (legacy migration) up to cloud
         const local = loadLocal();
