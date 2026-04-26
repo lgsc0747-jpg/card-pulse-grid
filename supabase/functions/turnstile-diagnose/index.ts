@@ -51,11 +51,14 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const configured = !!cfg && (cfg as any).enabled;
+    // Production: prefer Deno env (TURNSTILE_SECRET_KEY) — single source of truth.
+    // Dev/preview: prefer DB config (super-admin override), else Cloudflare test secret.
+    const envSecret = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
     const secret =
-      configured && (cfg as any).secret_key
-        ? ((cfg as any).secret_key as string)
-        : env === "prod"
-          ? Deno.env.get("TURNSTILE_SECRET_KEY") ?? ""
+      env === "prod"
+        ? envSecret || (configured ? ((cfg as any).secret_key as string) : "")
+        : configured && (cfg as any).secret_key
+          ? ((cfg as any).secret_key as string)
           : CF_TEST_SECRET_KEY;
 
     let verifyResult: any = null;
