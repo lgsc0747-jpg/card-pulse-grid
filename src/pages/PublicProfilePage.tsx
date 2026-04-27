@@ -233,12 +233,27 @@ const PublicProfilePage = () => {
       const connectionType = conn?.effectiveType || conn?.type || "unknown";
       const isBrave = (nav.brave && typeof nav.brave.isBrave === "function") ? true : false;
 
+      // Read tap origin (set by ShortUrlRedirect) so we can attribute the view to a specific card
+      let tapOrigin: { card_id?: string; card_serial?: string | null } = {};
+      try {
+        const raw = sessionStorage.getItem("tap_origin");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Date.now() - (parsed.ts ?? 0) < 60_000) {
+            tapOrigin = { card_id: parsed.card_id, card_serial: parsed.card_serial };
+          }
+          sessionStorage.removeItem("tap_origin");
+        }
+      } catch { /* ignore */ }
+
       fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           target_user_id: profileData.user_id,
           interaction_type: "profile_view",
+          card_id: tapOrigin.card_id ?? null,
+          card_serial: tapOrigin.card_serial ?? null,
           metadata: {
             source: "public_landing",
             ua: navigator.userAgent + (isBrave ? " Brave" : ""),
