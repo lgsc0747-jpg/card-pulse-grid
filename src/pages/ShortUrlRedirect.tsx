@@ -26,6 +26,24 @@ const ShortUrlRedirect = () => {
           return;
         }
 
+        // Stash the resolved card metadata so PublicProfilePage can attribute
+        // this view (and downstream interactions) to the specific card tapped.
+        try {
+          if (data.card_id) {
+            sessionStorage.setItem(
+              "tap_origin",
+              JSON.stringify({
+                card_id: data.card_id,
+                card_serial: data.card_serial ?? null,
+                short_code: code,
+                ts: Date.now(),
+              })
+            );
+          }
+        } catch {
+          // sessionStorage may be unavailable — fail silently.
+        }
+
         const path = data.persona_slug
           ? `/p/${data.username}/${data.persona_slug}`
           : `/p/${data.username}`;

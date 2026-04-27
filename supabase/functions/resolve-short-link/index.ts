@@ -26,10 +26,10 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Look up the short link -> user_id (and optional persona_id)
+    // Look up the short link -> user_id (and optional persona_id / card_id)
     const { data: link, error: linkErr } = await supabase
       .from("short_links")
-      .select("user_id, persona_id")
+      .select("user_id, persona_id, card_id")
       .eq("code", code)
       .single();
 
@@ -75,11 +75,25 @@ Deno.serve(async (req) => {
       personaSlug = activePer?.slug ?? null;
     }
 
+    // Look up serial for the linked card so the client can include it in
+    // interaction logs without a second round trip.
+    let cardSerial: string | null = null;
+    if (link.card_id) {
+      const { data: card } = await supabase
+        .from("nfc_cards")
+        .select("serial_number")
+        .eq("id", link.card_id)
+        .single();
+      cardSerial = card?.serial_number ?? null;
+    }
+
     return new Response(
       JSON.stringify({
         username: profile.username,
         persona_slug: personaSlug,
         user_id: link.user_id,
+        card_id: link.card_id ?? null,
+        card_serial: cardSerial,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

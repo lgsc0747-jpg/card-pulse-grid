@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { target_user_id, interaction_type, metadata } = await req.json();
+    const { target_user_id, interaction_type, metadata, card_id, card_serial } = await req.json();
 
     if (!target_user_id || !interaction_type) {
       return new Response(
@@ -162,6 +162,21 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Validate card_id (if provided) belongs to the target user
+    let safeCardId: string | null = null;
+    let safeCardSerial: string | null = card_serial ?? null;
+    if (card_id) {
+      const { data: cardRow } = await supabase
+        .from("nfc_cards")
+        .select("id, serial_number, user_id")
+        .eq("id", card_id)
+        .maybeSingle();
+      if (cardRow && cardRow.user_id === target_user_id) {
+        safeCardId = cardRow.id;
+        safeCardSerial = safeCardSerial ?? cardRow.serial_number;
+      }
+    }
+
     const { error } = await supabase.from("interaction_logs").insert({
       user_id: target_user_id,
       entity_id: metadata?.visitor_id || `visitor_${Date.now()}`,
@@ -169,6 +184,8 @@ Deno.serve(async (req) => {
       occasion,
       location: contextLabel,
       metadata: enrichedMeta,
+      card_id: safeCardId,
+      card_serial: safeCardSerial,
     });
 
     if (error) {

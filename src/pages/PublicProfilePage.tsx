@@ -233,12 +233,27 @@ const PublicProfilePage = () => {
       const connectionType = conn?.effectiveType || conn?.type || "unknown";
       const isBrave = (nav.brave && typeof nav.brave.isBrave === "function") ? true : false;
 
+      // Read tap origin (set by ShortUrlRedirect) so we can attribute the view to a specific card
+      let tapOrigin: { card_id?: string; card_serial?: string | null } = {};
+      try {
+        const raw = sessionStorage.getItem("tap_origin");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Date.now() - (parsed.ts ?? 0) < 60_000) {
+            tapOrigin = { card_id: parsed.card_id, card_serial: parsed.card_serial };
+          }
+          sessionStorage.removeItem("tap_origin");
+        }
+      } catch { /* ignore */ }
+
       fetch(`https://${projectId}.supabase.co/functions/v1/log-interaction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           target_user_id: profileData.user_id,
           interaction_type: "profile_view",
+          card_id: tapOrigin.card_id ?? null,
+          card_serial: tapOrigin.card_serial ?? null,
           metadata: {
             source: "public_landing",
             ua: navigator.userAgent + (isBrave ? " Brave" : ""),
@@ -713,7 +728,7 @@ const PublicProfilePage = () => {
       {googleFontUrl && <link rel="stylesheet" href={googleFontUrl} />}
       <div
         ref={containerRef}
-        className={cn("relative", hasPageTheme && PAGE_THEME_CLASS)}
+        className={cn("relative pb-[max(2rem,env(safe-area-inset-bottom))]", hasPageTheme && PAGE_THEME_CLASS)}
         style={{
           backgroundColor: hasPageTheme ? (pageThemeStyles as any)["--page-bg"] || landingBgColor : landingBgColor,
           fontFamily: hasPageTheme ? (pageThemeStyles as any)["--page-font"] || fontStack : fontStack,
@@ -721,8 +736,8 @@ const PublicProfilePage = () => {
           ...pageThemeStyles,
         }}
       >
-        {/* Multi-page navigation */}
-        {hasPageBuilder && sitePages.length > 1 && activePageId && (
+        {/* Multi-page navigation — only in Page Builder mode */}
+        {persona?.page_mode === 'builder' && hasPageBuilder && sitePages.length > 1 && activePageId && (
           <PublicPageNav
             pages={sitePages}
             activePageId={activePageId}
@@ -762,9 +777,10 @@ const PublicProfilePage = () => {
               return <div key={section.section_type}>{renderer()}</div>;
             }
 
+            const isHero = section.section_type === "hero";
             return (
               <section key={section.section_type} className="relative z-10" style={{ backgroundColor: landingBgColor }}>
-                <div className="max-w-lg mx-auto px-4 py-8">
+                <div className={cn("max-w-lg mx-auto px-5", isHero ? "pt-12 pb-10 md:pt-16 md:pb-14" : "py-10 md:py-14")}>
                   {renderer()}
                 </div>
               </section>
