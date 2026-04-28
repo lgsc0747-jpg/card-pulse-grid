@@ -26,6 +26,7 @@
 - [Lead Management](mem://features/lead-management) — Bypassing RLS via insert_lead_capture RPC for unauthenticated visitor leads
 - [Persona Kill Switch](mem://features/persona-kill-switch) — Active/Inactive persona toggle redirecting to disabled landing page
 - [Dependencies](mem://architecture/dependencies) — Strict pin: @tanstack/react-query@5.56.2 to prevent React 18 crashes
+- [Password Rotation](mem://features/password-rotation) — 90-day rotation prompt for email-password users with 7-day snooze
 - [Legal Compliance](mem://features/legal-compliance) — Philippine Data Privacy Act, auth-gated cookie settings, secure deletion
 - [Settings Management](mem://features/settings-management) — Centralized /settings hub for user config, eliminating UI redundancy
 - [Landing Page Hero](mem://style/landing-page-hero) — Fly-up spring animation, scroll-driven scaling, active persona glow
