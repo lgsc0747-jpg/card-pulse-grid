@@ -23,6 +23,7 @@ import { ChartTitleWithInfo } from "@/components/dashboard/ChartTitleWithInfo";
 import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
 import { useNfcData } from "@/hooks/useNfcData";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePreferences } from "@/contexts/PreferencesContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeOverlay } from "@/components/UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,41 +84,35 @@ const SECURITY_LABELS: Record<SecurityCard, string> = {
   leadGen: "Lead Gen Tracker",
 };
 
-const LS_ENG = "nfc_dash_engagement_order";
-const LS_TECH = "nfc_dash_technical_order";
-const LS_SEC = "nfc_dash_security_order";
-const LS_VIS = "nfc_dash_chart_visibility";
-
-function loadArr<T extends string>(key: string, def: T[]): T[] {
-  try { const r = localStorage.getItem(key); if (r) return JSON.parse(r); } catch {}
-  return def;
-}
-
-function loadVisibility(): Record<string, boolean> {
-  try { const r = localStorage.getItem(LS_VIS); if (r) return JSON.parse(r); } catch {}
-  return {};
-}
-
 const Dashboard = () => {
   const { user } = useAuth();
   const { stats, chartData, timeframe, setTimeframe, loading } = useNfcData();
   const { isPro } = useSubscription();
+  const { prefs, patchPrefs } = usePreferences();
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
   const editMode = true;
 
-  const [engOrder, setEngOrder] = useState<EngagementCard[]>(() => loadArr(LS_ENG, DEFAULT_ENGAGEMENT));
-  const [techOrder, setTechOrder] = useState<TechnicalCard[]>(() => loadArr(LS_TECH, DEFAULT_TECHNICAL));
-  const [secOrder, setSecOrder] = useState<SecurityCard[]>(() => loadArr(LS_SEC, DEFAULT_SECURITY));
-  const [visibility, setVisibility] = useState<Record<string, boolean>>(loadVisibility);
+  const engOrder = (prefs.dashEngagementOrder as EngagementCard[] | undefined) ?? DEFAULT_ENGAGEMENT;
+  const techOrder = (prefs.dashTechnicalOrder as TechnicalCard[] | undefined) ?? DEFAULT_TECHNICAL;
+  const secOrder = (prefs.dashSecurityOrder as SecurityCard[] | undefined) ?? DEFAULT_SECURITY;
+  const visibility = prefs.dashChartVisibility ?? {};
 
-  useEffect(() => { localStorage.setItem(LS_ENG, JSON.stringify(engOrder)); }, [engOrder]);
-  useEffect(() => { localStorage.setItem(LS_TECH, JSON.stringify(techOrder)); }, [techOrder]);
-  useEffect(() => { localStorage.setItem(LS_SEC, JSON.stringify(secOrder)); }, [secOrder]);
-  useEffect(() => { localStorage.setItem(LS_VIS, JSON.stringify(visibility)); }, [visibility]);
+  const setEngOrder = (next: EngagementCard[] | ((p: EngagementCard[]) => EngagementCard[])) => {
+    const value = typeof next === "function" ? next(engOrder) : next;
+    patchPrefs({ dashEngagementOrder: value });
+  };
+  const setTechOrder = (next: TechnicalCard[] | ((p: TechnicalCard[]) => TechnicalCard[])) => {
+    const value = typeof next === "function" ? next(techOrder) : next;
+    patchPrefs({ dashTechnicalOrder: value });
+  };
+  const setSecOrder = (next: SecurityCard[] | ((p: SecurityCard[]) => SecurityCard[])) => {
+    const value = typeof next === "function" ? next(secOrder) : next;
+    patchPrefs({ dashSecurityOrder: value });
+  };
 
   const isVisible = (key: string) => visibility[key] ?? true;
-  const toggleVisibility = (key: string, v: boolean) => setVisibility((prev) => ({ ...prev, [key]: v }));
+  const toggleVisibility = (key: string, v: boolean) => patchPrefs({ dashChartVisibility: { ...visibility, [key]: v } });
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } });
