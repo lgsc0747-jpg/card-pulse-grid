@@ -95,16 +95,22 @@ function SortableWidget({ id, title, value, icon }: {
 }
 
 export function WidgetManager({ stats }: WidgetManagerProps) {
-  const [order, setOrder] = useState<WidgetKey[]>(loadOrder);
-  const [visible, setVisible] = useState<Record<WidgetKey, boolean>>(loadVisibility);
+  const { prefs, patchPrefs } = usePreferences();
+  const order = (prefs.widgetOrder as WidgetKey[] | undefined) ?? DEFAULT_ORDER;
+  const visible = (prefs.widgetVisibility as Record<WidgetKey, boolean> | undefined) ?? DEFAULT_VISIBILITY;
+  const setOrder = (next: WidgetKey[] | ((p: WidgetKey[]) => WidgetKey[])) => {
+    const value = typeof next === "function" ? next(order) : next;
+    patchPrefs({ widgetOrder: value });
+  };
+  const setVisible = (next: Record<WidgetKey, boolean> | ((p: Record<WidgetKey, boolean>) => Record<WidgetKey, boolean>)) => {
+    const value = typeof next === "function" ? next(visible) : next;
+    patchPrefs({ widgetVisibility: value });
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
   );
-
-  useEffect(() => { localStorage.setItem(STORAGE_KEY_ORDER, JSON.stringify(order)); }, [order]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEY_VIS, JSON.stringify(visible)); }, [visible]);
 
   const getValue = useCallback((key: WidgetKey): string => {
     switch (key) {
