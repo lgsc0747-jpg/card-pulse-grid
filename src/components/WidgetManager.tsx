@@ -12,6 +12,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { usePreferences } from "@/contexts/PreferencesContext";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
@@ -64,24 +65,7 @@ const DEFAULT_VISIBILITY: Record<WidgetKey, boolean> = {
   avgDwellTime: true, authSuccessRate: false,
 };
 
-const STORAGE_KEY_ORDER = "nfc_widget_order";
-const STORAGE_KEY_VIS = "nfc_widget_visibility";
-
-function loadOrder(): WidgetKey[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_ORDER);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return DEFAULT_ORDER;
-}
-
-function loadVisibility(): Record<WidgetKey, boolean> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_VIS);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return DEFAULT_VISIBILITY;
-}
+// Legacy localStorage keys retained only for first-run migration in PreferencesContext.
 
 function SortableWidget({ id, title, value, icon }: {
   id: string; title: string; value: string; icon: React.ReactNode;
@@ -111,16 +95,22 @@ function SortableWidget({ id, title, value, icon }: {
 }
 
 export function WidgetManager({ stats }: WidgetManagerProps) {
-  const [order, setOrder] = useState<WidgetKey[]>(loadOrder);
-  const [visible, setVisible] = useState<Record<WidgetKey, boolean>>(loadVisibility);
+  const { prefs, patchPrefs } = usePreferences();
+  const order = (prefs.widgetOrder as WidgetKey[] | undefined) ?? DEFAULT_ORDER;
+  const visible = (prefs.widgetVisibility as Record<WidgetKey, boolean> | undefined) ?? DEFAULT_VISIBILITY;
+  const setOrder = (next: WidgetKey[] | ((p: WidgetKey[]) => WidgetKey[])) => {
+    const value = typeof next === "function" ? next(order) : next;
+    patchPrefs({ widgetOrder: value });
+  };
+  const setVisible = (next: Record<WidgetKey, boolean> | ((p: Record<WidgetKey, boolean>) => Record<WidgetKey, boolean>)) => {
+    const value = typeof next === "function" ? next(visible) : next;
+    patchPrefs({ widgetVisibility: value });
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
   );
-
-  useEffect(() => { localStorage.setItem(STORAGE_KEY_ORDER, JSON.stringify(order)); }, [order]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEY_VIS, JSON.stringify(visible)); }, [visible]);
 
   const getValue = useCallback((key: WidgetKey): string => {
     switch (key) {
@@ -199,7 +189,7 @@ export function WidgetManager({ stats }: WidgetManagerProps) {
             size="sm"
             variant="ghost"
             className="h-7 text-xs"
-            onClick={() => { setOrder(DEFAULT_ORDER); setVisible(DEFAULT_VISIBILITY); localStorage.removeItem(STORAGE_KEY_ORDER); localStorage.removeItem(STORAGE_KEY_VIS); }}
+            onClick={() => { patchPrefs({ widgetOrder: DEFAULT_ORDER, widgetVisibility: DEFAULT_VISIBILITY }); }}
             title="Reset to default layout"
           >
             <RotateCcw className="w-3 h-3" />
