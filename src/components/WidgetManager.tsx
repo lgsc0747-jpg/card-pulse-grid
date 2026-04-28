@@ -189,7 +189,7 @@ export function WidgetManager({ stats }: WidgetManagerProps) {
             size="sm"
             variant="ghost"
             className="h-7 text-xs"
-            onClick={() => { setOrder(DEFAULT_ORDER); setVisible(DEFAULT_VISIBILITY); localStorage.removeItem(STORAGE_KEY_ORDER); localStorage.removeItem(STORAGE_KEY_VIS); }}
+            onClick={() => { patchPrefs({ widgetOrder: DEFAULT_ORDER, widgetVisibility: DEFAULT_VISIBILITY }); }}
             title="Reset to default layout"
           >
             <RotateCcw className="w-3 h-3" />
