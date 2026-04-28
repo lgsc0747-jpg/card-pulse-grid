@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { PreferencesProvider } from "@/contexts/PreferencesContext";
 import { DashboardThemeProvider } from "@/contexts/DashboardThemeContext";
 import { NotificationListener } from "@/components/NotificationListener";
+import { PasswordRotationPrompt } from "@/components/PasswordRotationPrompt";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import CardsPage from "./pages/CardsPage.tsx";
@@ -51,6 +52,7 @@ const App = () => (
           <PreferencesProvider>
           <DashboardThemeProvider>
           <NotificationListener />
+          <PasswordRotationPrompt />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
