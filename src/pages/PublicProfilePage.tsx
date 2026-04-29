@@ -748,10 +748,13 @@ const PublicProfilePage = () => {
 
         {/* Route based on page_mode: builder = page blocks, personal/default = legacy card fly-up */}
         {persona?.page_mode === 'builder' && hasPageBuilder ? (
-          <div style={{
-            color: hasPageTheme ? (pageThemeStyles as any)["--page-text"] || textColor : textColor,
-            ...(hasPageTheme ? pageThemeStyles : {}),
-          }}>
+          <div
+            className="flex-1 flex flex-col"
+            style={{
+              color: hasPageTheme ? (pageThemeStyles as any)["--page-text"] || textColor : textColor,
+              ...(hasPageTheme ? pageThemeStyles : {}),
+            }}
+          >
             {pageBlocks.map(block => (
               <BlockRenderer key={block.id} block={block} persona={persona} onTrackInteraction={(type, metadata) => {
                 const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
@@ -766,6 +769,8 @@ const PublicProfilePage = () => {
                 }).catch(() => {});
               }} />
             ))}
+            {/* Spacer keeps the live page filling the viewport even when blocks are short */}
+            <div className="flex-1" aria-hidden="true" />
           </div>
         ) : (
           visibleSections.map((section, idx) => {
