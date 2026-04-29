@@ -142,6 +142,24 @@ const AdminPage = () => {
     setConfirmDialog(null);
   };
 
+  const sendPasswordReset = async (userId: string, name: string) => {
+    const { error, data } = await supabase.functions.invoke("admin-manage", {
+      body: { action: "send_password_reset", target_user_id: userId },
+    });
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Failed",
+        description: (data as any)?.error ?? "Could not send reset email",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Reset email sent",
+        description: `Password reset link emailed to ${name}.`,
+      });
+    }
+  };
+
   const filtered = users.filter((u) => {
     const matchSearch =
       !search ||
