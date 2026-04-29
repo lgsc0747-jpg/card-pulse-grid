@@ -74,6 +74,7 @@ const App = () => (
             <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/admin/turnstile" element={<ProtectedRoute><TurnstileSettingsPage /></ProtectedRoute>} />
+            <Route path="/help" element={<ProtectedRoute><HelpPage /></ProtectedRoute>} />
             <Route path="/p/:username" element={<PublicProfilePage />} />
             <Route path="/p/:username/:personaSlug" element={<PublicProfilePage />} />
             <Route path="/u/:code" element={<ShortUrlRedirect />} />
