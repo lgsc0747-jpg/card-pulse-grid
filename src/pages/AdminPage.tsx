@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { AdminActivityLog } from "@/components/admin/AdminActivityLog";
 import { AdminAuditTrail } from "@/components/admin/AdminAuditTrail";
 import { AdminLockouts } from "@/components/admin/AdminLockouts";
+import { AdminSupportTickets } from "@/components/admin/AdminSupportTickets";
 import { useIsSuperAdmin } from "@/hooks/useIsSuperAdmin";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
