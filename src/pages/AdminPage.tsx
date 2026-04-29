@@ -43,6 +43,7 @@ import {
   Search,
   Users,
   ArrowUpDown,
+  KeyRound,
 } from "lucide-react";
 
 interface AdminUser {
