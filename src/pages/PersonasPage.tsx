@@ -101,22 +101,8 @@ const PersonasPage = () => {
     }
   };
 
-  const handleSetActive = async (persona: Persona) => {
-    if (!user) return;
-    // Deactivate all, then activate this one
-    await supabase
-      .from("personas")
-      .update({ is_active: false })
-      .eq("user_id", user.id);
-    await supabase
-      .from("personas")
-      .update({ is_active: true })
-      .eq("id", persona.id);
-    setPersonas(
-      personas.map((p) => ({ ...p, is_active: p.id === persona.id }))
-    );
-    toast({ title: "Active persona updated", description: `"${persona.label}" is now live on your NFC card.` });
-  };
+  // "Set Active" was removed — every persona is now reachable simultaneously
+  // via direct slug URL or per-persona generated short links.
 
   const handleDelete = async (id: string) => {
     await supabase.from("personas").delete().eq("id", id);
