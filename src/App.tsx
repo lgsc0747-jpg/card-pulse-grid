@@ -34,6 +34,7 @@ import AdminPage from "./pages/AdminPage.tsx";
 import TurnstileSettingsPage from "./pages/TurnstileSettingsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import UnsubscribePage from "./pages/UnsubscribePage.tsx";
+import HelpPage from "./pages/HelpPage.tsx";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
