@@ -44,6 +44,7 @@ interface Persona {
   work_mode: string | null;
   show_availability: boolean | null;
   show_location: boolean | null;
+  page_mode: string | null;
 }
 
 const PersonasPage = () => {
