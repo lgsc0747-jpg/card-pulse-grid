@@ -412,18 +412,18 @@ const NfcManagerPage = () => {
       </Dialog>
 
       {/* QR preview dialog */}
-      <Dialog open={!!qrCode} onOpenChange={(open) => !open && setQrCode(null)}>
+      <Dialog open={!!qrPreview} onOpenChange={(open) => !open && setQrPreview(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-display">QR Code</DialogTitle>
           </DialogHeader>
-          {qrCode && (
+          {qrPreview && (
             <div className="flex flex-col items-center gap-3">
               <div className="p-4 bg-white rounded-xl">
-                <QRCodeSVG id={`qr-${qrCode}`} value={`${origin}/u/${qrCode}?src=qr`} size={200} level="H" includeMargin={false} />
+                <QRCodeSVG id={`qr-${qrPreview.label}`} value={qrPreview.url} size={200} level="H" includeMargin={false} />
               </div>
-              <code className="text-xs font-mono text-muted-foreground">/u/{qrCode}</code>
-              <Button onClick={() => downloadQr(qrCode)} className="gradient-primary text-primary-foreground">
+              <code className="text-xs font-mono text-muted-foreground break-all text-center">{qrPreview.url.replace(origin, "")}</code>
+              <Button onClick={() => downloadQr(qrPreview.label)} className="gradient-primary text-primary-foreground">
                 <Download className="w-4 h-4 mr-1.5" /> Download PNG (512×512)
               </Button>
             </div>
