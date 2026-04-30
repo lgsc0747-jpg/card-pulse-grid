@@ -56,8 +56,8 @@ const NfcManagerPage = () => {
   // delete confirm
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  // qr preview
-  const [qrCode, setQrCode] = useState<string | null>(null);
+  // qr preview — supports both short links and direct persona URLs
+  const [qrPreview, setQrPreview] = useState<{ url: string; code: string; label: string } | null>(null);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
