@@ -235,6 +235,13 @@ const PersonasPage = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="font-display text-base">{persona.label}</CardTitle>
                     <div className="flex items-center gap-1">
+                      <Badge variant="secondary" className="text-[10px]">
+                        {persona.page_mode === "builder" ? (
+                          <><LayoutTemplate className="w-3 h-3 mr-0.5" /> Page</>
+                        ) : (
+                          <><CreditCard className="w-3 h-3 mr-0.5" /> Card</>
+                        )}
+                      </Badge>
                       {persona.is_private && (
                         <Badge variant="outline" className="text-[10px]">
                           <Lock className="w-3 h-3 mr-0.5" /> Private
