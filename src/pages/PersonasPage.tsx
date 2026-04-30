@@ -15,6 +15,7 @@ import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Trash2, Check, Edit3, Shield, Lock, Users, Loader2, Eye,
+  CreditCard, LayoutTemplate,
 } from "lucide-react";
 
 interface Persona {
@@ -43,6 +44,7 @@ interface Persona {
   work_mode: string | null;
   show_availability: boolean | null;
   show_location: boolean | null;
+  page_mode: string | null;
 }
 
 const PersonasPage = () => {
@@ -138,6 +140,7 @@ const PersonasPage = () => {
       show_location: editingPersona.show_location ?? true,
       is_private: editingPersona.is_private,
       require_contact_exchange: editingPersona.require_contact_exchange,
+      page_mode: editingPersona.page_mode || "personal",
     };
 
     // Only send pin_code if user entered a new raw PIN
@@ -232,6 +235,13 @@ const PersonasPage = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="font-display text-base">{persona.label}</CardTitle>
                     <div className="flex items-center gap-1">
+                      <Badge variant="secondary" className="text-[10px]">
+                        {persona.page_mode === "builder" ? (
+                          <><LayoutTemplate className="w-3 h-3 mr-0.5" /> Page</>
+                        ) : (
+                          <><CreditCard className="w-3 h-3 mr-0.5" /> Card</>
+                        )}
+                      </Badge>
                       {persona.is_private && (
                         <Badge variant="outline" className="text-[10px]">
                           <Lock className="w-3 h-3 mr-0.5" /> Private
@@ -298,6 +308,42 @@ const PersonasPage = () => {
                 <p className="text-xs text-muted-foreground">
                   Identity, contact info, and design are managed in the <Link to="/page-builder" className="text-primary underline">Page Builder</Link> and <Link to="/design-studio" className="text-primary underline">Card Studio</Link>.
                 </p>
+              </div>
+
+              {/* Public View Mode */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Public View</h3>
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Choose what visitors see when they open this persona.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    { id: "personal", label: "Card Studio", desc: "3D card fly-up + contact", icon: CreditCard },
+                    { id: "builder", label: "Page Builder", desc: "Custom blocks & multi-page", icon: LayoutTemplate },
+                  ] as const).map((opt) => {
+                    const active = (editingPersona.page_mode || "personal") === opt.id;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => updateField("page_mode", opt.id)}
+                        className={`relative flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition-all ${
+                          active
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                            : "border-border/60 hover:border-primary/40"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 w-full">
+                          <Icon className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-semibold">{opt.label}</span>
+                          {active && <Check className="w-3.5 h-3.5 text-primary ml-auto" />}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">{opt.desc}</p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Security */}
