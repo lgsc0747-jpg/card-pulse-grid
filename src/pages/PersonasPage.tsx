@@ -15,6 +15,7 @@ import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Trash2, Check, Edit3, Shield, Lock, Users, Loader2, Eye,
+  CreditCard, LayoutTemplate,
 } from "lucide-react";
 
 interface Persona {
