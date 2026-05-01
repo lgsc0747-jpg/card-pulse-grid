@@ -714,14 +714,14 @@ function PageBuilderPage() {
         {/* ═══ Center Canvas ═══ */}
         <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
           <ScrollArea className="flex-1">
-            <div className="flex justify-center p-4 md:p-8 min-h-full">
+            <div className="flex justify-center p-2 md:p-4 min-h-full">
               <div
                 className={cn(
                   "relative transition-all duration-300 shadow-lg flex flex-col",
                   PAGE_THEME_CLASS,
                   deviceMode === "mobile"
                     ? "w-[375px] min-h-[667px] border-[6px] border-muted-foreground/15 rounded-[2.5rem]"
-                    : "w-full max-w-5xl min-h-[calc(100vh-8rem)] rounded-xl border border-border/60"
+                    : "w-full max-w-6xl min-h-[calc(100vh-7rem)] rounded-xl border border-border/60"
                 )}
                 style={{
                   ...getPageThemeStyles(pageThemeCtx.themeId),
