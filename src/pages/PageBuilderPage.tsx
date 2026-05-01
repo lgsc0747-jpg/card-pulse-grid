@@ -714,7 +714,7 @@ function PageBuilderPage() {
         {/* ═══ Center Canvas ═══ */}
         <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
           <ScrollArea className="flex-1">
-            <div className="flex justify-center p-4 md:p-8 min-h-full">
+            <div className="flex justify-center p-2 md:p-4 min-h-full">
               <div
                 className={cn(
                   "relative transition-all duration-300 shadow-lg flex flex-col",
