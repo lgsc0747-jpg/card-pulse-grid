@@ -261,8 +261,8 @@ const DesignStudioPage = () => {
                 <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Preview</span>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center p-4">
-              {cardPreview}
+            <div className="flex-1 flex items-center justify-center p-3">
+              <div className="w-full max-w-xl">{cardPreview}</div>
             </div>
           </div>
 
