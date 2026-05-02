@@ -204,6 +204,7 @@ function PageBuilderPage() {
   const { isPro, loading: subLoading } = useSubscription();
   const [personas, setPersonas] = useState<{ id: string; label: string; slug: string }[]>([]);
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
+  const [livePersona, setLivePersona] = useState<any | null>(null);
   const [pages, setPages] = useState<SitePage[]>([]);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<PageBlock[]>([]);
