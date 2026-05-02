@@ -775,15 +775,43 @@ function PageBuilderPage() {
           </ScrollArea>
         </div>
 
-        {/* ═══ Right Panel — Block Editor ═══ */}
-        {editingBlock && !isMobile && (
-          <div className="w-72 shrink-0 border-l border-border/40 bg-card/30 overflow-y-auto p-3">
-            <BlockEditor
-              block={editingBlock}
-              onChange={updateBlock}
-              onDelete={() => deleteBlock(editingBlock.id)}
-              onClose={() => setEditingBlockId(null)}
-            />
+        {/* ═══ Right Panel — Tabbed: Block / NFC / Activity ═══ */}
+        {!isMobile && (
+          <div className="w-72 shrink-0 border-l border-border/40 bg-card/30 flex flex-col overflow-hidden">
+            <Tabs defaultValue="block" className="flex-1 flex flex-col">
+              <TabsList className="grid grid-cols-3 m-2 h-8 bg-muted/40">
+                <TabsTrigger value="block" className="text-[10px] gap-1 h-6">
+                  <PanelLeft className="w-3 h-3" /> Block
+                </TabsTrigger>
+                <TabsTrigger value="nfc" className="text-[10px] gap-1 h-6">
+                  <CreditCard className="w-3 h-3" /> Cards
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="text-[10px] gap-1 h-6">
+                  <Activity className="w-3 h-3" /> Activity
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="block" className="flex-1 overflow-y-auto p-3 mt-0">
+                {editingBlock ? (
+                  <BlockEditor
+                    block={editingBlock}
+                    onChange={updateBlock}
+                    onDelete={() => deleteBlock(editingBlock.id)}
+                    onClose={() => setEditingBlockId(null)}
+                  />
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <PanelLeft className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                    <p className="text-[11px]">Select a block on the canvas to edit it.</p>
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="nfc" className="flex-1 overflow-y-auto p-3 mt-0">
+                {user && <NfcCardsPanel userId={user.id} personaId={selectedPersonaId} />}
+              </TabsContent>
+              <TabsContent value="activity" className="flex-1 overflow-y-auto p-3 mt-0">
+                {user && <RecentInteractionsPanel userId={user.id} personaId={selectedPersonaId} />}
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>
