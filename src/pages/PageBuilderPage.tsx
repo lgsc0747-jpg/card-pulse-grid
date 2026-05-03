@@ -177,7 +177,7 @@ function SortablePreviewBlock({ block, editingBlockId, onSelect, persona }: {
     position: "relative",
   };
   return (
-    <div ref={setNodeRef} style={style} className="group relative">
+    <div ref={setNodeRef} style={style} data-block-id={block.id} className="group relative">
       <div
         {...attributes}
         {...listeners}
