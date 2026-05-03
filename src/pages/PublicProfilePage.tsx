@@ -9,6 +9,7 @@ import { CardDisabledPage } from "@/components/CardDisabledPage";
 
 import { BlockRenderer } from "@/components/page-builder/BlockRenderer";
 import { PublicPageNav } from "@/components/page-builder/PublicPageNav";
+import { PageCanvas } from "@/components/page-builder/PageCanvas";
 
 import type { PageBlock } from "@/components/page-builder/types";
 import { downloadVCard } from "@/lib/vcard";
