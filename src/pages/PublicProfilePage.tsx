@@ -756,7 +756,7 @@ const PublicProfilePage = () => {
         {/* Route based on page_mode: builder = page blocks, personal/default = legacy card fly-up */}
         {persona?.page_mode === 'builder' && hasPageBuilder ? (
           <div
-            className="flex-1 flex flex-col"
+            className="flex-1 flex flex-col w-full max-w-6xl mx-auto"
             style={{
               color: hasPageTheme ? (pageThemeStyles as any)["--page-text"] || textColor : textColor,
               ...(hasPageTheme ? pageThemeStyles : {}),
