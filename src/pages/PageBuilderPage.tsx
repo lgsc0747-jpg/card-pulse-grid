@@ -607,6 +607,17 @@ function PageBuilderPage() {
               <Smartphone className="w-3 h-3" />
             </Button>
           </div>
+          {import.meta.env.DEV && selectedPersonaId && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0"
+              onClick={() => setDiffOpen(true)}
+              title="Compare editor vs live"
+            >
+              <GitCompare className="w-3.5 h-3.5" />
+            </Button>
+          )}
           <Button onClick={saveAll} disabled={saving} size="sm" className="gradient-primary text-primary-foreground rounded-lg h-7 text-xs px-3">
             {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />}
             Save
