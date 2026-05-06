@@ -53,9 +53,9 @@ const FunnelPage = () => {
 
         <PageSection title="Workspaces">
           <motion.div
-            variants={staggerChildren}
-            initial="hidden"
-            animate="show"
+            variants={staggerChildren()}
+            initial="initial"
+            animate="animate"
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           >
             {TILES.map((t) => {
