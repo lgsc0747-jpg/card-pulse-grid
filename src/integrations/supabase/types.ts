@@ -309,6 +309,47 @@ export type Database = {
         }
         Relationships: []
       }
+      member_permissions: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          member_user_id: string
+          organization_id: string
+          permission: string
+          resource_id: string | null
+          resource_type: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          member_user_id: string
+          organization_id: string
+          permission: string
+          resource_id?: string | null
+          resource_type: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          member_user_id?: string
+          organization_id?: string
+          permission?: string
+          resource_id?: string | null
+          resource_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfc_cards: {
         Row: {
           created_at: string
@@ -359,6 +400,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          organization_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_user_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       page_blocks: {
         Row: {
@@ -603,6 +706,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           availability_status: string | null
           avatar_url: string | null
           bio: string | null
@@ -626,6 +730,7 @@ export type Database = {
           work_mode: string | null
         }
         Insert: {
+          account_type?: string
           availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -649,6 +754,7 @@ export type Database = {
           work_mode?: string | null
         }
         Update: {
+          account_type?: string
           availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -1030,6 +1136,16 @@ export type Database = {
           work_mode: string
         }[]
       }
+      has_org_permission: {
+        Args: {
+          _org_id: string
+          _permission: string
+          _resource_id: string
+          _resource_type: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1051,6 +1167,10 @@ export type Database = {
         }
         Returns: string
       }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_user_pro: { Args: { p_user_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
@@ -1060,6 +1180,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      org_role_of: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["org_role"]
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
@@ -1086,6 +1210,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user" | "super_admin"
       card_status: "active" | "inactive"
+      org_role: "owner" | "admin" | "manager" | "member"
       subscription_plan: "free" | "pro"
     }
     CompositeTypes: {
@@ -1216,6 +1341,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user", "super_admin"],
       card_status: ["active", "inactive"],
+      org_role: ["owner", "admin", "manager", "member"],
       subscription_plan: ["free", "pro"],
     },
   },
