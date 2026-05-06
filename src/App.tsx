@@ -70,6 +70,7 @@ const App = () => (
             <Route path="/design-studio" element={<ProtectedRoute><DesignStudioPage /></ProtectedRoute>} />
             <Route path="/page-builder" element={<ProtectedRoute><PageBuilderPage /></ProtectedRoute>} />
             <Route path="/funnel" element={<ProtectedRoute><FunnelPage /></ProtectedRoute>} />
+            <Route path="/personas/:slug/analytics" element={<ProtectedRoute><PersonaAnalyticsPage /></ProtectedRoute>} />
 
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
