@@ -24,6 +24,58 @@ const ProfilePage = () => {
     email_public: "",
   });
 
+  // Email change
+  const [newEmail, setNewEmail] = useState("");
+  const [changingEmail, setChangingEmail] = useState(false);
+
+  // Linked identities (Google / Apple)
+  const [identities, setIdentities] = useState<Array<{ id: string; provider: string }>>([]);
+  const [identityBusy, setIdentityBusy] = useState<string | null>(null);
+
+  const refreshIdentities = async () => {
+    const { data } = await supabase.auth.getUserIdentities();
+    setIdentities(((data?.identities ?? []) as any[]).map((i) => ({ id: i.identity_id, provider: i.provider })));
+  };
+
+  useEffect(() => { refreshIdentities(); }, [user]);
+
+  const handleChangeEmail = async () => {
+    if (!newEmail.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) {
+      toast({ title: "Invalid email", variant: "destructive" });
+      return;
+    }
+    setChangingEmail(true);
+    const { error } = await supabase.auth.updateUser(
+      { email: newEmail },
+      { emailRedirectTo: window.location.origin + "/profile" },
+    );
+    setChangingEmail(false);
+    if (error) return toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    toast({ title: "Confirmation sent", description: "Check both your old and new inbox to confirm the change." });
+    setNewEmail("");
+  };
+
+  const linkProvider = async (provider: "google" | "apple") => {
+    setIdentityBusy(provider);
+    const { error } = await supabase.auth.linkIdentity({
+      provider,
+      options: { redirectTo: window.location.origin + "/profile" },
+    } as any);
+    setIdentityBusy(null);
+    if (error) toast({ title: "Could not start linking", description: error.message, variant: "destructive" });
+  };
+
+  const unlinkProvider = async (provider: string) => {
+    const target = (await supabase.auth.getUserIdentities()).data?.identities?.find((i: any) => i.provider === provider);
+    if (!target) return;
+    setIdentityBusy(provider);
+    const { error } = await supabase.auth.unlinkIdentity(target as any);
+    setIdentityBusy(null);
+    if (error) return toast({ title: "Unlink failed", description: error.message, variant: "destructive" });
+    toast({ title: `Disconnected ${provider}` });
+    refreshIdentities();
+  };
+
   useEffect(() => {
     if (!user) return;
     supabase
