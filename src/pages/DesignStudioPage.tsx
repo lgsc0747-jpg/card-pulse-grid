@@ -257,14 +257,14 @@ const DesignStudioPage = () => {
           </div>
 
           {/* Live Preview — Desktop */}
-          <div className="flex-1 hidden lg:flex flex-col overflow-y-auto bg-background/50">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+          <div className="flex-1 hidden lg:flex flex-col overflow-y-auto bg-muted/20">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background">
               <div className="flex items-center gap-2">
                 <Eye className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Preview</span>
+                <span className="text-eyebrow text-muted-foreground">Preview</span>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center p-3">
+            <div className="flex-1 flex items-center justify-center p-6">
               <div className="w-full max-w-xl">{cardPreview}</div>
             </div>
           </div>
