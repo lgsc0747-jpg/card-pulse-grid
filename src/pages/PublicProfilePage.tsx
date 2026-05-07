@@ -104,6 +104,7 @@ const PublicProfilePage = () => {
   const [ownerIsPro, setOwnerIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [gateUnlocked, setGateUnlocked] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
@@ -154,6 +155,37 @@ const PublicProfilePage = () => {
         setLoading(false);
         return;
       }
+
+      // Detect tap source up front so we can skip rate limit for trusted entries
+      let earlySource: string | undefined;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = (params.get("src") ?? "").toLowerCase();
+        if (raw === "qr" || raw === "nfc" || raw === "link") earlySource = raw;
+      } catch { /* ignore */ }
+      try {
+        const tapRaw = sessionStorage.getItem("tap_origin");
+        if (tapRaw) {
+          const parsed = JSON.parse(tapRaw);
+          if (parsed && Date.now() - (parsed.ts ?? 0) < 60_000 &&
+              (parsed.card_id || parsed.source === "short_link")) {
+            earlySource = "nfc";
+          }
+        }
+      } catch { /* ignore */ }
+
+      // Rate-limit check: blocks anyone enumerating /p/<random>/<random> URLs.
+      // NFC / QR taps are always allowed.
+      try {
+        const { data: gate } = await supabase.functions.invoke("check-profile-access", {
+          body: { target_user_id: profileData.user_id, source_method: earlySource },
+        });
+        if (gate && gate.allowed === false) {
+          setRateLimited(true);
+          setLoading(false);
+          return;
+        }
+      } catch { /* fail open */ }
 
       setProfile(profileData as ProfileData);
 
@@ -435,6 +467,21 @@ const PublicProfilePage = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (rateLimited) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+          <Wifi className="w-6 h-6 text-muted-foreground" />
+        </div>
+        <h1 className="text-xl font-display font-bold">Slow down</h1>
+        <p className="text-muted-foreground max-w-sm text-sm">
+          Too many profile lookups from your network. Please try again in a few minutes,
+          or tap a card to open the profile directly.
+        </p>
       </div>
     );
   }

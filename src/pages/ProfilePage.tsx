@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Save, Loader2, Camera } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Save, Loader2, Camera, Mail, Link2, Unlink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,58 @@ const ProfilePage = () => {
     username: "",
     email_public: "",
   });
+
+  // Email change
+  const [newEmail, setNewEmail] = useState("");
+  const [changingEmail, setChangingEmail] = useState(false);
+
+  // Linked identities (Google / Apple)
+  const [identities, setIdentities] = useState<Array<{ id: string; provider: string }>>([]);
+  const [identityBusy, setIdentityBusy] = useState<string | null>(null);
+
+  const refreshIdentities = async () => {
+    const { data } = await supabase.auth.getUserIdentities();
+    setIdentities(((data?.identities ?? []) as any[]).map((i) => ({ id: i.identity_id, provider: i.provider })));
+  };
+
+  useEffect(() => { refreshIdentities(); }, [user]);
+
+  const handleChangeEmail = async () => {
+    if (!newEmail.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) {
+      toast({ title: "Invalid email", variant: "destructive" });
+      return;
+    }
+    setChangingEmail(true);
+    const { error } = await supabase.auth.updateUser(
+      { email: newEmail },
+      { emailRedirectTo: window.location.origin + "/profile" },
+    );
+    setChangingEmail(false);
+    if (error) return toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    toast({ title: "Confirmation sent", description: "Check both your old and new inbox to confirm the change." });
+    setNewEmail("");
+  };
+
+  const linkProvider = async (provider: "google" | "apple") => {
+    setIdentityBusy(provider);
+    const { error } = await supabase.auth.linkIdentity({
+      provider,
+      options: { redirectTo: window.location.origin + "/profile" },
+    } as any);
+    setIdentityBusy(null);
+    if (error) toast({ title: "Could not start linking", description: error.message, variant: "destructive" });
+  };
+
+  const unlinkProvider = async (provider: string) => {
+    const target = (await supabase.auth.getUserIdentities()).data?.identities?.find((i: any) => i.provider === provider);
+    if (!target) return;
+    setIdentityBusy(provider);
+    const { error } = await supabase.auth.unlinkIdentity(target as any);
+    setIdentityBusy(null);
+    if (error) return toast({ title: "Unlink failed", description: error.message, variant: "destructive" });
+    toast({ title: `Disconnected ${provider}` });
+    refreshIdentities();
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -145,6 +198,76 @@ const ProfilePage = () => {
               {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
               Save changes
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-sm">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2"><Mail className="w-4 h-4" /> Sign-in email</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-xs text-muted-foreground">
+              Current: <span className="font-mono">{user?.email}</span>. Changing requires confirming
+              from <em>both</em> the old and new inbox.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                type="email"
+                placeholder="new@example.com"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+              <Button onClick={handleChangeEmail} disabled={changingEmail || !newEmail} className="rounded-sm">
+                {changingEmail ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Mail className="w-4 h-4 mr-1.5" />}
+                Update email
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-sm">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2"><Link2 className="w-4 h-4" /> Linked accounts</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Sign in faster by linking a Google or Apple account. You can keep your password too.
+            </p>
+            {(["google", "apple"] as const).map((p) => {
+              const linked = identities.some((i) => i.provider === p);
+              return (
+                <div key={p} className="flex items-center justify-between p-3 border border-border rounded-sm">
+                  <div className="flex items-center gap-2.5">
+                    <span className="capitalize text-sm font-medium">{p}</span>
+                    {linked && <Badge variant="secondary" className="text-[10px]">Linked</Badge>}
+                  </div>
+                  {linked ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-sm"
+                      disabled={identityBusy === p || identities.length <= 1}
+                      onClick={() => unlinkProvider(p)}
+                    >
+                      <Unlink className="w-3.5 h-3.5 mr-1.5" />Unlink
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="rounded-sm"
+                      disabled={identityBusy === p}
+                      onClick={() => linkProvider(p)}
+                    >
+                      {identityBusy === p ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5 mr-1.5" />}
+                      Link {p}
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+            <p className="text-[10px] text-muted-foreground">
+              GitHub and other providers aren't supported yet.
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -15,7 +15,9 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import { Building2, Plus, ShieldCheck, UserPlus, Loader2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Building2, Plus, ShieldCheck, UserPlus, Loader2, MessageSquare, Send, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +67,24 @@ const AgencyPage = () => {
   const [inviteRole, setInviteRole] = useState<OrgRole>("member");
   const [inviting, setInviting] = useState(false);
 
+  // Messages
+  interface AgencyMessage {
+    id: string; sender_user_id: string; recipient_user_id: string | null;
+    subject: string | null; body: string; created_at: string;
+  }
+  const [messages, setMessages] = useState<AgencyMessage[]>([]);
+  const [composeRecipient, setComposeRecipient] = useState<string>("all");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const loadMessages = useCallback(async (orgId: string) => {
+    const { data } = await supabase.from("agency_messages")
+      .select("*").eq("organization_id", orgId)
+      .order("created_at", { ascending: false }).limit(50);
+    setMessages((data ?? []) as AgencyMessage[]);
+  }, []);
+
   const loadOrgs = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -91,9 +111,29 @@ const AgencyPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!activeOrg) { setMembers([]); setPerms([]); return; }
+    if (!activeOrg) { setMembers([]); setPerms([]); setMessages([]); return; }
     loadMembersAndPerms(activeOrg.id);
-  }, [activeOrg, loadMembersAndPerms]);
+    loadMessages(activeOrg.id);
+  }, [activeOrg, loadMembersAndPerms, loadMessages]);
+
+  const sendMessage = async () => {
+    if (!activeOrg || !composeBody.trim()) return;
+    setSending(true);
+    const { error } = await supabase.functions.invoke("send-agency-message", {
+      body: {
+        organization_id: activeOrg.id,
+        recipient_user_id: composeRecipient === "all" ? null : composeRecipient,
+        subject: composeSubject.trim() || null,
+        body: composeBody.trim(),
+      },
+    });
+    setSending(false);
+    if (error) return toast({ title: "Send failed", description: error.message, variant: "destructive" });
+    toast({ title: "Message sent", description: "Members will receive an email notification." });
+    setComposeBody(""); setComposeSubject(""); setComposeRecipient("all");
+    loadMessages(activeOrg.id);
+  };
+
 
   const upgradeToAgency = async () => {
     if (!user) return;
@@ -240,6 +280,14 @@ const AgencyPage = () => {
             </PageSection>
 
             {activeOrg && (
+              <Tabs defaultValue="members" className="space-y-3">
+                <TabsList className="rounded-sm">
+                  <TabsTrigger value="members" className="rounded-sm text-xs">Members & permissions</TabsTrigger>
+                  <TabsTrigger value="messages" className="rounded-sm text-xs">
+                    <MessageSquare className="w-3.5 h-3.5 mr-1.5" />Messages
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="members">
               <PageSection
                 title="Members & permissions"
                 description="Owners and admins have all permissions implicitly. Toggle per-feature access for managers and members."
@@ -327,6 +375,87 @@ const AgencyPage = () => {
                   </CardContent>
                 </Card>
               </PageSection>
+                </TabsContent>
+
+                <TabsContent value="messages">
+                  <PageSection
+                    title="Messages"
+                    description="Send updates to a single member or broadcast to the whole workspace. Recipients also get an email."
+                  >
+                    <Card className="mb-3">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">To</Label>
+                            <Select value={composeRecipient} onValueChange={setComposeRecipient}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">Everyone in workspace</SelectItem>
+                                {members.filter((m) => m.user_id !== user?.id).map((m) => (
+                                  <SelectItem key={m.user_id} value={m.user_id}>
+                                    {m.display_name || m.username || m.user_id.slice(0, 8)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Subject (optional)</Label>
+                            <Input value={composeSubject} onChange={(e) => setComposeSubject(e.target.value)} placeholder="Quick update…" />
+                          </div>
+                        </div>
+                        <Textarea
+                          value={composeBody}
+                          onChange={(e) => setComposeBody(e.target.value)}
+                          placeholder="Write your message…"
+                          rows={4}
+                        />
+                        <div className="flex justify-end">
+                          <Button onClick={sendMessage} disabled={sending || !composeBody.trim()}>
+                            {sending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Send className="w-4 h-4 mr-1.5" />}
+                            Send
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <div className="space-y-2">
+                      {messages.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-6">No messages yet.</p>
+                      )}
+                      {messages.map((msg) => {
+                        const sender = members.find((m) => m.user_id === msg.sender_user_id);
+                        const recipient = msg.recipient_user_id
+                          ? members.find((m) => m.user_id === msg.recipient_user_id)
+                          : null;
+                        return (
+                          <Card key={msg.id}>
+                            <CardContent className="p-3 space-y-1.5">
+                              <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                                <span>
+                                  <span className="text-foreground font-medium">
+                                    {sender?.display_name || sender?.username || "Member"}
+                                  </span>
+                                  {" → "}
+                                  {recipient
+                                    ? (recipient.display_name || recipient.username || "member")
+                                    : <Badge variant="secondary" className="text-[9px] py-0">Everyone</Badge>}
+                                </span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Mail className="w-3 h-3" />
+                                  {new Date(msg.created_at).toLocaleString()}
+                                </span>
+                              </div>
+                              {msg.subject && <p className="text-sm font-medium">{msg.subject}</p>}
+                              <p className="text-sm whitespace-pre-wrap">{msg.body}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </PageSection>
+                </TabsContent>
+              </Tabs>
             )}
           </>
         )}
