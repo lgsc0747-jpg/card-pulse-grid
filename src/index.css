@@ -261,12 +261,11 @@
     outline: none !important;
   }
   .recharts-default-tooltip {
-    background: hsl(var(--card) / 0.92) !important;
-    backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--border) / 0.6) !important;
-    border-radius: 12px !important;
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 2px !important;
     box-shadow: var(--shadow-elevated) !important;
-    padding: 10px 12px !important;
+    padding: 8px 10px !important;
   }
   .recharts-tooltip-label {
     color: hsl(var(--foreground)) !important;
