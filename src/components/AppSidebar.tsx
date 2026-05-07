@@ -85,8 +85,8 @@ function SortableNavItem({ item, collapsed }: { item: NavItem; collapsed: boolea
           <NavLink
             to={item.url}
             end={item.url === "/"}
-            className="relative flex-1 flex items-center gap-2.5 rounded-md pl-2 pr-3 py-1.5 text-[13px] text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-primary before:rounded-r"
+            className="relative flex-1 flex items-center gap-2.5 rounded-sm pl-2 pr-3 py-1.5 text-[13px] text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[2px] before:bg-accent"
           >
             <item.icon className="h-4 w-4 shrink-0 opacity-80" strokeWidth={1.75} />
             {!collapsed && <span className="truncate">{item.title}</span>}
