@@ -1,10 +1,8 @@
 /**
- * Apple-grade page layout primitives. Use these inside DashboardLayout to
- * get consistent responsive width, padding, and section spacing across every
- * surface. Mobile / tablet / desktop variants are baked in.
+ * Editorial / Linear-style page primitives.
  *
  *   <Page>
- *     <PageHeader title="Leads" description="..." actions={<Button .../>} />
+ *     <PageHeader eyebrow="Workspace" title="Leads" description="..." actions={<Button .../>} />
  *     <PageSection>...</PageSection>
  *     <PageSection title="Recent">...</PageSection>
  *   </Page>
@@ -13,26 +11,30 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("w-full space-y-6 sm:space-y-8", className)}>{children}</div>;
+  return <div className={cn("w-full space-y-8", className)}>{children}</div>;
 }
 
 interface PageHeaderProps {
+  eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
   className?: string;
 }
 
-export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
+export function PageHeader({ eyebrow, title, description, actions, className }: PageHeaderProps) {
   return (
-    <header className={cn("flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4", className)}>
-      <div className="min-w-0 flex-1">
-        <h1 className="text-title-1 font-display">{title}</h1>
-        {description && (
-          <p className="mt-1 text-sm text-muted-foreground max-w-2xl">{description}</p>
-        )}
+    <header className={cn("flex flex-col gap-4 pb-5 border-b border-border", className)}>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-1">
+          {eyebrow && <div className="text-eyebrow">{eyebrow}</div>}
+          <h1 className="text-[22px] sm:text-[26px] font-semibold tracking-tight leading-tight">{title}</h1>
+          {description && (
+            <p className="text-[13px] text-muted-foreground max-w-2xl leading-relaxed">{description}</p>
+          )}
+        </div>
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>
-      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
     </header>
   );
 }
@@ -47,12 +49,12 @@ interface PageSectionProps {
 
 export function PageSection({ title, description, actions, children, className }: PageSectionProps) {
   return (
-    <section className={cn("space-y-3 sm:space-y-4", className)}>
+    <section className={cn("space-y-3", className)}>
       {(title || actions) && (
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
-            {title && <h2 className="text-title-2 font-display">{title}</h2>}
-            {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
+            {title && <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>}
+            {description && <p className="mt-0.5 text-[12px] text-muted-foreground">{description}</p>}
           </div>
           {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
         </div>
@@ -75,7 +77,7 @@ export function PageGrid({
   const lg =
     cols === 2 ? "lg:grid-cols-2" : cols === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
   return (
-    <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5", lg, className)}>
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4", lg, className)}>
       {children}
     </div>
   );
