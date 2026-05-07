@@ -38,6 +38,7 @@ import NotFound from "./pages/NotFound.tsx";
 import UnsubscribePage from "./pages/UnsubscribePage.tsx";
 import HelpPage from "./pages/HelpPage.tsx";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { CommandPalette } from "@/components/CommandPalette";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";
@@ -56,6 +57,7 @@ const App = () => (
           <DashboardThemeProvider>
           <NotificationListener />
           <PasswordRotationPrompt />
+          <CommandPalette />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
