@@ -67,6 +67,24 @@ const AgencyPage = () => {
   const [inviteRole, setInviteRole] = useState<OrgRole>("member");
   const [inviting, setInviting] = useState(false);
 
+  // Messages
+  interface AgencyMessage {
+    id: string; sender_user_id: string; recipient_user_id: string | null;
+    subject: string | null; body: string; created_at: string;
+  }
+  const [messages, setMessages] = useState<AgencyMessage[]>([]);
+  const [composeRecipient, setComposeRecipient] = useState<string>("all");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const loadMessages = useCallback(async (orgId: string) => {
+    const { data } = await supabase.from("agency_messages")
+      .select("*").eq("organization_id", orgId)
+      .order("created_at", { ascending: false }).limit(50);
+    setMessages((data ?? []) as AgencyMessage[]);
+  }, []);
+
   const loadOrgs = useCallback(async () => {
     if (!user) return;
     setLoading(true);
