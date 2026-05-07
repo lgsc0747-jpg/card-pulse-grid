@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wifi, UserPlus, Eye, EyeOff } from "lucide-react";
+import { Wifi, UserPlus, Eye, EyeOff, User, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SignupPage = () => {
@@ -18,6 +18,7 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [accountType, setAccountType] = useState<"personal" | "agency">("personal");
   const { toast } = useToast();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -52,18 +53,23 @@ const SignupPage = () => {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName, username },
+        data: { full_name: fullName, username, account_type: accountType },
       },
     });
 
     if (error) {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });
     } else {
+      // Persist account_type on the profile (created by handle_new_user trigger).
+      const newUserId = signUpData.user?.id;
+      if (newUserId && accountType === "agency") {
+        await supabase.from("profiles").update({ account_type: "agency" }).eq("user_id", newUserId);
+      }
       toast({ title: "Check your email", description: "We sent a verification link to confirm your account." });
     }
     setLoading(false);
@@ -81,6 +87,33 @@ const SignupPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground">Account type</label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { id: "personal", label: "Personal", desc: "1 user, full personal toolkit", icon: User },
+                  { id: "agency", label: "Agency", desc: "Multiple members, shared workspace", icon: Building2 },
+                ] as const).map((opt) => {
+                  const Icon = opt.icon;
+                  const active = accountType === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setAccountType(opt.id)}
+                      className={`text-left rounded-2xl border p-3 transition-all ${
+                        active ? "border-primary bg-primary/5 shadow-sm" : "border-border/60 hover:border-primary/40"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 mb-1.5" />
+                      <div className="text-sm font-semibold">{opt.label}</div>
+                      <div className="text-[11px] text-muted-foreground leading-snug">{opt.desc}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <label className="text-sm text-muted-foreground">Full Name</label>
               <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Alex Smith" required />

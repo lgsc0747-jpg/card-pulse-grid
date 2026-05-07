@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, FileText, GripVertical, RotateCcw, Contact, Sliders, Sparkles } from "lucide-react";
+import { CreditCard, LayoutDashboard, List, User, Wifi, LogOut, Smartphone, Users, Mail, Palette, Settings, Crown, ShieldCheck, FileText, GripVertical, RotateCcw, Contact, Sliders, Sparkles, Building2 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -43,6 +43,7 @@ const DEFAULT_NFC: NavItem[] = [
 const DEFAULT_GENERAL: NavItem[] = [
   { title: "Funnel", url: "/funnel", icon: Sparkles },
   { title: "Leads", url: "/leads", icon: Mail },
+  { title: "Agency", url: "/agency", icon: Building2 },
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "Plans", url: "/plans", icon: Crown },
 ];
