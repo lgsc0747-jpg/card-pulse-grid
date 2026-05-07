@@ -39,6 +39,7 @@ import UnsubscribePage from "./pages/UnsubscribePage.tsx";
 import HelpPage from "./pages/HelpPage.tsx";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { CommandPalette } from "@/components/CommandPalette";
+import { KeyboardShortcutsModal } from "@/components/KeyboardShortcutsModal";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";
