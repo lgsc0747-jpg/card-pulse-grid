@@ -1081,6 +1081,18 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_org_member_profiles: {
+        Args: { _org_id: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          membership_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+          username: string
+        }[]
+      }
       get_public_persona: {
         Args: { p_slug?: string; p_user_id: string }
         Returns: {
@@ -1179,6 +1191,14 @@ export type Database = {
           p_visitor_message?: string
           p_visitor_name?: string
           p_visitor_phone?: string
+        }
+        Returns: string
+      }
+      invite_org_member: {
+        Args: {
+          _identifier: string
+          _org_id: string
+          _role?: Database["public"]["Enums"]["org_role"]
         }
         Returns: string
       }
