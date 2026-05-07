@@ -156,6 +156,37 @@ const PublicProfilePage = () => {
         return;
       }
 
+      // Detect tap source up front so we can skip rate limit for trusted entries
+      let earlySource: string | undefined;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = (params.get("src") ?? "").toLowerCase();
+        if (raw === "qr" || raw === "nfc" || raw === "link") earlySource = raw;
+      } catch { /* ignore */ }
+      try {
+        const tapRaw = sessionStorage.getItem("tap_origin");
+        if (tapRaw) {
+          const parsed = JSON.parse(tapRaw);
+          if (parsed && Date.now() - (parsed.ts ?? 0) < 60_000 &&
+              (parsed.card_id || parsed.source === "short_link")) {
+            earlySource = "nfc";
+          }
+        }
+      } catch { /* ignore */ }
+
+      // Rate-limit check: blocks anyone enumerating /p/<random>/<random> URLs.
+      // NFC / QR taps are always allowed.
+      try {
+        const { data: gate } = await supabase.functions.invoke("check-profile-access", {
+          body: { target_user_id: profileData.user_id, source_method: earlySource },
+        });
+        if (gate && gate.allowed === false) {
+          setRateLimited(true);
+          setLoading(false);
+          return;
+        }
+      } catch { /* fail open */ }
+
       setProfile(profileData as ProfileData);
 
       const { data: proData } = await (supabase.rpc as any)("is_user_pro", {
