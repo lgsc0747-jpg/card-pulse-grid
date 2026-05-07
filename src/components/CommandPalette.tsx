@@ -80,7 +80,7 @@ export const CommandPalette = () => {
       { icon: Users, label: "Personas", path: "/personas" },
       { icon: UserCircle, label: "Leads", path: "/leads" },
       { icon: TrendingUp, label: "Funnel", path: "/funnel" },
-      { icon: Wifi, label: "NFC Devices", path: "/nfc" },
+      { icon: Wifi, label: "NFC Devices", path: "/nfc-manager" },
       { icon: FileText, label: "Logs", path: "/logs" },
       { icon: Building2, label: "Agency", path: "/agency" },
       { icon: Settings, label: "Settings", path: "/settings" },
