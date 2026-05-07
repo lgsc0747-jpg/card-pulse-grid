@@ -104,6 +104,7 @@ const PublicProfilePage = () => {
   const [ownerIsPro, setOwnerIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [gateUnlocked, setGateUnlocked] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
