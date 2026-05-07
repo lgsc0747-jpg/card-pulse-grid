@@ -59,6 +59,7 @@ const App = () => (
           <NotificationListener />
           <PasswordRotationPrompt />
           <CommandPalette />
+          <KeyboardShortcutsModal />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
