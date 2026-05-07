@@ -173,16 +173,16 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       {/* Brand */}
       <div className={cn("flex items-center gap-2 h-12 border-b border-sidebar-border", collapsed ? "justify-center px-2" : "px-4")}>
-        <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center shrink-0">
-          <span className="text-[11px] font-bold tracking-tight">H</span>
+        <div className="w-6 h-6 rounded-sm bg-foreground text-background flex items-center justify-center shrink-0">
+          <span className="font-mono text-[11px] font-bold tracking-tight">H</span>
         </div>
         {!collapsed && (
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="font-display text-[13px] font-semibold tracking-tight text-foreground truncate">
+            <span className="font-display text-[13px] font-bold tracking-tight text-foreground truncate">
               Handshake
             </span>
             {isPro && (
-              <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase">
+              <span className="font-mono text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-sm bg-accent text-accent-foreground uppercase">
                 Pro
               </span>
             )}
