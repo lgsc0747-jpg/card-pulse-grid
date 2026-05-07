@@ -281,8 +281,8 @@ const AgencyPage = () => {
 
             {activeOrg && (
               <Tabs defaultValue="members" className="space-y-3">
-                <TabsList className="rounded-sm">
-                  <TabsTrigger value="members" className="rounded-sm text-xs">Members & permissions</TabsTrigger>
+                <TabsList className="rounded-sm w-full sm:w-auto grid grid-cols-2 sm:flex">
+                  <TabsTrigger value="members" className="rounded-sm text-xs">Members</TabsTrigger>
                   <TabsTrigger value="messages" className="rounded-sm text-xs">
                     <MessageSquare className="w-3.5 h-3.5 mr-1.5" />Messages
                   </TabsTrigger>
