@@ -121,11 +121,27 @@ export function IdentityPanel({ editing, update, isPro }: StudioPanelProps) {
             <Input value={editing?.display_name ?? ""} onChange={(e) => update("display_name", e.target.value)} className="rounded-xl" />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Headline</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Headline</Label>
+              <AIAssistButton
+                kind="headline"
+                context={`Name: ${editing?.display_name ?? ""}. Current bio: ${editing?.bio ?? ""}`}
+                onResult={(t) => update("headline", t)}
+                label="Generate"
+              />
+            </div>
             <Input value={editing?.headline ?? ""} onChange={(e) => update("headline", e.target.value)} placeholder="Full-Stack Developer" className="rounded-xl" />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Bio</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Bio</Label>
+              <AIAssistButton
+                kind={editing?.bio ? "rewrite" : "bio"}
+                context={editing?.bio || `Name: ${editing?.display_name ?? ""}. Headline: ${editing?.headline ?? ""}`}
+                onResult={(t) => update("bio", t)}
+                label={editing?.bio ? "Polish" : "Generate"}
+              />
+            </div>
             <Input value={editing?.bio ?? ""} onChange={(e) => update("bio", e.target.value)} className="rounded-xl" />
           </div>
         </div>
