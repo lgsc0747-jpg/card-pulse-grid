@@ -75,7 +75,7 @@ export function CopyDesignDialog({ open, onOpenChange, source, targets, onDone }
       g.fields.forEach((f) => { payload[f] = (source as any)[f] ?? null; })
     );
     const ids = Array.from(targetIds);
-    const { error } = await supabase.from("personas").update(payload).in("id", ids);
+    const { error } = await supabase.from("personas").update(payload as any).in("id", ids);
     setSaving(false);
     if (error) {
       toast({ title: "Copy failed", description: error.message, variant: "destructive" });
