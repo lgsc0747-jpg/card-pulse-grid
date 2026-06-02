@@ -125,7 +125,190 @@ const Dashboard = () => {
   return (
     <ChartPaletteProvider>
       <DashboardLayout>
-        <div className="space-y-6">
+        {/* Break out of layout padding for true edge-to-edge cinematic bands */}
+        <div className="-mx-4 sm:-mx-6 lg:-mx-8 -my-6 lg:-my-8">
+
+          {/* ── BAND 1 · Masthead (ink on paper) ───────────────────────── */}
+          <section className="bg-foreground text-background px-4 sm:px-6 lg:px-12 py-10 lg:py-16">
+            <div className="mx-auto max-w-[1400px]">
+              <div className="flex items-center justify-between text-eyebrow text-background/60">
+                <span>Vol. 1 · {today}</span>
+                <span className="hidden sm:inline">The Handshake Broadsheet</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-background animate-pulse" />
+                  {TIMEFRAME_LABELS[timeframe]}
+                </span>
+              </div>
+              <h1 className="font-display leading-[0.9] tracking-tight mt-6 lg:mt-10 text-[clamp(3rem,10vw,9rem)]">
+                Analytics.
+              </h1>
+              <div className="mt-6 lg:mt-10 pt-6 border-t border-background/20 flex items-center gap-2 flex-wrap">
+                <TimeframeSelector value={timeframe} onChange={setTimeframe} />
+                <ChartPaletteSelector />
+                {isPro && <ExportButton stats={stats} chartData={chartData} timeframe={timeframe} />}
+              </div>
+            </div>
+          </section>
+
+          {/* ── BAND 2 · Lead story (oversized chart) ──────────────────── */}
+          <section className="bg-background px-4 sm:px-6 lg:px-12 py-12 lg:py-20 border-b border-border">
+            <div className="mx-auto max-w-[1400px]">
+              <p className="text-eyebrow text-muted-foreground mb-4">01 · Lead Story</p>
+              <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-tight mb-8 max-w-3xl">
+                The week, charted — every tap, view, and handshake across your network.
+              </h2>
+              {loading ? (
+                <ChartSkeleton height="h-[420px]" />
+              ) : (
+                <Suspense fallback={<ChartSkeleton height="h-[420px]" />}>
+                  <AnalyticsChart data={chartData} />
+                </Suspense>
+              )}
+            </div>
+          </section>
+
+          {/* ── BAND 3 · By the Numbers (paper, big KPIs) ──────────────── */}
+          <section className="bg-muted/40 px-4 sm:px-6 lg:px-12 py-12 lg:py-20 border-b border-border">
+            <div className="mx-auto max-w-[1400px]">
+              <p className="text-eyebrow text-muted-foreground mb-4">02 · By the Numbers</p>
+              <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-tight mb-10">
+                Four signals, no noise.
+              </h2>
+              {loading ? (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
+                  <KpiSkeleton /><KpiSkeleton /><KpiSkeleton /><KpiSkeleton />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
+                  <Kpi label="Profile views" value={stats.profileViews} icon={<Eye className="w-3.5 h-3.5" />} />
+                  <Kpi label="Unique visitors" value={stats.uniqueVisitors} icon={<Users className="w-3.5 h-3.5" />} />
+                  <Kpi label="Save rate" value={`${stats.contactSaveRate}%`} icon={<FileText className="w-3.5 h-3.5" />} />
+                  <Kpi label="Leads" value={stats.leadGenCount} icon={<MousePointerClick className="w-3.5 h-3.5" />} />
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ── BAND 4 · Featured identities (ink band, cinematic) ─────── */}
+          <section className="bg-foreground text-background px-4 sm:px-6 lg:px-12 py-12 lg:py-20">
+            <div className="mx-auto max-w-[1400px]">
+              <p className="text-eyebrow text-background/60 mb-4">03 · Identities</p>
+              <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-tight mb-10">
+                Every face you wear.
+              </h2>
+              <PersonaCardCarousel />
+            </div>
+          </section>
+
+          {/* ── BAND 5 · Funnel (full-bleed, single focus) ─────────────── */}
+          <section className="bg-background px-4 sm:px-6 lg:px-12 py-12 lg:py-20 border-b border-border">
+            <div className="mx-auto max-w-[1400px]">
+              <p className="text-eyebrow text-muted-foreground mb-4">04 · The Funnel</p>
+              <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-tight mb-10 max-w-3xl">
+                From a glance to a saved contact.
+              </h2>
+              {loading ? (
+                <FunnelSkeleton />
+              ) : (
+                <Suspense fallback={<FunnelSkeleton />}>
+                  <ConversionFunnel
+                    profileViews={stats.profileViews}
+                    cardFlips={stats.cardFlips}
+                    linkClicks={totalLinkClicks}
+                    vcardDownloads={stats.vcardDownloads}
+                  />
+                </Suspense>
+              )}
+            </div>
+          </section>
+
+          {/* ── BAND 6 · Personas + Devices (two-up cinematic split) ──── */}
+          <section className="bg-muted/40 px-4 sm:px-6 lg:px-12 py-12 lg:py-20 border-b border-border">
+            <div className="mx-auto max-w-[1400px]">
+              <p className="text-eyebrow text-muted-foreground mb-4">05 · Audience</p>
+              <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-tight mb-10 max-w-3xl">
+                Who they are. What they carry.
+              </h2>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-border">
+                <div className="lg:col-span-8 bg-background p-6">
+                  <p className="text-eyebrow text-muted-foreground mb-3">Persona Index</p>
+                  {loading ? (
+                    <ChartSkeleton height="h-[280px]" />
+                  ) : (
+                    <Suspense fallback={<ChartSkeleton height="h-[280px]" />}>
+                      <PersonaBarChart data={stats.personaPerformance} />
+                    </Suspense>
+                  )}
+                </div>
+                <div className="lg:col-span-4 bg-background p-6">
+                  <p className="text-eyebrow text-muted-foreground mb-3">Devices</p>
+                  {loading ? (
+                    <ChartSkeleton />
+                  ) : (
+                    <Suspense fallback={<ChartSkeleton />}>
+                      <DeviceDonutChart data={stats.deviceBreakdown} title="Devices" />
+                    </Suspense>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── BAND 7 · The Wire (closing credits) ────────────────────── */}
+          <section className="bg-background px-4 sm:px-6 lg:px-12 py-12 lg:py-20">
+            <div className="mx-auto max-w-[1400px]">
+              <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
+                <div>
+                  <p className="text-eyebrow text-muted-foreground mb-2">06 · The Wire</p>
+                  <h2 className="font-display text-[clamp(1.75rem,4vw,3rem)] leading-tight">
+                    Latest from the field.
+                  </h2>
+                </div>
+                <Link to="/logs" className="text-eyebrow text-accent hover:underline flex items-center gap-1">
+                  View all <ArrowUpRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="border-t-2 border-foreground">
+                {loading ? (
+                  <div className="divide-y divide-border">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 py-3">
+                        <Skeleton className="w-1.5 h-1.5 rounded-full shrink-0" />
+                        <Skeleton className="h-3 w-40 flex-1" />
+                        <Skeleton className="h-3 w-12 shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                ) : recentLogs.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-10 text-center italic">No interactions yet.</p>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {recentLogs.map((log) => {
+                      const meta = (log.metadata as Record<string, any>) ?? {};
+                      return (
+                        <div key={log.id} className="flex items-center gap-3 py-3 hover:bg-muted/40 transition-colors">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                          <p className="text-base font-medium flex-1 truncate">
+                            {log.occasion || log.interaction_type?.replace(/_/g, " ")}
+                          </p>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {meta.persona_slug && (
+                              <Badge variant="outline" className="rounded-sm text-eyebrow">
+                                {meta.persona_slug}
+                              </Badge>
+                            )}
+                            {meta.device && <span className="text-eyebrow text-muted-foreground">{meta.device}</span>}
+                            <span className="text-eyebrow text-muted-foreground tabular-nums w-10 text-right">{timeSince(log.created_at)}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
           {/* ── Masthead ─────────────────────────────────────────── */}
           <header className="border-y-2 border-foreground py-4">
             <div className="flex items-center justify-between text-eyebrow text-muted-foreground">
