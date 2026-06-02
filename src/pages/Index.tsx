@@ -120,75 +120,84 @@ const Dashboard = () => {
     return `${Math.floor(h / 24)}d`;
   };
 
+  const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
   return (
     <ChartPaletteProvider>
       <DashboardLayout>
-        <div className="space-y-5">
-          {/* Header */}
-          <div className="flex items-end justify-between flex-wrap gap-3 border-b border-border pb-4">
-            <div>
-              <p className="text-eyebrow text-muted-foreground">Overview</p>
-              <h1 className="text-display font-semibold tracking-tight">Analytics</h1>
-              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+        <div className="space-y-6">
+          {/* ── Masthead ─────────────────────────────────────────── */}
+          <header className="border-y-2 border-foreground py-4">
+            <div className="flex items-center justify-between text-eyebrow text-muted-foreground">
+              <span>Vol. 1 · {today}</span>
+              <span className="hidden sm:inline">The Handshake Broadsheet</span>
+              <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                 {TIMEFRAME_LABELS[timeframe]}
-              </p>
+              </span>
             </div>
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <h1 className="text-display font-display text-center mt-2 leading-none">Analytics</h1>
+            <div className="flex items-center justify-center gap-1.5 flex-wrap mt-3 pt-3 border-t border-border">
               <TimeframeSelector value={timeframe} onChange={setTimeframe} />
               <ChartPaletteSelector />
               {isPro && <ExportButton stats={stats} chartData={chartData} timeframe={timeframe} />}
             </div>
-          </div>
+          </header>
 
-          {/* KPI Strip */}
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <KpiSkeleton />
-              <KpiSkeleton />
-              <KpiSkeleton />
-              <KpiSkeleton />
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Kpi label="Profile views" value={stats.profileViews} icon={<Eye className="w-3.5 h-3.5" />} />
-              <Kpi label="Unique visitors" value={stats.uniqueVisitors} icon={<Users className="w-3.5 h-3.5" />} />
-              <Kpi label="Save rate" value={`${stats.contactSaveRate}%`} icon={<FileText className="w-3.5 h-3.5" />} />
-              <Kpi label="Leads" value={stats.leadGenCount} icon={<MousePointerClick className="w-3.5 h-3.5" />} />
-            </div>
-          )}
-
-          {/* 3D Card carousel */}
-          <PersonaCardCarousel />
-
-          {/* Trend + funnel */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <div className="lg:col-span-2">
+          {/* ── Lede: featured trend + KPI rail ──────────────────── */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 pb-6 border-b border-border">
+            <div className="lg:col-span-8 lg:border-r lg:border-border lg:pr-5">
+              <p className="text-eyebrow text-muted-foreground mb-2">Lead Story</p>
               {loading ? (
-                <ChartSkeleton />
+                <ChartSkeleton height="h-[300px]" />
               ) : (
-                <Suspense fallback={<ChartSkeleton />}>
+                <Suspense fallback={<ChartSkeleton height="h-[300px]" />}>
                   <AnalyticsChart data={chartData} />
                 </Suspense>
               )}
             </div>
-            {loading ? (
-              <FunnelSkeleton />
-            ) : (
-              <Suspense fallback={<FunnelSkeleton />}>
-                <ConversionFunnel
-                  profileViews={stats.profileViews}
-                  cardFlips={stats.cardFlips}
-                  linkClicks={totalLinkClicks}
-                  vcardDownloads={stats.vcardDownloads}
-                />
-              </Suspense>
-            )}
-          </div>
+            <aside className="lg:col-span-4 flex flex-col gap-3">
+              <p className="text-eyebrow text-muted-foreground">By the Numbers</p>
+              {loading ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <KpiSkeleton /><KpiSkeleton /><KpiSkeleton /><KpiSkeleton />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Kpi label="Profile views" value={stats.profileViews} icon={<Eye className="w-3.5 h-3.5" />} />
+                  <Kpi label="Unique visitors" value={stats.uniqueVisitors} icon={<Users className="w-3.5 h-3.5" />} />
+                  <Kpi label="Save rate" value={`${stats.contactSaveRate}%`} icon={<FileText className="w-3.5 h-3.5" />} />
+                  <Kpi label="Leads" value={stats.leadGenCount} icon={<MousePointerClick className="w-3.5 h-3.5" />} />
+                </div>
+              )}
+            </aside>
+          </section>
 
-          {/* Personas + devices */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <div className="lg:col-span-2">
+          {/* ── Editorial feature: 3D card ────────────────────────── */}
+          <section className="pb-6 border-b border-border">
+            <p className="text-eyebrow text-muted-foreground mb-3 text-center">Featured · Identities</p>
+            <PersonaCardCarousel />
+          </section>
+
+          {/* ── Three-column editorial grid ──────────────────────── */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 pb-6 border-b border-border">
+            <div className="lg:col-span-5 lg:border-r lg:border-border lg:pr-5">
+              <p className="text-eyebrow text-muted-foreground mb-2">Funnel Report</p>
+              {loading ? (
+                <FunnelSkeleton />
+              ) : (
+                <Suspense fallback={<FunnelSkeleton />}>
+                  <ConversionFunnel
+                    profileViews={stats.profileViews}
+                    cardFlips={stats.cardFlips}
+                    linkClicks={totalLinkClicks}
+                    vcardDownloads={stats.vcardDownloads}
+                  />
+                </Suspense>
+              )}
+            </div>
+            <div className="lg:col-span-4 lg:border-r lg:border-border lg:pr-5">
+              <p className="text-eyebrow text-muted-foreground mb-2">Persona Index</p>
               {loading ? (
                 <ChartSkeleton height="h-[220px]" />
               ) : (
@@ -197,60 +206,65 @@ const Dashboard = () => {
                 </Suspense>
               )}
             </div>
-            {loading ? (
-              <ChartSkeleton />
-            ) : (
-              <Suspense fallback={<ChartSkeleton />}>
-                <DeviceDonutChart data={stats.deviceBreakdown} title="Devices" />
-              </Suspense>
-            )}
-          </div>
+            <div className="lg:col-span-3">
+              <p className="text-eyebrow text-muted-foreground mb-2">Devices</p>
+              {loading ? (
+                <ChartSkeleton />
+              ) : (
+                <Suspense fallback={<ChartSkeleton />}>
+                  <DeviceDonutChart data={stats.deviceBreakdown} title="Devices" />
+                </Suspense>
+              )}
+            </div>
+          </section>
 
-          {/* Recent activity */}
-          <div className="rounded-sm border border-border bg-card">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <p className="text-eyebrow text-muted-foreground">Recent activity</p>
+          {/* ── Wire: recent activity ────────────────────────────── */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-eyebrow text-muted-foreground">The Wire · Recent Activity</p>
               <Link to="/logs" className="text-eyebrow text-accent hover:underline flex items-center gap-1">
                 View all <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
-            {loading ? (
-              <div className="divide-y divide-border">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                    <Skeleton className="w-1.5 h-1.5 rounded-full shrink-0" />
-                    <Skeleton className="h-3 w-40 flex-1" />
-                    <Skeleton className="h-3 w-12 shrink-0" />
-                  </div>
-                ))}
-              </div>
-            ) : recentLogs.length === 0 ? (
-              <p className="text-sm text-muted-foreground p-6 text-center">No interactions yet.</p>
-            ) : (
-              <div className="divide-y divide-border">
-                {recentLogs.map((log) => {
-                  const meta = (log.metadata as Record<string, any>) ?? {};
-                  return (
-                    <div key={log.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-                      <p className="text-sm font-medium flex-1 truncate">
-                        {log.occasion || log.interaction_type?.replace(/_/g, " ")}
-                      </p>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {meta.persona_slug && (
-                          <Badge variant="outline" className="rounded-sm text-eyebrow">
-                            {meta.persona_slug}
-                          </Badge>
-                        )}
-                        {meta.device && <span className="text-eyebrow text-muted-foreground">{meta.device}</span>}
-                        <span className="text-eyebrow text-muted-foreground tabular-nums w-8 text-right">{timeSince(log.created_at)}</span>
-                      </div>
+            <div className="border-t-2 border-foreground">
+              {loading ? (
+                <div className="divide-y divide-border">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 py-2.5">
+                      <Skeleton className="w-1.5 h-1.5 rounded-full shrink-0" />
+                      <Skeleton className="h-3 w-40 flex-1" />
+                      <Skeleton className="h-3 w-12 shrink-0" />
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : recentLogs.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-6 text-center italic">No interactions yet.</p>
+              ) : (
+                <div className="divide-y divide-border columns-1 md:columns-2 gap-x-6">
+                  {recentLogs.map((log) => {
+                    const meta = (log.metadata as Record<string, any>) ?? {};
+                    return (
+                      <div key={log.id} className="flex items-center gap-3 py-2.5 break-inside-avoid hover:bg-muted/40 transition-colors">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                        <p className="text-sm font-medium flex-1 truncate">
+                          {log.occasion || log.interaction_type?.replace(/_/g, " ")}
+                        </p>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {meta.persona_slug && (
+                            <Badge variant="outline" className="rounded-sm text-eyebrow">
+                              {meta.persona_slug}
+                            </Badge>
+                          )}
+                          {meta.device && <span className="text-eyebrow text-muted-foreground">{meta.device}</span>}
+                          <span className="text-eyebrow text-muted-foreground tabular-nums w-8 text-right">{timeSince(log.created_at)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </DashboardLayout>
     </ChartPaletteProvider>
@@ -258,3 +272,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
