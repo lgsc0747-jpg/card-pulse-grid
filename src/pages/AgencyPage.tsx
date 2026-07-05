@@ -98,6 +98,7 @@ const AgencyPage = () => {
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="flex flex-wrap h-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="studio">Studio</TabsTrigger>
               <TabsTrigger value="members">Members</TabsTrigger>
               <TabsTrigger value="inbox">Inbox</TabsTrigger>
               <TabsTrigger value="goals">Goals</TabsTrigger>
@@ -105,6 +106,7 @@ const AgencyPage = () => {
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="mt-4"><AgencyOverview orgId={activeOrg.id} /></TabsContent>
+            <TabsContent value="studio" className="mt-4"><AgencyStudio orgId={activeOrg.id} /></TabsContent>
             <TabsContent value="members" className="mt-4">
               <AgencyMembers orgId={activeOrg.id} ownerUserId={activeOrg.owner_user_id} onLeft={loadOrg} />
             </TabsContent>
