@@ -1426,6 +1426,32 @@ export type Database = {
           username: string
         }[]
       }
+      get_org_personas: {
+        Args: { _org_id: string }
+        Returns: {
+          accent_color: string
+          avatar_url: string
+          background_image_url: string
+          background_preset: string
+          block_count: number
+          created_at: string
+          display_name: string
+          headline: string
+          id: string
+          is_active: boolean
+          is_private: boolean
+          label: string
+          landing_bg_color: string
+          owner_avatar: string
+          owner_name: string
+          owner_username: string
+          page_count: number
+          secondary_color: string
+          slug: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_public_persona: {
         Args: { p_slug?: string; p_user_id: string }
         Returns: {
