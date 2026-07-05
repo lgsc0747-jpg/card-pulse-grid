@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { AgencyOverview } from "@/components/agency/AgencyOverview";
+import { AgencyStudio } from "@/components/agency/AgencyStudio";
 import { AgencyMembers } from "@/components/agency/AgencyMembers";
 import { AgencyInbox } from "@/components/agency/AgencyInbox";
 import { AgencyGoals } from "@/components/agency/AgencyGoals";
