@@ -1166,10 +1166,12 @@ export type Database = {
       }
       site_pages: {
         Row: {
+          canvas_settings: Json
           created_at: string
           id: string
           is_homepage: boolean
           is_visible: boolean
+          layout_mode: string
           page_icon: string | null
           persona_id: string
           slug: string
@@ -1179,10 +1181,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          canvas_settings?: Json
           created_at?: string
           id?: string
           is_homepage?: boolean
           is_visible?: boolean
+          layout_mode?: string
           page_icon?: string | null
           persona_id: string
           slug?: string
@@ -1192,10 +1196,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          canvas_settings?: Json
           created_at?: string
           id?: string
           is_homepage?: boolean
           is_visible?: boolean
+          layout_mode?: string
           page_icon?: string | null
           persona_id?: string
           slug?: string
@@ -1403,6 +1409,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
@@ -1417,6 +1424,32 @@ export type Database = {
           role: Database["public"]["Enums"]["org_role"]
           user_id: string
           username: string
+        }[]
+      }
+      get_org_personas: {
+        Args: { _org_id: string }
+        Returns: {
+          accent_color: string
+          avatar_url: string
+          background_image_url: string
+          background_preset: string
+          block_count: number
+          created_at: string
+          display_name: string
+          headline: string
+          id: string
+          is_active: boolean
+          is_private: boolean
+          label: string
+          landing_bg_color: string
+          owner_avatar: string
+          owner_name: string
+          owner_username: string
+          page_count: number
+          secondary_color: string
+          slug: string
+          updated_at: string
+          user_id: string
         }[]
       }
       get_public_persona: {

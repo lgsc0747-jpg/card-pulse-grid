@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { AgencyOverview } from "@/components/agency/AgencyOverview";
+import { AgencyStudio } from "@/components/agency/AgencyStudio";
 import { AgencyMembers } from "@/components/agency/AgencyMembers";
 import { AgencyInbox } from "@/components/agency/AgencyInbox";
 import { AgencyGoals } from "@/components/agency/AgencyGoals";
@@ -97,6 +98,7 @@ const AgencyPage = () => {
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="flex flex-wrap h-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="studio">Studio</TabsTrigger>
               <TabsTrigger value="members">Members</TabsTrigger>
               <TabsTrigger value="inbox">Inbox</TabsTrigger>
               <TabsTrigger value="goals">Goals</TabsTrigger>
@@ -104,6 +106,7 @@ const AgencyPage = () => {
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="mt-4"><AgencyOverview orgId={activeOrg.id} /></TabsContent>
+            <TabsContent value="studio" className="mt-4"><AgencyStudio orgId={activeOrg.id} /></TabsContent>
             <TabsContent value="members" className="mt-4">
               <AgencyMembers orgId={activeOrg.id} ownerUserId={activeOrg.owner_user_id} onLeft={loadOrg} />
             </TabsContent>
