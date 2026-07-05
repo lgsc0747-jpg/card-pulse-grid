@@ -4,7 +4,6 @@ import { Mail, Phone, Globe, Linkedin, Github, Twitter, Instagram, Facebook, You
 import { useState, useRef, useEffect } from "react";
 import { InteractiveCard3D } from "@/components/InteractiveCard3D";
 import { downloadVCard } from "@/lib/vcard";
-import { InlineTextEditor } from "./canvas/InlineTextEditor";
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -72,48 +71,9 @@ interface BlockRendererProps {
   onClick?: () => void;
   persona?: any;
   onTrackInteraction?: (type: string, metadata?: Record<string, any>) => void;
-  /** When true, render an inline contentEditable surface for the primary text field. */
-  inlineEdit?: boolean;
-  onInlineEditCommit?: (field: string, value: string) => void;
-  onInlineEditCancel?: () => void;
 }
 
-function EditableText({
-  enabled,
-  value,
-  fallback,
-  field,
-  multiline,
-  className,
-  style,
-  onCommit,
-  onCancel,
-}: {
-  enabled?: boolean;
-  value?: string;
-  fallback: string;
-  field: string;
-  multiline?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-  onCommit?: (field: string, value: string) => void;
-  onCancel?: () => void;
-}) {
-  if (!enabled) return <span className={className} style={style}>{value || fallback}</span>;
-  return (
-    <InlineTextEditor
-      value={value || fallback}
-      multiline={multiline}
-      autoFocus={field === "text" || field === "title"}
-      className={className}
-      style={style}
-      onCommit={(next) => onCommit?.(field, next)}
-      onCancel={onCancel}
-    />
-  );
-}
-
-export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInteraction, inlineEdit, onInlineEditCommit, onInlineEditCancel }: BlockRendererProps) {
+export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInteraction }: BlockRendererProps) {
   const { block_type, content, styles } = block;
   const animRef = useRef<HTMLDivElement>(null);
   const inView = useInView(animRef);
@@ -159,7 +119,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
     ...(shouldAnimate && inView ? { ...styleFromMotion(anim.animate), transition: cssTransition(anim.transition) } : {}),
   };
 
-  const editOverlay = isEditing && !inlineEdit ? (
+  const editOverlay = isEditing ? (
     <div
       className="absolute inset-0 border-2 border-dashed border-transparent hover:border-primary/40 rounded-lg cursor-pointer transition-colors group"
       onClick={onClick}
@@ -174,29 +134,18 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
     case "heading":
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
-          <h2>
-            <EditableText
-              enabled={inlineEdit}
-              value={content.text}
-              fallback="Heading"
-              field="text"
-              className="font-display leading-[1.05] tracking-tight block"
-              style={{ fontSize: content.fontSize ?? 44, color: styles.textColor ?? "inherit", fontWeight: 400 }}
-              onCommit={onInlineEditCommit}
-              onCancel={onInlineEditCancel}
-            />
+          <h2
+            className="font-display font-bold leading-tight"
+            style={{
+              fontSize: content.fontSize ?? 32,
+              color: styles.textColor ?? "inherit",
+            }}
+          >
+            {content.text || "Heading"}
           </h2>
-          {(content.subtitle || inlineEdit) && (
+          {content.subtitle && (
             <p className="mt-2 text-muted-foreground" style={{ fontSize: (content.fontSize ?? 32) * 0.45 }}>
-              <EditableText
-                enabled={inlineEdit}
-                value={content.subtitle}
-                fallback="Subtitle"
-                field="subtitle"
-                className="block"
-                onCommit={onInlineEditCommit}
-                onCancel={onInlineEditCancel}
-              />
+              {content.subtitle}
             </p>
           )}
         </div>
@@ -214,16 +163,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
               lineHeight: content.lineHeight ?? 1.7,
             }}
           >
-            <EditableText
-              enabled={inlineEdit}
-              value={content.text}
-              fallback="Your text goes here. Click to edit and add your content."
-              field="text"
-              multiline
-              className="block"
-              onCommit={onInlineEditCommit}
-              onCancel={onInlineEditCancel}
-            />
+            {content.text || "Your text goes here. Click to edit and add your content."}
           </div>
         </div>
       );
@@ -250,10 +190,8 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
               <span className="text-sm text-muted-foreground">Click to add image</span>
             </div>
           )}
-          {(content.caption || inlineEdit) && (
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              <EditableText enabled={inlineEdit} value={content.caption} fallback="Image caption" field="caption" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />
-            </p>
+          {content.caption && (
+            <p className="text-xs text-muted-foreground mt-2 text-center">{content.caption}</p>
           )}
         </div>
       );
@@ -340,15 +278,14 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
           }}>
             <Button
               size="lg"
-              className="rounded-sm font-medium tracking-wide uppercase text-[12px] border border-foreground/90 hover:translate-y-[-1px] transition-transform"
+              className="rounded-xl font-semibold"
               style={{
                 background: styles.buttonColor ?? "hsl(var(--primary))",
                 color: styles.buttonTextColor ?? "hsl(var(--primary-foreground))",
-                fontSize: content.fontSize ?? 12,
-                letterSpacing: "0.12em",
+                fontSize: content.fontSize ?? 14,
               }}
             >
-              <EditableText enabled={inlineEdit} value={content.text} fallback="Click Me" field="text" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />
+              {content.text || "Click Me"}
               {content.showArrow && <ExternalLink className="w-4 h-4 ml-2" />}
             </Button>
           </a>
@@ -359,13 +296,13 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <blockquote className="relative pl-8 border-l-2" style={{ borderColor: styles.accentColor ?? "hsl(var(--foreground))" }}>
-            <QuoteIcon className="absolute -left-1 -top-3 w-10 h-10 opacity-[0.08]" />
-            <p className="font-display text-2xl italic leading-snug" style={{ color: styles.textColor ?? "inherit" }}>
-              “<EditableText enabled={inlineEdit} value={content.text} fallback="Your inspirational quote here." field="text" multiline onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />”
+          <blockquote className="relative pl-6 border-l-4" style={{ borderColor: styles.accentColor ?? "hsl(var(--primary))" }}>
+            <QuoteIcon className="absolute -left-2 -top-2 w-8 h-8 opacity-10" />
+            <p className="text-lg italic leading-relaxed" style={{ color: styles.textColor ?? "inherit" }}>
+              "{content.text || "Your inspirational quote here."}"
             </p>
-            {(content.author || inlineEdit) && (
-              <footer className="mt-4 text-[11px] tracking-[0.18em] uppercase text-muted-foreground font-medium">— <EditableText enabled={inlineEdit} value={content.author} fallback="Author" field="author" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></footer>
+            {content.author && (
+              <footer className="mt-3 text-sm text-muted-foreground font-medium">— {content.author}</footer>
             )}
           </blockquote>
         </div>
@@ -375,16 +312,16 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <div className="flex items-center gap-4 p-5 rounded-sm bg-card border border-border shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-4 p-5 rounded-2xl bg-card/40 border border-white/10 backdrop-blur-xl shadow-lg">
             {content.photoUrl ? (
-              <img src={content.photoUrl} alt={content.name ?? ""} className="w-16 h-16 rounded-sm object-cover shrink-0 grayscale" />
+              <img src={content.photoUrl} alt={content.name ?? ""} className="w-16 h-16 rounded-2xl object-cover shrink-0 ring-2 ring-white/10" />
             ) : (
-              <div className="w-16 h-16 rounded-sm bg-muted shrink-0" />
+              <div className="w-16 h-16 rounded-2xl bg-white/5 shrink-0 ring-2 ring-white/10" />
             )}
             <div>
-              <h3 className="font-display text-lg leading-tight"><EditableText enabled={inlineEdit} value={content.name} fallback="Team Member" field="name" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></h3>
-              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-0.5"><EditableText enabled={inlineEdit} value={content.role} fallback="Role / Title" field="role" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></p>
-              {(content.description || inlineEdit) && <p className="text-xs mt-2 opacity-80 leading-relaxed"><EditableText enabled={inlineEdit} value={content.description} fallback="Short bio" field="description" multiline onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></p>}
+              <h3 className="font-semibold text-sm">{content.name || "Team Member"}</h3>
+              <p className="text-xs text-muted-foreground">{content.role || "Role / Title"}</p>
+              {content.description && <p className="text-xs mt-1 opacity-70">{content.description}</p>}
             </div>
           </div>
         </div>
@@ -394,15 +331,11 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {(content.items ?? [{ value: "100+", label: "Customers" }, { value: "50K", label: "Sales" }, { value: "4.9", label: "Rating" }]).map((item: { value: string; label: string }, i: number) => (
-              <div key={i} className="text-center p-6 bg-card">
-                <div className="font-display text-4xl leading-none" style={{ color: styles.accentColor ?? "hsl(var(--foreground))" }}>
-                  <EditableText enabled={inlineEdit} value={item.value} fallback="100+" field={`items.${i}.value`} onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-3">
-                  <EditableText enabled={inlineEdit} value={item.label} fallback="Label" field={`items.${i}.label`} onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />
-                </div>
+              <div key={i} className="text-center p-4 rounded-2xl bg-card/40 border border-white/10 backdrop-blur-xl shadow-lg hover:scale-[1.02] transition-transform">
+                <div className="text-2xl font-bold" style={{ color: styles.accentColor ?? "hsl(var(--primary))" }}>{item.value}</div>
+                <div className="text-xs text-muted-foreground mt-1">{item.label}</div>
               </div>
             ))}
           </div>
@@ -413,18 +346,18 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <div className="p-6 rounded-sm bg-card border border-border shadow-[var(--shadow-card)]">
-            <div className="flex gap-0.5 mb-4">
+          <div className="p-5 rounded-2xl bg-card/40 border border-white/10 backdrop-blur-xl shadow-lg">
+            <div className="flex gap-0.5 mb-3">
               {Array.from({ length: content.rating ?? 5 }).map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-foreground text-foreground" />
+                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               ))}
             </div>
-            <p className="font-display text-xl italic leading-snug">“<EditableText enabled={inlineEdit} value={content.text} fallback="Amazing experience!" field="text" multiline onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />”</p>
-            <div className="flex items-center gap-3 mt-5 pt-4 border-t border-border">
-              {content.avatarUrl && <img src={content.avatarUrl} alt="" className="w-8 h-8 rounded-sm object-cover grayscale" />}
+            <p className="text-sm italic leading-relaxed">"{content.text || "Amazing experience!"}"</p>
+            <div className="flex items-center gap-3 mt-4">
+              {content.avatarUrl && <img src={content.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-white/10" />}
               <div>
-                <p className="text-xs font-medium"><EditableText enabled={inlineEdit} value={content.name} fallback="Customer" field="name" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></p>
-                {(content.company || inlineEdit) && <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-0.5"><EditableText enabled={inlineEdit} value={content.company} fallback="Company" field="company" onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></p>}
+                <p className="text-xs font-semibold">{content.name || "Customer"}</p>
+                {content.company && <p className="text-[10px] text-muted-foreground">{content.company}</p>}
               </div>
             </div>
           </div>
@@ -437,7 +370,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
           {editOverlay}
           <div className="space-y-2">
             {(content.items ?? [{ q: "Question?", a: "Answer goes here." }]).map((item: { q: string; a: string }, i: number) => (
-              <FaqItem key={i} question={item.q} answer={item.a} index={i} inlineEdit={inlineEdit} onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} />
+              <FaqItem key={i} question={item.q} answer={item.a} />
             ))}
           </div>
         </div>
@@ -448,12 +381,12 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <div className="grid grid-cols-3 gap-px bg-border">
+          <div className="grid grid-cols-3 gap-3">
             {(content.items ?? [{ icon: "🚀", label: "Fast" }, { icon: "🔒", label: "Secure" }, { icon: "🎨", label: "Beautiful" }]).map((item: { icon: string; label: string; description?: string }, i: number) => (
-              <div key={i} className="text-center p-5 bg-card">
-                <div className="text-2xl mb-3 grayscale">{item.icon}</div>
-                <div className="text-[11px] uppercase tracking-[0.16em] font-medium"><EditableText enabled={inlineEdit} value={item.label} fallback="Label" field={`items.${i}.label`} onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></div>
-                {(item.description || inlineEdit) && <div className="text-[11px] text-muted-foreground mt-2 leading-relaxed"><EditableText enabled={inlineEdit} value={item.description} fallback="Description" field={`items.${i}.description`} multiline onCommit={onInlineEditCommit} onCancel={onInlineEditCancel} /></div>}
+              <div key={i} className="text-center p-4 rounded-2xl bg-card/40 border border-white/10 backdrop-blur-xl shadow-lg hover:scale-[1.02] transition-transform">
+                <div className="text-2xl mb-2">{item.icon}</div>
+                <div className="text-xs font-semibold">{item.label}</div>
+                {item.description && <div className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{item.description}</div>}
               </div>
             ))}
           </div>
@@ -511,7 +444,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
       return (
         <div ref={animRef} className="relative" style={wrapperStyle}>
           {editOverlay}
-          <ContactFormBlock content={content} isEditing={isEditing} persona={persona} onTrackInteraction={onTrackInteraction} inlineEdit={inlineEdit} onInlineEditCommit={onInlineEditCommit} onInlineEditCancel={onInlineEditCancel} />
+          <ContactFormBlock content={content} isEditing={isEditing} persona={persona} onTrackInteraction={onTrackInteraction} />
         </div>
       );
 
@@ -525,11 +458,12 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
           <div className="flex flex-wrap gap-3 justify-center">
             {showVcard && persona && (
               <button
-                className="w-11 h-11 rounded-sm bg-card border border-border flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+                className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors"
                 title="Save Contact"
                 onClick={() => {
                   if (!isEditing) {
                     onTrackInteraction?.("vcard_download", { source: "social_block" });
+                    // Trigger vCard download
                     const { downloadVCard } = require("@/lib/vcard");
                     downloadVCard({
                       displayName: persona.display_name ?? undefined,
@@ -552,7 +486,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
                 href={persona.cv_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-11 h-11 rounded-sm bg-card border border-border flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+                className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors"
                 title="Download CV"
                 onClick={() => {
                   if (!isEditing) onTrackInteraction?.("cv_download", { source: "social_block" });
@@ -562,7 +496,7 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
               </a>
             )}
             {links.length > 0 ? links.map((l: { platform: string; url: string }, i: number) => (
-              <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-sm bg-card border border-border flex items-center justify-center hover:bg-foreground hover:text-background transition-colors" onClick={() => {
+              <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-xl bg-card/50 border border-border/60 flex items-center justify-center hover:border-primary/50 transition-colors" onClick={() => {
                 if (!isEditing) onTrackInteraction?.("link_click", { link_type: l.platform.toLowerCase() });
               }}>
                 <span className="text-sm">{getSocialIcon(l.platform)}</span>
@@ -596,33 +530,15 @@ export function BlockRenderer({ block, isEditing, onClick, persona, onTrackInter
   }
 }
 
-function FaqItem({
-  question,
-  answer,
-  index,
-  inlineEdit,
-  onCommit,
-  onCancel,
-}: {
-  question: string;
-  answer: string;
-  index: number;
-  inlineEdit?: boolean;
-  onCommit?: (field: string, value: string) => void;
-  onCancel?: () => void;
-}) {
+function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-border overflow-hidden bg-card">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between py-5 text-left font-display text-lg leading-tight">
-        <EditableText enabled={inlineEdit} value={question} fallback="Question?" field={`items.${index}.q`} onCommit={onCommit} onCancel={onCancel} />
-        {open ? <ChevronUp className="w-4 h-4 shrink-0 ml-4" /> : <ChevronDown className="w-4 h-4 shrink-0 ml-4" />}
+    <div className="rounded-2xl border border-white/10 overflow-hidden bg-card/40 backdrop-blur-xl shadow-lg">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between p-4 text-left text-sm font-medium">
+        {question}
+        {open ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
       </button>
-      {(open || inlineEdit) && (
-        <div className="pb-5 text-sm text-muted-foreground leading-relaxed">
-          <EditableText enabled={inlineEdit} value={answer} fallback="Answer goes here." field={`items.${index}.a`} multiline onCommit={onCommit} onCancel={onCancel} />
-        </div>
-      )}
+      {open && <div className="px-4 pb-4 text-sm text-muted-foreground">{answer}</div>}
     </div>
   );
 }
@@ -658,7 +574,7 @@ function cssTransition(t: Record<string, any>): string {
   return `all ${dur}s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
 }
 
-function ContactFormBlock({ content, isEditing, persona, onTrackInteraction, inlineEdit, onInlineEditCommit, onInlineEditCancel }: { content: Record<string, any>; isEditing?: boolean; persona?: any; onTrackInteraction?: (type: string, metadata?: Record<string, any>) => void; inlineEdit?: boolean; onInlineEditCommit?: (field: string, value: string) => void; onInlineEditCancel?: () => void }) {
+function ContactFormBlock({ content, isEditing, persona, onTrackInteraction }: { content: Record<string, any>; isEditing?: boolean; persona?: any; onTrackInteraction?: (type: string, metadata?: Record<string, any>) => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -697,33 +613,24 @@ function ContactFormBlock({ content, isEditing, persona, onTrackInteraction, inl
 
   if (submitted) {
     return (
-      <div className="p-6 rounded-sm bg-card border border-border text-center space-y-2 shadow-[var(--shadow-card)]">
-        <Mail className="w-8 h-8 mx-auto text-foreground" />
-        <p className="font-display text-xl">Thank you.</p>
-        <p className="text-xs text-muted-foreground uppercase tracking-[0.16em]">Your message has been sent</p>
+      <div className="p-5 rounded-2xl bg-card/50 border border-border/60 text-center space-y-2 backdrop-blur-sm">
+        <Mail className="w-8 h-8 mx-auto text-primary" />
+        <p className="font-semibold text-sm">Thank you!</p>
+        <p className="text-xs text-muted-foreground">Your message has been sent.</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 rounded-sm bg-card border border-border space-y-3 shadow-[var(--shadow-card)]">
-      <h3 className="font-display text-2xl leading-tight">
-        {inlineEdit ? (
-          <InlineTextEditor
-            value={content.title || "Get in Touch"}
-            onCommit={(v) => onInlineEditCommit?.("title", v)}
-            onCancel={onInlineEditCancel}
-          />
-        ) : (content.title || "Get in Touch")}
-      </h3>
-      <div className="h-px bg-border my-3" />
-      <input className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-foreground" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} disabled={isEditing} />
-      <input className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-foreground" placeholder="Email *" type="email" value={email} onChange={e => setEmail(e.target.value)} disabled={isEditing} required />
-      <input className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-foreground" placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} disabled={isEditing} />
-      <input className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-foreground" placeholder="Company" value={company} onChange={e => setCompany(e.target.value)} disabled={isEditing} />
-      <textarea className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm min-h-[80px] focus:outline-none focus:border-foreground" placeholder="Message" value={message} onChange={e => setMessage(e.target.value)} disabled={isEditing} />
-      <Button className="w-full rounded-sm uppercase tracking-[0.14em] text-xs h-11" disabled={isEditing || submitting || !email} onClick={handleSubmit}>
-        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (content.buttonText || "Send Message")}
+    <div className="p-5 rounded-2xl bg-card/40 border border-white/10 space-y-3 backdrop-blur-xl shadow-lg">
+      <h3 className="font-semibold text-sm">{content.title || "Get in Touch"}</h3>
+      <input className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm backdrop-blur-sm" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} disabled={isEditing} />
+      <input className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm backdrop-blur-sm" placeholder="Email *" type="email" value={email} onChange={e => setEmail(e.target.value)} disabled={isEditing} required />
+      <input className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm backdrop-blur-sm" placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} disabled={isEditing} />
+      <input className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm backdrop-blur-sm" placeholder="Company" value={company} onChange={e => setCompany(e.target.value)} disabled={isEditing} />
+      <textarea className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm min-h-[60px] backdrop-blur-sm" placeholder="Message" value={message} onChange={e => setMessage(e.target.value)} disabled={isEditing} />
+      <Button className="w-full rounded-xl" disabled={isEditing || submitting || !email} onClick={handleSubmit}>
+        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (content.buttonText || "Send")}
       </Button>
     </div>
   );

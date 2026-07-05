@@ -1,7 +1,7 @@
 # Project Memory
 
 ## Core
-- Paper & Ink editorial aesthetic: warm off-white (#f5f3ee), deep ink, hairline borders, 2–6px radii, DM Serif Display + Fira Sans. No glassmorphism.
+- blocks.so design language: soft warm-neutral + dark-first, 8–12px radii, subtle shadows, indigo accent, Inter only.
 - Supabase relational DB: strict RLS, Security Definer RPCs for public access.
 - React 18 SPA: strict pin @tanstack/react-query@5.56.2, use react-router-dom Link.
 - Privacy-First: NEVER implement location tracking. Follow Philippine Data Privacy Act.
@@ -14,7 +14,6 @@
 - Agency: one auto-provisioned workspace per agency account. No multi-workspace UI. Self-invite blocked server-side.
 
 ## Memories
-- [Canvas Page Builder](mem://features/canvas-page-builder) — Per-page layout_mode (stack/grid/free), marquee select, drag-resize, guides
 - [Page Transitions](mem://style/page-transitions) — Global blur+zoom-in route transition via framer-motion AnimatePresence
 - [Visual Design](mem://style/visual-design) — Cyber Dark aesthetic, glassmorphism, slate colors, bento box grid
 - [Database](mem://architecture/database) — Supabase schemas, JSONB blocks, public RPCs, pgcrypto

@@ -1,110 +1,86 @@
-## Page Builder: Figma/Framer-Style Overhaul
+## Agency Workspace Rebuild
 
-A full rebuild of the editor shell around a single scrollable freeform canvas with manual color control, floating contextual toolbars, and pan/zoom navigation.
+A complete rebuild of `/agency` into a true multi-seat workspace with granular delegation, a real inbox for leads, and team productivity features.
 
----
+### 1. Granular Permissions (per persona × per section × per member)
 
-### 1. Remove layout modes
-- Drop the Stack / Grid / Free toggle from `PageBuilderPage.tsx`.
-- Treat every page as freeform (absolute positioning) — keep `layout_mode` column for back-compat but always render in free mode.
-- Delete `useBlockClipboard`/old stack rendering branches in `PublicProfilePage.tsx`. Public render uses absolute coords on desktop, sorted stack on mobile (already behaves that way).
+New table `persona_member_grants`:
+- `organization_id`, `persona_id`, `member_user_id`
+- `section`: enum-ish text — `identity`, `design`, `blocks`, `cards`, `leads`, `analytics`, `inbox`, `goals`
+- `permission`: `view` | `edit` | `manage`
+- Plus four **role presets** in UI: Viewer, Editor, Lead Manager, Analyst — each writes a bundle of grants.
 
-### 2. Remove preset themes — full manual color control
-- Strip `PageThemeProvider`, `PAGE_THEMES`, and `PageThemeContext` usage from the builder + public render.
-- Replace with per-page + per-block manual color fields stored in JSON:
-  - `site_pages.canvas_settings.background`: `{ kind: "solid"|"gradient"|"image", color, gradient: {from,to,angle}, image: {url, fit, position, opacity, blur} }`
-  - `site_pages.canvas_settings.accent`: hex (used as default for new buttons/links)
-  - `page_blocks.styles.bg`, `.text`, `.borderColor`, `.borderWidth`, `.borderRadius`, `.shadow` (color + blur + spread + opacity)
-- Add a `ColorControl` primitive (color + alpha) reused everywhere. Gradient picker + image picker built on top.
+Owner/admin opens a persona, sees a matrix: rows = members, columns = sections, cells = view/edit/manage dropdown. Save persists rows.
 
-### 3. Image / gradient canvas background
-- New `CanvasBackgroundPanel` (left sidebar) with: solid/gradient/image tabs, fit (cover/contain/fill/tile), position, opacity slider, blur slider, replace/remove.
-- Image source: URL input + drag-drop to a dropzone; uploads go to existing `personas-assets` bucket under `pages/{pageId}/bg-{ts}`.
-- `FreeformCanvas` renders the background as an absolutely-positioned layer beneath blocks.
+A new SECURITY DEFINER RPC `has_persona_section_access(_persona_id, _section, _permission)` is called from existing pages to gate edit affordances. Lead/inbox/goals tables get RLS using this RPC, so non-owners can read/write only what they're granted.
 
-### 4. Relocate & redesign the inspector
-- Remove the right-side `BlockEditor` panel.
-- Left sidebar becomes a 3-tab rail: **Layers** (block list/reorder), **Insert** (block library), **Page** (canvas bg, accent, sections).
-- Selection-driven editing happens through a **floating contextual toolbar** anchored above the bounding box (style, color, border, shadow, layer, delete). Built on `@radix-ui/react-popover` with `floating-ui` style positioning math.
-- Content-only fields (image URL, link href, list items, embed code) appear inside an expandable secondary popover from the floating toolbar — never blocks the canvas.
+### 2. Lead Inbox with Outbound Email + Internal Notes
 
-### 5. Canvas navigation controls
-- New bottom toolbar `CanvasNavBar`: pan tool toggle, zoom out / % / zoom in, fit-to-screen, undo, redo.
-- Spacebar held → temporary pan mode; cursor switches to `grab` / `grabbing`; click-drag pans `scrollTop`/`scrollLeft` of the viewport.
-- Zoom range 25% – 400%, multiplies CSS `transform: scale()` on the canvas inner. Coordinates remain 1:1; pointer handlers divide by zoom.
-- Undo/redo: lightweight `useCanvasHistory` ring buffer over block layouts + content (max 50 steps), wired to ⌘Z / ⌘⇧Z.
+Per-lead conversation thread inside Agency → Inbox:
+- New table `lead_messages`: `lead_id`, `author_user_id`, `kind` (`note` | `email_out`), `body`, `subject`, `email_message_id`, `created_at`.
+- Compose box with two tabs: **Send Email** (goes out via shared agency address) and **Internal Note** (team-only).
+- Outbound emails routed through a new edge function `send-lead-email` that uses Lovable Emails (notify subdomain) with `From: "<Org name> <team@notify.handshake-nfc.online>"` and `Reply-To: agency_settings.reply_to_email` (configurable per org). Lead receives a real email; replies land in the configured reply-to inbox (no inbound capture this pass).
+- Each sent email is logged in `lead_messages` and `email_send_log`; thread shows delivery status badge.
+- Reusable **email templates** (`agency_email_templates` table, org-scoped) selectable from the compose box with `{{lead_name}}`, `{{persona}}`, `{{owner}}` token replacement.
 
-### 6. Selection marquee color
-- `FreeformCanvas` marquee rect changes from black/neutral to `bg-blue-500/15 border-blue-500` (`#3b82f6`).
+### 3. Goals & Checklist
 
-### 7. Perfect bounding box
-- `BlockFrame` updated:
-  - Outline: `ring-2 ring-blue-500` with white inner ring for contrast.
-  - 8 handles (corners + edges) sized in CSS pixels (compensate for zoom so they stay constant on screen).
-  - New top-center **rotation handle** (16px circle, 24px above box) → updates `block.styles.layout.rotate` (deg). Render uses `transform: rotate()` around center.
-  - Pointer math accounts for rotation when resizing/moving.
+New table `agency_goals`: `organization_id`, `persona_id?`, `assignee_user_id?`, `title`, `description`, `due_at`, `created_by`, plus `agency_goal_items`: `goal_id`, `label`, `is_done`, `done_at`, `done_by`, `sort_order`.
 
-### 8. Inline text editing (all text blocks)
-- Already exists for heading/text/quote/button via `InlineTextEditor`. Expand to all text-bearing blocks (testimonial quote, faq Q/A, stats labels, team name/role, button label).
-- Double-click anywhere on a text block enters edit mode with cursor; `Esc` / click-outside commits.
-- Mini floating text toolbar (font family, size, weight, color) appears above the editing element while in edit mode.
-- Remove text-content fields from any remaining inspector forms.
+UI: collapsible Goals card per persona (and an "All goals" tab in Agency). Big "+ Goal" FAB. Click a goal → drawer with check-listable items, progress bar, due-date pill, assignee avatar.
 
-### 9. Scrollable canvas + sections
-- Canvas is no longer a fixed-height box. New `canvas_settings.sections: Array<{ id, height, bg?: ColorOrImage, label? }>` with at least one default section.
-- Total canvas height = sum of section heights. Rendered as stacked full-width section bands inside the scroll viewport.
-- "+ Add Section" button at the bottom appends a new 600px section. Drag handle on each section's bottom edge resizes height. Sections reorder via drag handle in the layers panel.
-- Dashed divider line between sections shown only in editor (not public).
-- Blocks store absolute `y` relative to canvas top; they remain free to overlap sections. Section bg is purely cosmetic.
-- Public render: same sectioned background + absolute blocks on desktop; stacks on mobile (sorted by y).
+### 4. Lead Assignment & SLA
 
-### 10. Responsive device handling
-- Top toolbar device toggle stays (Desktop 1440 / Tablet 768 / Phone 375). Switching only changes the canvas inner width; height stays scrollable.
-- No per-device block overrides yet (single coordinate set) — same as today; documented as a follow-up.
+- Add `assigned_to uuid` and `first_response_at timestamptz` columns to `lead_captures`.
+- Inbox lists show assignee avatar; unassigned leads filter chip.
+- SLA: org-level `first_response_sla_minutes` (default 240). Overdue leads get a red "Overdue" badge based on `created_at + sla - first_response_at IS NULL`.
+- `first_response_at` is auto-stamped on first `email_out` message.
 
-### 11. Overall UI polish
-- Workspace bg → neutral `bg-zinc-900` with `bg-zinc-800` panels, subtle `shadow-lg`, `rounded-xl` panels.
-- Floating toolbars: `bg-zinc-900/95 backdrop-blur border border-white/10 rounded-lg shadow-2xl`.
-- Smooth `transition-all duration-150` on panel collapses, zoom level changes, selection ring.
-- Keep app's existing dark theme tokens; only the page-builder shell gets the Figma-like neutral skin.
+### 5. Activity Feed + @mentions
 
----
+New table `agency_activity`: `organization_id`, `actor_user_id`, `verb`, `target_type`, `target_id`, `summary`, `mentions uuid[]`, `created_at`.
+- Triggers (or write-through in app code) log: lead assigned, email sent, note added, goal completed, member added, persona shared.
+- Right-rail "Activity" panel with realtime subscription (Supabase Realtime on `agency_activity`).
+- `@username` autocomplete in note/email composers; mentioned users get an in-app notification (reuse `NotificationListener` + a new `mention` notification type).
 
-### Files
+### 6. Page Restructure
 
-**New**
-- `src/components/page-builder/canvas/CanvasNavBar.tsx` — pan/zoom/fit/undo/redo
-- `src/components/page-builder/canvas/FloatingBlockToolbar.tsx` — selection-anchored style controls
-- `src/components/page-builder/canvas/FloatingTextToolbar.tsx` — appears during inline edit
-- `src/components/page-builder/canvas/CanvasBackgroundPanel.tsx` — solid/gradient/image
-- `src/components/page-builder/canvas/SectionLayer.tsx` — single section band + resize handle
-- `src/components/page-builder/canvas/useCanvasHistory.ts` — undo/redo
-- `src/components/page-builder/canvas/useCanvasViewport.ts` — zoom, pan, space-hold
-- `src/components/page-builder/canvas/ColorControl.tsx` — color + alpha primitive
-- `src/components/page-builder/canvas/GradientControl.tsx`
-- `src/components/page-builder/sidebar/LeftRail.tsx` — Layers / Insert / Page tabs
+Tabs in `/agency`:
+1. **Overview** — KPI strip (open leads, overdue, goals progress, members), recent activity feed.
+2. **Members** — list + per-member quick role; "Permissions" button opens the persona×section matrix.
+3. **Personas** — pick a persona to manage sharing, see who has which sections.
+4. **Inbox** — lead list (filters: assignee, persona, overdue, unread) + thread view + composer.
+5. **Goals** — kanban-ish list grouped by status (Active / Done).
+6. **Templates** — manage shared email templates.
+7. **Settings** — org name, shared reply-to email, SLA minutes, default sender name.
 
-**Edited**
-- `src/pages/PageBuilderPage.tsx` — new shell layout, drop right panel + layout-mode toggle, mount new toolbars
-- `src/components/page-builder/canvas/FreeformCanvas.tsx` — zoom/pan, blue marquee, sections, bg layer
-- `src/components/page-builder/canvas/BlockFrame.tsx` — zoom-aware handles, rotation handle, blue ring
-- `src/components/page-builder/canvas/InlineTextEditor.tsx` — emit edit-state for mini toolbar
-- `src/components/page-builder/BlockRenderer.tsx` — read new style fields (bg/border/shadow/text color), expand inline-edit targets
-- `src/components/page-builder/BlockEditor.tsx` — slim down to a fallback popover view (or delete)
-- `src/components/page-builder/canvas/types.ts` — new `BackgroundFill`, `SectionDef`, layout rotate
-- `src/pages/PublicProfilePage.tsx` — render new canvas bg + sections; remove theme provider usage
+Profile/Account/Persona settings pages get a small "Shared with team" indicator when applicable, and edit affordances hide based on `has_persona_section_access`.
 
-**Removed/Deprecated**
-- `src/contexts/PageBuilderThemeContext.tsx` — no longer imported by builder/public render (keep file only if still referenced elsewhere; delete if not)
-- Stack/Grid branches in canvas + `SelectionToolbar` align/distribute UI moves into the floating block toolbar
+### Technical Details
 
-**No DB migration required** — all new state fits in existing `jsonb` columns (`canvas_settings`, `page_blocks.styles`).
+```text
+NEW TABLES
+  persona_member_grants      RLS: org admins manage; member can read own grants
+  lead_messages              RLS: visible if owner OR has_persona_section_access(persona, 'inbox', 'view')
+  agency_email_templates     RLS: org members read; admins write
+  agency_goals + items       RLS: org members read; assignee/creator/admin write
+  agency_activity            RLS: org members read; service role + RPC writes
+  agency_settings            (1 row per org) reply_to_email, sender_name, sla_minutes
 
----
+NEW EDGE FUNCTIONS
+  send-lead-email            validates JWT, checks has_persona_section_access,
+                             enqueues via Lovable Emails queue, logs to lead_messages
+  agency-activity-log        thin wrapper used by client to insert activity rows
 
-### Out of scope (call out, don't build)
-- Per-device block overrides (one coord set per block)
-- Multi-block alignment math beyond the existing helpers
-- Real text rich-formatting beyond font/size/weight/color (no bold/italic/lists)
-- System-clipboard paste of arbitrary HTML
-- Side-by-side multi-device preview mode (single-device toggle only for now)
+CHANGES TO EXISTING
+  lead_captures: + assigned_to, first_response_at columns + index
+  PersonaPage / DesignStudio / BlockEditor: gate edit buttons with new hook
+  NotificationListener: subscribe to mentions
+```
+
+### Out of scope this pass
+- Inbound email parsing (lead replies still land in your real inbox via Reply-To).
+- Per-persona custom sender domains.
+- Billing/seat limits.
+
+I'll implement everything above; the migration runs first (one approval), then code lands in a single sweep.

@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { BlockRenderer } from "@/components/page-builder/BlockRenderer";
 import { BlockEditor } from "@/components/page-builder/BlockEditor";
 import { BLOCK_TYPES, type SitePage, type PageBlock, type BlockTypeId } from "@/components/page-builder/types";
@@ -22,31 +24,25 @@ import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } 
 import { CSS } from "@dnd-kit/utilities";
 import {
   Loader2, Plus, Save, Monitor, Smartphone, Eye, FileText,
-  GripVertical, Trash2, Copy, EyeOff,
+  GripVertical, ChevronLeft, ChevronRight, Trash2, Copy, EyeOff,
   Type, AlignLeft, Image, LayoutGrid, Play, Minus, SeparatorHorizontal,
   MousePointerClick, Quote, Users, BarChart3, MessageSquareQuote,
   HelpCircle, Grid3x3, CreditCard, Mail, Share2, Code,
   Home, PanelLeftClose, PanelLeft, FilePlus, Undo2, Redo2, BookTemplate,
-  ArrowLeft, Wifi, Paintbrush, Crown,
+  CheckSquare, Square, ArrowLeft, Wifi, Paintbrush, Check, Crown,
 } from "lucide-react";
-import { CanvasBackgroundPanel } from "@/components/page-builder/canvas/CanvasBackgroundPanel";
-import {
-  DEFAULT_CANVAS_SETTINGS,
-  readLayout,
-  withLayout,
-  type BackgroundFill,
-  type CanvasSection,
-  type CanvasSettings,
-} from "@/components/page-builder/canvas/types";
+import { PageThemeProvider, usePageTheme, PAGE_THEMES, getPageThemeStyles, PAGE_THEME_CLASS } from "@/contexts/PageBuilderThemeContext";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { NfcCardsPanel } from "@/components/page-builder/NfcCardsPanel";
+import { RecentInteractionsPanel } from "@/components/page-builder/RecentInteractionsPanel";
+import { PageCanvas, PAGE_CANVAS_MAX_W_PX } from "@/components/page-builder/PageCanvas";
 import { PreviewDiffOverlay } from "@/components/page-builder/PreviewDiffOverlay";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { GitCompare, Square as SquareIcon } from "lucide-react";
-import { FreeformCanvas } from "@/components/page-builder/canvas/FreeformCanvas";
-import { CanvasNavBar } from "@/components/page-builder/canvas/CanvasNavBar";
+import { Activity, GitCompare } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
   Type, AlignLeft, Image, LayoutGrid, Play, Minus, SeparatorHorizontal,
@@ -202,49 +198,11 @@ function SortablePreviewBlock({ block, editingBlockId, onSelect, persona }: {
   );
 }
 
-function SectionListItem({ section, index, onMove, onDelete, canDelete }: {
-  section: CanvasSection;
-  index: number;
-  onMove: (fromId: string, toId: string) => void;
-  onDelete: () => void;
-  canDelete: boolean;
-}) {
-  return (
-    <div
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.setData("text/page-builder-section", section.id);
-        e.dataTransfer.effectAllowed = "move";
-      }}
-      onDragOver={(e) => {
-        if (e.dataTransfer.types.includes("text/page-builder-section")) e.preventDefault();
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        const fromId = e.dataTransfer.getData("text/page-builder-section");
-        if (fromId) onMove(fromId, section.id);
-      }}
-      className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-2 py-2 text-xs"
-    >
-      <GripVertical className="h-3.5 w-3.5 shrink-0 cursor-grab text-muted-foreground" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{section.label || `Section ${index + 1}`}</p>
-        <p className="text-[10px] text-muted-foreground">{section.height}px tall</p>
-      </div>
-      {canDelete && (
-        <button onClick={onDelete} className="rounded-md p-1 text-muted-foreground hover:text-destructive" title="Delete section">
-          <Trash2 className="h-3 w-3" />
-        </button>
-      )}
-    </div>
-  );
-}
-
 function PageBuilderPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const pageThemeCtx = { themeId: "default", setThemeId: (_: string) => {}, setPersonaId: (_: string | null) => {} };
+  const pageThemeCtx = usePageTheme();
   const isMobile = useIsMobile();
   const { isPro, loading: subLoading } = useSubscription();
   const [personas, setPersonas] = useState<{ id: string; label: string; slug: string }[]>([]);
@@ -256,19 +214,11 @@ function PageBuilderPage() {
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deviceMode, setDeviceMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [canvasScale, setCanvasScale] = useState(1);
-  const [canvasPanTool, setCanvasPanTool] = useState(false);
-  const [canvasFitRequest, setCanvasFitRequest] = useState(0);
-  const [canvasSelection, setCanvasSelection] = useState<Set<string>>(new Set());
+  const [deviceMode, setDeviceMode] = useState<"desktop" | "mobile">("desktop");
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [addBlockOpen, setAddBlockOpen] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
-  const [saveState, setSaveState] = useState<"saved" | "saving" | "dirty" | "error">("saved");
-  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const latestBlocksRef = useRef<PageBlock[]>([]);
-  const latestPagesRef = useRef<SitePage[]>([]);
 
   // Confirmation dialogs
   const [confirmDeleteBlock, setConfirmDeleteBlock] = useState<string | null>(null);
@@ -318,10 +268,6 @@ function PageBuilderPage() {
     setBlocks(JSON.parse(JSON.stringify(historyRef.current[historyIdxRef.current])));
   }, []);
 
-  const setCanvasScaleClamped = useCallback((value: number) => {
-    setCanvasScale(Math.min(4, Math.max(0.25, value)));
-  }, []);
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "z") {
@@ -335,12 +281,6 @@ function PageBuilderPage() {
   }, [undo, redo]);
 
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
-
-  useEffect(() => { latestBlocksRef.current = blocks; }, [blocks]);
-  useEffect(() => { latestPagesRef.current = pages; }, [pages]);
-  useEffect(() => () => {
-    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -386,7 +326,6 @@ function PageBuilderPage() {
       const { data: newPage } = await supabase.from("site_pages").insert({
         persona_id: selectedPersonaId!, user_id: user!.id,
         title: "Home", slug: "home", is_homepage: true, sort_order: 0,
-        layout_mode: "free", canvas_settings: DEFAULT_CANVAS_SETTINGS as any,
       }).select().single();
       if (newPage) {
         setPages([newPage as SitePage]);
@@ -420,7 +359,6 @@ function PageBuilderPage() {
     const { data } = await supabase.from("site_pages").insert({
       persona_id: selectedPersonaId, user_id: user.id,
       title, slug: title.toLowerCase().replace(/\s+/g, "-"), sort_order: pages.length,
-      layout_mode: "free", canvas_settings: DEFAULT_CANVAS_SETTINGS as any,
     }).select().single();
     if (data) { setPages([...pages, data as SitePage]); setSelectedPageId(data.id); }
   };
@@ -456,7 +394,6 @@ function PageBuilderPage() {
   const updateBlock = (updated: PageBlock) => {
     const newBlocks = blocks.map(b => b.id === updated.id ? updated : b);
     setBlocks(newBlocks); pushHistory(newBlocks);
-    queueAutosave();
   };
 
   const deleteBlock = async (id: string) => {
@@ -479,7 +416,6 @@ function PageBuilderPage() {
   const bulkToggleVisibility = (visible: boolean) => {
     const newBlocks = blocks.map(b => selectedBlockIds.has(b.id) ? { ...b, is_visible: visible } : b);
     setBlocks(newBlocks); pushHistory(newBlocks);
-    queueAutosave();
   };
 
   const duplicateBlock = async (block: PageBlock) => {
@@ -493,45 +429,19 @@ function PageBuilderPage() {
       const updated = [...blocks];
       updated.splice(idx + 1, 0, data as PageBlock);
       setBlocks(updated);
-      queueAutosave();
     }
   };
 
-  const saveAll = async (silent = false) => {
-    if (!selectedPageId) return;
+  const saveAll = async () => {
     setSaving(true);
-    setSaveState("saving");
-    const currentPage = latestPagesRef.current.find((p) => p.id === selectedPageId);
-    const currentBlocks = latestBlocksRef.current;
-    try {
-      if (currentPage) {
-        await supabase.from("site_pages")
-          .update({ canvas_settings: currentPage.canvas_settings as any, layout_mode: "free" })
-          .eq("id", currentPage.id);
-      }
-      if (selectedPersonaId) {
-        await supabase.from("personas").update({ page_mode: "builder" }).eq("id", selectedPersonaId).eq("user_id", user!.id);
-      }
-      for (const block of currentBlocks) {
+    for (const block of blocks) {
       await supabase.from("page_blocks")
         .update({ content: block.content as any, styles: block.styles as any, sort_order: block.sort_order, is_visible: block.is_visible })
         .eq("id", block.id);
-      }
-      setSaveState("saved");
-      if (!silent) toast({ title: "Saved to live page" });
-    } catch {
-      setSaveState("error");
-      if (!silent) toast({ title: "Save failed", variant: "destructive" });
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
+    toast({ title: "All changes saved!" });
   };
-
-  const queueAutosave = useCallback(() => {
-    setSaveState("dirty");
-    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
-    autosaveTimerRef.current = setTimeout(() => saveAll(true), 900);
-  }, [selectedPageId, selectedPersonaId, user?.id]);
 
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } });
@@ -583,45 +493,6 @@ function PageBuilderPage() {
 
   const editingBlock = blocks.find(b => b.id === editingBlockId) ?? null;
   const selectedPage = pages.find(p => p.id === selectedPageId);
-  const pageCanvasSettings = { ...DEFAULT_CANVAS_SETTINGS, ...((selectedPage?.canvas_settings ?? {}) as CanvasSettings) } as CanvasSettings;
-  const canvasSections = pageCanvasSettings.sections?.length ? pageCanvasSettings.sections : DEFAULT_CANVAS_SETTINGS.sections;
-  const updateCanvasSettings = (next: CanvasSettings, opts?: { commit?: boolean }) => {
-    if (!selectedPage) return;
-    setPages(pages.map(p => p.id === selectedPage.id ? { ...p, canvas_settings: next } : p));
-    if (opts?.commit) {
-      queueAutosave();
-    }
-  };
-  const reorderCanvasSection = (fromId: string, toId: string) => {
-    if (fromId === toId) return;
-    const oldTop = new Map<string, number>();
-    let y = 0;
-    canvasSections.forEach((sec) => { oldTop.set(sec.id, y); y += sec.height; });
-    const from = canvasSections.findIndex((sec) => sec.id === fromId);
-    const to = canvasSections.findIndex((sec) => sec.id === toId);
-    if (from < 0 || to < 0) return;
-    const nextSections = [...canvasSections];
-    const [moved] = nextSections.splice(from, 1);
-    nextSections.splice(to, 0, moved);
-    const newTop = new Map<string, number>();
-    y = 0;
-    nextSections.forEach((sec) => { newTop.set(sec.id, y); y += sec.height; });
-    const ranges = canvasSections.map((sec) => ({ id: sec.id, top: oldTop.get(sec.id) ?? 0, bottom: (oldTop.get(sec.id) ?? 0) + sec.height }));
-    const nextBlocks = blocks.map((b) => {
-      const layout = readLayout(b.styles);
-      if (!layout) return b;
-      const center = layout.y + layout.h / 2;
-      const range = ranges.find((r) => center >= r.top && center < r.bottom) ?? ranges[ranges.length - 1];
-      const delta = (newTop.get(range.id) ?? 0) - (oldTop.get(range.id) ?? 0);
-      return { ...b, styles: withLayout(b.styles, { ...layout, y: layout.y + delta }) };
-    });
-    setBlocks(nextBlocks); pushHistory(nextBlocks);
-    updateCanvasSettings({ ...pageCanvasSettings, sections: nextSections }, { commit: true });
-  };
-  const deleteCanvasSection = (id: string) => {
-    if (canvasSections.length <= 1) return;
-    updateCanvasSettings({ ...pageCanvasSettings, sections: canvasSections.filter((sec) => sec.id !== id) }, { commit: true });
-  };
   
 
   if (loading || subLoading) {
@@ -736,13 +607,10 @@ function PageBuilderPage() {
           <ThemeToggle />
           <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
           <div className="hidden sm:flex items-center gap-0.5 bg-muted/40 rounded-md p-0.5">
-            <Button size="sm" variant={deviceMode === "desktop" ? "default" : "ghost"} className="h-6 w-6 p-0 rounded-sm" onClick={() => setDeviceMode("desktop")} title="Desktop">
+            <Button size="sm" variant={deviceMode === "desktop" ? "default" : "ghost"} className="h-6 w-6 p-0 rounded-sm" onClick={() => setDeviceMode("desktop")}>
               <Monitor className="w-3 h-3" />
             </Button>
-            <Button size="sm" variant={deviceMode === "tablet" ? "default" : "ghost"} className="h-6 w-6 p-0 rounded-sm" onClick={() => setDeviceMode("tablet")} title="Tablet">
-              <SquareIcon className="w-3 h-3" />
-            </Button>
-            <Button size="sm" variant={deviceMode === "mobile" ? "default" : "ghost"} className="h-6 w-6 p-0 rounded-sm" onClick={() => setDeviceMode("mobile")} title="Phone">
+            <Button size="sm" variant={deviceMode === "mobile" ? "default" : "ghost"} className="h-6 w-6 p-0 rounded-sm" onClick={() => setDeviceMode("mobile")}>
               <Smartphone className="w-3 h-3" />
             </Button>
           </div>
@@ -751,7 +619,7 @@ function PageBuilderPage() {
               <GitCompare className="w-3.5 h-3.5" />
             </Button>
           )}
-          <Button onClick={() => saveAll(false)} disabled={saving} size="sm" className="rounded-md h-7 text-[11px] px-3 ml-1 bg-foreground text-background hover:bg-foreground/90">
+          <Button onClick={saveAll} disabled={saving} size="sm" className="rounded-md h-7 text-[11px] px-3 ml-1 bg-foreground text-background hover:bg-foreground/90">
             {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />}
             Publish
           </Button>
@@ -785,140 +653,9 @@ function PageBuilderPage() {
 
       {/* ═══ Main Area ═══ */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel — Inspector */}
-        {!isMobile && (
-          <div className="w-72 shrink-0 border-r border-border/60 bg-card flex flex-col overflow-hidden">
-            <div className="px-3 py-2 border-b border-border/60 flex items-center justify-between shrink-0">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">Inspector</span>
-              {editingBlock && (
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  {BLOCK_TYPES.find(b => b.id === editingBlock.block_type)?.label}
-                </span>
-              )}
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-3">
-                {editingBlock ? (
-                  <BlockEditor
-                    block={editingBlock}
-                    onChange={updateBlock}
-                    onDelete={() => deleteBlock(editingBlock.id)}
-                    onClose={() => setEditingBlockId(null)}
-                  />
-                ) : (
-                  <div className="space-y-5">
-                    <div className="text-center py-5 text-muted-foreground border border-dashed border-border/70 rounded-xl">
-                      <div className="w-8 h-8 mx-auto mb-2 rounded-md border border-dashed border-border flex items-center justify-center">
-                        <Paintbrush className="w-3.5 h-3.5 opacity-50" />
-                      </div>
-                      <p className="text-[11px]">Page appearance</p>
-                    </div>
-                    <CanvasBackgroundPanel
-                      background={pageCanvasSettings.background as BackgroundFill | null | undefined}
-                      accent={pageCanvasSettings.accent as string | null | undefined}
-                      overflowPadding={pageCanvasSettings.overflowPadding}
-                      onChange={(background) => updateCanvasSettings({ ...pageCanvasSettings, background }, { commit: true })}
-                      onAccent={(accent) => updateCanvasSettings({ ...pageCanvasSettings, accent }, { commit: true })}
-                      onOverflowPadding={(overflowPadding) => updateCanvasSettings({ ...pageCanvasSettings, overflowPadding }, { commit: true })}
-                    />
-                    <div className="border-t border-border/60 pt-4 space-y-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">Sections</p>
-                      {canvasSections.map((section, index) => (
-                        <SectionListItem
-                          key={section.id}
-                          section={section}
-                          index={index}
-                          onMove={reorderCanvasSection}
-                          onDelete={() => deleteCanvasSection(section.id)}
-                          canDelete={canvasSections.length > 1}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
-
-        {!isMobile && (
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden items-center justify-center w-4 bg-card hover:bg-muted/40 border-r border-border/60 transition-colors shrink-0"
-          >
-            {sidebarOpen ? <PanelLeftClose className="w-3 h-3 text-muted-foreground" /> : <PanelLeft className="w-3 h-3 text-muted-foreground" />}
-          </button>
-        )}
-
-        {/* ═══ Center Canvas ═══ */}
-        <div className="relative flex-1 flex flex-col overflow-hidden bg-muted/20">
-          {!isMobile && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2">
-              <button
-                onClick={() => setAddBlockOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-foreground text-background shadow-2xl hover:scale-[1.03] transition-transform text-[11px] font-semibold"
-              >
-                <Plus className="w-3.5 h-3.5" /> Insert
-              </button>
-              <CanvasNavBar
-                scale={canvasScale}
-                panTool={canvasPanTool}
-                setPanTool={setCanvasPanTool}
-                zoomIn={() => setCanvasScaleClamped(canvasScale + 0.1)}
-                zoomOut={() => setCanvasScaleClamped(canvasScale - 0.1)}
-                fit={() => setCanvasFitRequest((v) => v + 1)}
-                onUndo={undo}
-                onRedo={redo}
-                dragPreview={pageCanvasSettings.dragPreview ?? "live"}
-                setDragPreview={(v) => updateCanvasSettings({ ...pageCanvasSettings, dragPreview: v }, { commit: true })}
-                smartSnap={pageCanvasSettings.smartSnap ?? true}
-                setSmartSnap={(v) => updateCanvasSettings({ ...pageCanvasSettings, smartSnap: v }, { commit: true })}
-                snapTolerance={pageCanvasSettings.snapTolerance ?? 6}
-                setSnapTolerance={(v) => updateCanvasSettings({ ...pageCanvasSettings, snapTolerance: v }, { commit: true })}
-                snapMode={pageCanvasSettings.snapMode ?? "edges-centers"}
-                setSnapMode={(v) => updateCanvasSettings({ ...pageCanvasSettings, snapMode: v }, { commit: true })}
-                snapDebug={pageCanvasSettings.snapDebug ?? false}
-                setSnapDebug={(v) => updateCanvasSettings({ ...pageCanvasSettings, snapDebug: v }, { commit: true })}
-              />
-
-            </div>
-          )}
-          <div className="flex-1 overflow-hidden p-2 md:p-4 pt-14">
-            <div className="flex justify-center h-full min-h-0">
-              <div
-                className={cn(
-                  "relative transition-all duration-300 shadow-lg flex flex-col w-full h-full min-h-0 rounded-xl border border-white/10 bg-zinc-950",
-                )}
-              >
-                <FreeformCanvas
-                  blocks={blocks.filter(b => b.is_visible || editingBlockId === b.id)}
-                  device={deviceMode}
-                  settings={pageCanvasSettings}
-                  scale={canvasScale}
-                  setScale={setCanvasScaleClamped}
-                  fitRequest={canvasFitRequest}
-                  panTool={canvasPanTool}
-                  selectedIds={canvasSelection}
-                  setSelectedIds={(s) => {
-                    setCanvasSelection(s);
-                    if (s.size === 1) setEditingBlockId(Array.from(s)[0]);
-                  }}
-                  onUpdateBlocks={(next, opts) => {
-                    setBlocks(next);
-                    if (opts?.commit) { pushHistory(next); queueAutosave(); }
-                  }}
-                  onUpdateSettings={updateCanvasSettings}
-                  onDuplicateBlock={duplicateBlock}
-                  persona={livePersona}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Old block layer reordering is intentionally hidden; sections live in the left inspector. */}
-        {false && sidebarOpen && !isMobile && (
-          <div className="w-60 shrink-0 border-l border-border/60 bg-card flex flex-col overflow-hidden">
+        {/* Left Sidebar — Layers (Framer style) */}
+        {sidebarOpen && !isMobile && (
+          <div className="w-60 shrink-0 border-r border-border/60 bg-card flex flex-col overflow-hidden">
             <div className="px-3 py-2 border-b border-border/60 flex items-center gap-2 shrink-0">
               <Input
                 value={selectedPage?.title ?? ""}
@@ -993,7 +730,109 @@ function PageBuilderPage() {
             </div>
           </div>
         )}
+
+        {!isMobile && (
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="flex items-center justify-center w-4 bg-card hover:bg-muted/40 border-r border-border/60 transition-colors shrink-0"
+          >
+            {sidebarOpen ? <PanelLeftClose className="w-3 h-3 text-muted-foreground" /> : <PanelLeft className="w-3 h-3 text-muted-foreground" />}
+          </button>
+        )}
+
+        {/* ═══ Center Canvas ═══ */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
+          <ScrollArea className="flex-1">
+            <div className="flex justify-center p-2 md:p-4 min-h-full">
+              <div
+                className={cn(
+                  "relative transition-all duration-300 shadow-lg flex flex-col",
+                  PAGE_THEME_CLASS,
+                  deviceMode === "mobile"
+                    ? "w-[375px] min-h-[667px] border-[6px] border-muted-foreground/15 rounded-[2.5rem]"
+                    : "w-full min-h-[calc(100vh-7rem)] rounded-xl border border-border/60",
+                )}
+                style={{
+                  ...getPageThemeStyles(pageThemeCtx.themeId),
+                  backgroundColor: "var(--page-bg, hsl(var(--background)))",
+                  color: "var(--page-text, hsl(var(--foreground)))",
+                  fontFamily: "var(--page-font, inherit)",
+                  borderRadius: deviceMode === "mobile" ? undefined : "var(--page-radius, 0.75rem)",
+                  maxWidth: deviceMode === "mobile" ? undefined : `${PAGE_CANVAS_MAX_W_PX + 32}px`,
+                }}
+              >
+                <PageCanvas surface="editor" mobileFrame={deviceMode === "mobile"} className="flex-1">
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSortEnd}>
+                    <SortableContext items={blocks.filter(b => b.is_visible || editingBlockId === b.id).map(b => b.id)} strategy={verticalListSortingStrategy}>
+                      {blocks.filter(b => b.is_visible || editingBlockId === b.id).map(block => (
+                        <SortablePreviewBlock
+                          key={block.id} block={block}
+                          editingBlockId={editingBlockId}
+                          onSelect={() => setEditingBlockId(block.id)}
+                          persona={livePersona}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                  {blocks.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center flex-1 min-h-[300px] text-muted-foreground">
+                      <Plus className="w-8 h-8 mb-2" />
+                      <p className="text-sm">Add your first block</p>
+                    </div>
+                  ) : (
+                    /* Spacer keeps the canvas filling available height. */
+                    <div className="flex-1" aria-hidden="true" />
+                  )}
+                </PageCanvas>
+              </div>
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* ═══ Right Panel — Inspector (Framer style) ═══ */}
+        {!isMobile && (
+          <div className="w-72 shrink-0 border-l border-border/60 bg-card flex flex-col overflow-hidden">
+            <div className="px-3 py-2 border-b border-border/60 flex items-center justify-between shrink-0">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">Inspector</span>
+              {editingBlock && (
+                <span className="text-[10px] text-muted-foreground font-mono">
+                  {BLOCK_TYPES.find(b => b.id === editingBlock.block_type)?.label}
+                </span>
+              )}
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="p-3">
+                {editingBlock ? (
+                  <BlockEditor
+                    block={editingBlock}
+                    onChange={updateBlock}
+                    onDelete={() => deleteBlock(editingBlock.id)}
+                    onClose={() => setEditingBlockId(null)}
+                  />
+                ) : (
+                  <div className="text-center py-16 text-muted-foreground">
+                    <div className="w-8 h-8 mx-auto mb-2 rounded-md border border-dashed border-border flex items-center justify-center">
+                      <PanelLeft className="w-3.5 h-3.5 opacity-50" />
+                    </div>
+                    <p className="text-[11px]">Select a layer to edit its properties</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
       </div>
+
+      {/* Floating Insert Pill (Framer-style) */}
+      {!isMobile && (
+        <button
+          onClick={() => setAddBlockOpen(true)}
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background shadow-2xl hover:scale-[1.03] transition-transform text-[11px] font-semibold"
+        >
+          <Plus className="w-3.5 h-3.5" /> Insert block
+        </button>
+      )}
+
 
       {/* ═══ Mobile Bottom Bar ═══ */}
       {isMobile && (
@@ -1124,8 +963,59 @@ function PageBuilderPage() {
   );
 }
 
-function PBThemeSwitcher() { return null; }
+function PBThemeSwitcher() {
+  const { themeId, setThemeId } = usePageTheme();
+  const colorThemes = PAGE_THEMES.filter(t => t.type === "color");
+  const layoutThemes = PAGE_THEMES.filter(t => t.type === "layout");
 
-export default PageBuilderPage;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Page Theme">
+          <Paintbrush className="w-3.5 h-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52 max-h-80 overflow-y-auto">
+        <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Color Schemes
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {colorThemes.map((t) => (
+          <DropdownMenuItem key={t.id} onClick={() => setThemeId(t.id)} className="flex items-center gap-2 cursor-pointer">
+            <span className="w-3 h-3 rounded-full shrink-0 border border-border" style={{ background: t.preview }} />
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-medium">{t.label}</span>
+              <p className="text-[9px] text-muted-foreground truncate">{t.description}</p>
+            </div>
+            {themeId === t.id && <Check className="w-3 h-3 text-primary shrink-0" />}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Layout Themes
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {layoutThemes.map((t) => (
+          <DropdownMenuItem key={t.id} onClick={() => setThemeId(t.id)} className="flex items-center gap-2 cursor-pointer">
+            <span className="w-3 h-3 rounded-full shrink-0 border border-border" style={{ background: t.preview }} />
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-medium">{t.label}</span>
+              <p className="text-[9px] text-muted-foreground truncate">{t.description}</p>
+            </div>
+            {themeId === t.id && <Check className="w-3 h-3 text-primary shrink-0" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
+function PageBuilderWithTheme() {
+  return (
+    <PageThemeProvider>
+      <PageBuilderPage />
+    </PageThemeProvider>
+  );
+}
 
+export default PageBuilderWithTheme;

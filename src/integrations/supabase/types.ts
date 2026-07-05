@@ -1166,12 +1166,10 @@ export type Database = {
       }
       site_pages: {
         Row: {
-          canvas_settings: Json
           created_at: string
           id: string
           is_homepage: boolean
           is_visible: boolean
-          layout_mode: string
           page_icon: string | null
           persona_id: string
           slug: string
@@ -1181,12 +1179,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          canvas_settings?: Json
           created_at?: string
           id?: string
           is_homepage?: boolean
           is_visible?: boolean
-          layout_mode?: string
           page_icon?: string | null
           persona_id: string
           slug?: string
@@ -1196,12 +1192,10 @@ export type Database = {
           user_id: string
         }
         Update: {
-          canvas_settings?: Json
           created_at?: string
           id?: string
           is_homepage?: boolean
           is_visible?: boolean
-          layout_mode?: string
           page_icon?: string | null
           persona_id?: string
           slug?: string
